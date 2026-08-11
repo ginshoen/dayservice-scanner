@@ -1,0 +1,1706 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="QRスキャナー">
+  <meta name="theme-color" content="#0f766e">
+  <title>デイサービス QRスキャナー</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js" defer></script>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --panel: #ffffff;
+      --text: #0f1c2e;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --brand: #0f766e;
+      --arrival: #0f766e;
+      --bath: #d97706;
+      --lunch: #7c3aed;
+      --success: #067647;
+      --warning: #b54708;
+      --danger: #b42318;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 1px 2px rgba(15, 28, 46, .05), 0 8px 24px -14px rgba(15, 28, 46, .14);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #e8eef6 0%, var(--bg) 260px);
+      color: var(--text);
+      font-size: 16px;
+    }
+    button, input, select, textarea { font: inherit; }
+    button {
+      border: 0;
+      border-radius: var(--radius-sm);
+      min-height: 46px;
+      padding: 10px 14px;
+      background: #e7edf4;
+      color: var(--text);
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform .08s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+    }
+    button:active { transform: scale(.97); }
+    button.primary {
+      background: linear-gradient(180deg, #128a7e 0%, #0c645d 100%);
+      color: #fff;
+      box-shadow: 0 2px 10px -2px rgba(15, 118, 110, .45);
+    }
+    button.ghost {
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .55);
+      color: #fff;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+    input {
+      width: 100%;
+      border: 1.5px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      background: #fff;
+      color: var(--text);
+      transition: border-color .15s ease, box-shadow .15s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus {
+      outline: none;
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, .16);
+    }
+    .app { min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, .85);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-bottom: 1px solid rgba(15, 28, 46, .07);
+      padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+    }
+    .toprow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .title { display: flex; flex-direction: column; min-width: 0; }
+    .title strong { font-size: 17px; letter-spacing: .01em; }
+    .title span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sync-pill {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: #ecfdf3;
+      color: #067647;
+      font-size: 12px;
+      font-weight: 700;
+      transition: background .2s ease, color .2s ease;
+    }
+    .sync-pill::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #12b76a;
+      flex: 0 0 auto;
+    }
+    .sync-pill.pending { background: #fffaeb; color: #b54708; }
+    .sync-pill.pending::before { background: #f79009; animation: pulse 1.4s infinite ease-in-out; }
+    .sync-pill.offline { background: #fef3f2; color: #b42318; }
+    .sync-pill.offline::before { background: #f04438; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(.8); }
+    }
+    .tabbar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-top: 1px solid rgba(15, 28, 46, .07);
+      padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    }
+    .tabbar button {
+      min-height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 5px 4px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+    }
+    .tabbar button svg {
+      width: 23px;
+      height: 23px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .tabbar button.active {
+      color: var(--brand);
+      background: rgba(15, 118, 110, .09);
+    }
+    main {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 14px 14px calc(92px + env(safe-area-inset-bottom));
+      flex: 1;
+    }
+    .view { display: none; }
+    .view.active { display: block; animation: fadein .22s ease; }
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+    .mode-banner {
+      border-radius: var(--radius);
+      color: #fff;
+      padding: 16px;
+      min-height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow);
+      transition: background .3s ease;
+      margin-bottom: 10px;
+    }
+    .mode-banner strong {
+      font-size: 26px;
+      line-height: 1.1;
+      letter-spacing: .01em;
+      display: block;
+    }
+    .mode-banner span { font-size: 13px; opacity: .92; }
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .mode-buttons button {
+      min-height: 66px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px 4px;
+      background: #fff;
+      border: 1.5px solid var(--line);
+      font-size: 13px;
+      box-shadow: 0 1px 2px rgba(15, 28, 46, .04);
+    }
+    .mode-buttons button.active {
+      color: #fff;
+      border-color: transparent;
+      box-shadow: var(--shadow);
+    }
+    .mode-dot {
+      width: 27px;
+      height: 27px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 13px;
+      transition: background .18s ease, color .18s ease;
+    }
+    .camera-box {
+      overflow: hidden;
+      background: #0b1220;
+      border-radius: var(--radius);
+      position: relative;
+      aspect-ratio: 4 / 3;
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow);
+      margin-bottom: 10px;
+    }
+    video { width: 100%; height: 100%; object-fit: cover; }
+    .camera-placeholder {
+      color: #cbd5e1;
+      text-align: center;
+      padding: 18px;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+    .scan-overlay { position: absolute; inset: 0; pointer-events: none; }
+    .scan-frame { position: absolute; inset: 13% 16%; }
+    .scan-frame i {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 3.5px solid #5eead4;
+      filter: drop-shadow(0 0 6px rgba(94, 234, 212, .7));
+    }
+    .scan-frame i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; border-radius: 10px 0 0 0; }
+    .scan-frame i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; border-radius: 0 10px 0 0; }
+    .scan-frame i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; border-radius: 0 0 0 10px; }
+    .scan-frame i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; border-radius: 0 0 10px 0; }
+    .scan-line {
+      position: absolute;
+      left: 20%;
+      right: 20%;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #5eead4 20%, #5eead4 80%, transparent);
+      box-shadow: 0 0 14px #5eead4;
+      animation: scan 1.6s infinite ease-in-out;
+      opacity: .9;
+    }
+    @keyframes scan {
+      0% { transform: translateY(-82px); }
+      50% { transform: translateY(82px); }
+      100% { transform: translateY(-82px); }
+    }
+    .scan-flash {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 16px;
+      font-size: 30px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+      animation: flashin .15s ease;
+    }
+    .scan-flash.success { background: rgba(6, 118, 71, .84); }
+    .scan-flash.warning { background: rgba(181, 71, 8, .86); }
+    .scan-flash.danger { background: rgba(180, 35, 24, .86); }
+    .scan-flash.info { background: rgba(51, 65, 85, .86); }
+    .scan-flash small { display: block; font-size: 15px; font-weight: 700; opacity: .92; margin-top: 6px; }
+    @keyframes flashin { from { opacity: 0; } to { opacity: 1; } }
+    .flags {
+      display: grid;
+      grid-template-columns: repeat(4, 34px);
+      gap: 4px;
+      flex: 0 0 auto;
+    }
+    .flags .flag { background: #f1f4f8; color: #7c8a99; }
+    .flags .flag.on { background: #d1fadf; color: #05603a; }
+    .result {
+      border-radius: var(--radius);
+      border: 1.5px solid var(--line);
+      background: #fff;
+      padding: 16px;
+      min-height: 100px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .result.pop { animation: pop .22s ease; }
+    @keyframes pop {
+      0% { transform: scale(.975); }
+      100% { transform: scale(1); }
+    }
+    .result.success { background: #ecfdf3; border-color: #a6f4c5; }
+    .result.success h2 { color: #054f31; }
+    .result.warning { background: #fffaeb; border-color: #fedf89; }
+    .result.warning h2 { color: #7a2e0e; }
+    .result.danger { background: #fef3f2; border-color: #fecdca; }
+    .result.danger h2 { color: #912018; }
+    .result h2 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: .01em;
+    }
+    .result p { margin: 0; color: #475467; line-height: 1.55; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(15, 28, 46, .06);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #344054;
+      letter-spacing: .02em;
+    }
+    .panel .note { color: var(--muted); font-size: 13px; line-height: 1.7; margin: 0 0 12px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .scan-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .list { display: grid; gap: 8px; }
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 11px 12px;
+      background: #fff;
+    }
+    .row strong { font-size: 16px; }
+    .row small { color: var(--muted); }
+    .flag {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .form-grid { display: grid; gap: 12px; }
+    label {
+      display: grid;
+      gap: 6px;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    #settingsStatus { min-height: 22px; font-size: 14px; margin: 12px 0 0; }
+    #settingsStatus.ok { color: var(--success); }
+    #settingsStatus.error { color: var(--danger); }
+    .alert-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+    .alert-badge.normal { background: #f1f4f8; color: #64748b; }
+    .alert-badge.notice { background: #fffaeb; color: #b54708; }
+    .alert-badge.critical { background: #fef3f2; color: #b42318; }
+    .user-info {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(15, 28, 46, .12);
+      display: grid;
+      gap: 7px;
+      font-size: 14px;
+    }
+    .user-info .kv { display: flex; gap: 10px; align-items: baseline; }
+    .user-info .k { flex: 0 0 74px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .user-info .v { flex: 1; color: #1d2939; line-height: 1.55; }
+    .user-info .care-note {
+      background: rgba(255, 255, 255, .65);
+      border: 1px solid rgba(181, 71, 8, .25);
+      border-radius: 10px;
+      padding: 9px 11px;
+      color: #7a2e0e;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+    .user-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fff;
+      overflow: hidden;
+    }
+    .user-card-head {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      min-height: 0;
+      text-align: left;
+      font-weight: 400;
+    }
+    .user-card-head .name { display: grid; gap: 2px; min-width: 0; }
+    .user-card-head .name strong { font-size: 16px; }
+    .user-card-head .name small { color: var(--muted); }
+    .user-card-detail {
+      display: grid;
+      gap: 7px;
+      font-size: 14px;
+      padding: 10px 12px 12px;
+      border-top: 1px dashed var(--line);
+    }
+    .user-card-detail .kv { display: flex; gap: 10px; align-items: baseline; }
+    .user-card-detail .k { flex: 0 0 74px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .user-card-detail .v { flex: 1; line-height: 1.55; white-space: pre-wrap; }
+    .user-card-detail .detail-heading {
+      margin-top: 5px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      color: #344054;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .user-card-detail .detail-heading:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+    .user-card-detail .care-note {
+      background: #fffaeb;
+      border: 1px solid #fedf89;
+      border-radius: 10px;
+      padding: 9px 11px;
+      color: #7a2e0e;
+      font-weight: 700;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="toprow">
+        <div class="title">
+          <strong>QRスキャナー</strong>
+          <span id="statusLine">読み込み中</span>
+        </div>
+        <div class="sync-pill" id="syncPill">未同期 0</div>
+      </div>
+    </header>
+
+    <main>
+      <section id="scanView" class="view">
+        <div class="mode-banner" id="modeBanner">
+          <div>
+            <strong id="modeTitle">来所を記録中</strong>
+            <span id="modeSubtitle">QRを連続で読み取れます</span>
+          </div>
+          <button class="ghost" id="cameraToggle">カメラ開始</button>
+        </div>
+        <div class="mode-buttons" id="modeButtons"></div>
+        <div class="camera-box">
+          <video id="video" playsinline muted class="hidden"></video>
+          <div class="scan-overlay hidden" id="scanOverlay">
+            <div class="scan-frame"><i></i><i></i><i></i><i></i></div>
+            <div class="scan-line"></div>
+          </div>
+          <div class="scan-flash hidden" id="scanFlash"></div>
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            「カメラ開始」を押してください。<br>起動しない場合は「カメラ撮影で読む」か手入力が使えます。
+          </div>
+        </div>
+        <div class="scan-actions">
+          <button id="photoScan" class="primary">カメラ撮影で読む</button>
+          <button id="retryCamera">連続カメラ再試行</button>
+        </div>
+        <input id="photoQrInput" class="hidden" type="file" accept="image/*" capture="environment">
+
+        <div class="panel">
+          <div class="grid-2">
+            <input id="manualQr" placeholder="QRトークン手入力">
+            <button id="manualSubmit" class="primary">記録</button>
+          </div>
+        </div>
+
+        <div class="result" id="resultPanel">
+          <h2>待機中</h2>
+          <p>業務モードを確認してから読み取ってください。</p>
+        </div>
+
+        <div class="panel">
+          <h2>最後に読んだ5件</h2>
+          <div class="list" id="recentList"></div>
+        </div>
+      </section>
+
+      <section id="todayView" class="view">
+        <div class="panel">
+          <h2>今日の実績 <span id="todayDate" style="font-weight:700;color:var(--muted)"></span></h2>
+          <div class="grid-2" style="margin-bottom:12px;align-items:center">
+            <p class="note" style="margin:0" id="todaySummary"></p>
+            <button id="refreshToday">更新</button>
+          </div>
+          <div class="list" id="todayList"></div>
+          <p class="note" style="margin:12px 0 0">未送信の読み取りも反映されています。表示が古い場合は「更新」を押してください。</p>
+        </div>
+      </section>
+
+      <section id="usersView" class="view">
+        <div class="panel">
+          <h2>利用者一覧</h2>
+          <input id="userSearch" placeholder="名前・ふりがなで検索" autocomplete="off">
+          <p class="note" style="margin:10px 0 12px">タップすると詳細を表示します。情報は最後にオンラインで取得した時点のものです。</p>
+          <div class="list" id="userList"></div>
+        </div>
+      </section>
+
+      <section id="settingsView" class="view">
+        <div class="panel hidden" id="settingsLock">
+          <h2>設定はロックされています</h2>
+          <p class="note">接続設定の表示・変更には暗証番号が必要です。</p>
+          <div class="form-grid">
+            <label>暗証番号<input id="pinInput" type="password" inputmode="numeric" autocomplete="off"></label>
+            <button id="unlockSettings" class="primary">ロック解除</button>
+          </div>
+          <p id="lockStatus" style="color:var(--danger);font-size:14px;min-height:20px;margin:10px 0 0"></p>
+          <p class="note" style="margin:14px 0 10px">
+            暗証番号を忘れた場合は下のボタンで接続設定を消去できます。
+            再設定にはAPI URLとAPIキーの入力が必要です(管理者に確認してください)。
+          </p>
+          <button id="resetSettings" style="width:100%">接続設定をリセット</button>
+        </div>
+        <div id="settingsBody">
+        <div class="panel">
+          <h2>接続設定</h2>
+          <p class="note">
+            管理者用アプリの「今日」タブ →「スキャナー連携情報」に表示されるURLとAPIキーを入力してください。
+            URLはアクセス権「全員」でデプロイしたウェブアプリのもの(https://script.google.com/macros/s/…/exec)を使います。
+            APIキーは施設外に共有しないでください。
+          </p>
+          <div class="form-grid">
+            <label>API URL<input id="apiUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+            <label>APIキー<input id="apiKey" placeholder="skey_…" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+            <label>端末名(任意)<input id="deviceName" placeholder="例: 玄関iPhone"></label>
+            <label>設定ロック用暗証番号<input id="pinNew" type="password" inputmode="numeric" placeholder="4桁以上(変更しない場合は空欄)" autocomplete="off"></label>
+            <div class="grid-2">
+              <button id="saveSettings" class="primary">保存</button>
+              <button id="testConnection">接続テスト</button>
+            </div>
+          </div>
+          <p id="settingsStatus"></p>
+        </div>
+        <div class="panel">
+          <h2>このページについて</h2>
+          <p class="note">
+            Googleの仕様変更(2026年2月)により、Apps Scriptアプリの画面内ではカメラが起動できなくなりました。
+            このページはApps Scriptの外(施設のウェブサイトなど)に置いてカメラで読み取り、
+            記録だけをApps ScriptへAPI送信します。読み取りは通信が切れていても端末内に保存され、
+            電波が戻ると自動で送信されます。
+          </p>
+        </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar">
+      <button data-view="scanView" id="tabScan">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5.5A2.5 2.5 0 0 1 5.5 3H7M17 3h1.5A2.5 2.5 0 0 1 21 5.5V7M21 17v1.5a2.5 2.5 0 0 1-2.5 2.5H17M7 21H5.5A2.5 2.5 0 0 1 3 18.5V17M4 12h16"/></svg>
+        <span>スキャン</span>
+      </button>
+      <button data-view="todayView" id="tabToday">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10.5h17M9 15l2 2 4-4"/></svg>
+        <span>今日</span>
+      </button>
+      <button data-view="usersView" id="tabUsers">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0M16 5a3.5 3.5 0 0 1 0 7M17.5 15.1a5.5 5.5 0 0 1 3 4.9"/></svg>
+        <span>利用者</span>
+      </button>
+      <button data-view="settingsView" id="tabSettings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.98 19.3a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.7 8.98a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9.1a1.7 1.7 0 0 0 1.02-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08a1.7 1.7 0 0 0 1.56 1.02H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.56 1.03z"/></svg>
+        <span>設定</span>
+      </button>
+    </nav>
+  </div>
+
+  <canvas id="qrCanvas" class="hidden"></canvas>
+
+  <script>
+    const SERVICE_META = {
+      arrival: { label: '来所', short: '来', color: '#0f766e', colorDark: '#0b5a54' },
+      bath: { label: '入浴', short: '入', color: '#d97706', colorDark: '#b45309' },
+      lunch: { label: '昼食', short: '昼', color: '#7c3aed', colorDark: '#6d28d9' }
+    };
+
+    // 記録モード3種 + 記録しない情報確認モード
+    const MODE_META = Object.assign({}, SERVICE_META, {
+      info: { label: '確認', short: '確', color: '#475569', colorDark: '#334155' }
+    });
+
+    const IDLE_STOP_MS = 30000;
+    const REPEAT_SUPPRESS_MS = 2600;
+    const FREEZE_MS = 1500;
+
+    const STORAGE = {
+      url: 'ds_scanner_url',
+      key: 'ds_scanner_key',
+      deviceName: 'ds_scanner_device_name',
+      deviceId: 'ds_scanner_device_id',
+      queue: 'ds_scanner_queue',
+      seq: 'ds_scanner_seq',
+      state: 'ds_scanner_state',
+      pin: 'ds_scanner_pin'
+    };
+
+    const app = {
+      mode: 'arrival',
+      config: {
+        url: localStorage.getItem(STORAGE.url) || '',
+        key: localStorage.getItem(STORAGE.key) || '',
+        deviceName: localStorage.getItem(STORAGE.deviceName) || ''
+      },
+      users: [],
+      usersByHash: {},
+      records: [],
+      queue: [],
+      recent: [],
+      stream: null,
+      scanning: false,
+      detector: null,
+      syncing: false,
+      expandedUserId: '',
+      settingsUnlocked: false,
+      frozen: false,
+      freezeTimer: null,
+      idleTimer: null,
+      lastReadAt: 0,
+      lastScan: { value: '', at: 0 },
+      lastJsQrAt: 0,
+      clientSeq: Number(localStorage.getItem(STORAGE.seq) || '0'),
+      deviceId: localStorage.getItem(STORAGE.deviceId) || ('scn_' + randomId())
+    };
+    localStorage.setItem(STORAGE.deviceId, app.deviceId);
+
+    document.addEventListener('DOMContentLoaded', init);
+
+    function init() {
+      bindNavigation();
+      bindActions();
+      buildModeButtons();
+      loadQueue();
+      loadCachedState();
+      renderSync();
+      renderRecent();
+      renderUsers();
+      renderToday();
+      fillSettingsForm();
+      if (hasConfig()) {
+        showView('scanView');
+        refreshState();
+      } else {
+        showView('settingsView');
+        setStatusLine('接続設定を入力してください');
+      }
+      window.addEventListener('online', syncQueue);
+      setInterval(syncQueue, 15000);
+    }
+
+    function hasConfig() {
+      return Boolean(app.config.url && app.config.key);
+    }
+
+    function randomId() {
+      if (crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '').slice(0, 18);
+      return String(Date.now()) + String(Math.floor(Math.random() * 1e8));
+    }
+
+    function todayStr() {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function bindNavigation() {
+      document.querySelectorAll('.tabbar button').forEach((button) => {
+        button.addEventListener('click', () => showView(button.dataset.view));
+      });
+    }
+
+    function bindActions() {
+      document.getElementById('cameraToggle').addEventListener('click', toggleCamera);
+      document.getElementById('retryCamera').addEventListener('click', startCamera);
+      document.getElementById('photoScan').addEventListener('click', () => {
+        document.getElementById('photoQrInput').click();
+      });
+      document.getElementById('photoQrInput').addEventListener('change', readQrFromPhoto);
+      document.getElementById('manualSubmit').addEventListener('click', () => {
+        const value = document.getElementById('manualQr').value.trim();
+        if (value) handleQrValue(value);
+      });
+      document.getElementById('manualQr').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          document.getElementById('manualSubmit').click();
+        }
+      });
+      document.getElementById('saveSettings').addEventListener('click', saveSettings);
+      document.getElementById('testConnection').addEventListener('click', testConnection);
+      document.getElementById('userSearch').addEventListener('input', renderUsers);
+      document.getElementById('refreshToday').addEventListener('click', refreshState);
+      document.getElementById('unlockSettings').addEventListener('click', unlockSettings);
+      document.getElementById('resetSettings').addEventListener('click', resetSettings);
+      document.getElementById('pinInput').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          unlockSettings();
+        }
+      });
+    }
+
+    function showView(id) {
+      document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.querySelectorAll('.tabbar button').forEach((button) => {
+        button.classList.toggle('active', button.dataset.view === id);
+      });
+      if (id === 'todayView') {
+        renderToday();
+        refreshStateQuiet();
+      }
+      if (id === 'settingsView') {
+        updateSettingsLock();
+      }
+    }
+
+    function buildModeButtons() {
+      const container = document.getElementById('modeButtons');
+      container.innerHTML = '';
+      Object.keys(MODE_META).forEach((key) => {
+        const meta = MODE_META[key];
+        const button = document.createElement('button');
+        button.dataset.mode = key;
+        const dot = document.createElement('span');
+        dot.className = 'mode-dot';
+        dot.textContent = meta.short;
+        const label = document.createElement('span');
+        label.textContent = meta.label;
+        button.appendChild(dot);
+        button.appendChild(label);
+        button.addEventListener('click', () => setMode(key));
+        container.appendChild(button);
+      });
+      setMode(app.mode);
+    }
+
+    function setMode(mode) {
+      app.mode = mode;
+      const meta = MODE_META[mode];
+      document.getElementById('modeTitle').textContent = mode === 'info' ? '情報確認モード' : `${meta.label}を記録中`;
+      document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録せずに利用者情報だけ表示します' : 'QRを連続で読み取れます';
+      document.getElementById('modeBanner').style.background = `linear-gradient(135deg, ${meta.color} 0%, ${meta.colorDark} 100%)`;
+      document.querySelectorAll('#modeButtons button').forEach((button) => {
+        const buttonMeta = MODE_META[button.dataset.mode];
+        const active = button.dataset.mode === mode;
+        button.classList.toggle('active', active);
+        button.style.background = active ? `linear-gradient(135deg, ${buttonMeta.color} 0%, ${buttonMeta.colorDark} 100%)` : '#fff';
+        const dot = button.querySelector('.mode-dot');
+        dot.style.background = active ? 'rgba(255,255,255,.22)' : `${buttonMeta.color}1f`;
+        dot.style.color = active ? '#fff' : buttonMeta.color;
+      });
+    }
+
+    // ---- 設定 ----
+
+    function fillSettingsForm() {
+      document.getElementById('apiUrl').value = app.config.url;
+      document.getElementById('apiKey').value = app.config.key;
+      document.getElementById('deviceName').value = app.config.deviceName;
+    }
+
+    // 暗証番号が設定済みで未解除のあいだは、接続設定を表示しない
+    function updateSettingsLock() {
+      const locked = Boolean(localStorage.getItem(STORAGE.pin)) && !app.settingsUnlocked;
+      document.getElementById('settingsLock').classList.toggle('hidden', !locked);
+      document.getElementById('settingsBody').classList.toggle('hidden', locked);
+    }
+
+    async function unlockSettings() {
+      const pin = document.getElementById('pinInput').value.trim();
+      const status = document.getElementById('lockStatus');
+      if (!pin) {
+        status.textContent = '暗証番号を入力してください。';
+        return;
+      }
+      const hash = await sha256Hex(pin);
+      if (hash === localStorage.getItem(STORAGE.pin)) {
+        app.settingsUnlocked = true;
+        document.getElementById('pinInput').value = '';
+        status.textContent = '';
+        updateSettingsLock();
+      } else {
+        status.textContent = '暗証番号が違います。';
+      }
+    }
+
+    function resetSettings() {
+      if (!confirm('接続設定(API URL・APIキー・暗証番号)を消去します。再設定にはAPIキーの再入力が必要です。よろしいですか?')) {
+        return;
+      }
+      [STORAGE.url, STORAGE.key, STORAGE.pin, STORAGE.deviceName].forEach((key) => localStorage.removeItem(key));
+      app.config = { url: '', key: '', deviceName: '' };
+      app.settingsUnlocked = true;
+      fillSettingsForm();
+      document.getElementById('pinInput').value = '';
+      document.getElementById('lockStatus').textContent = '';
+      setSettingsStatus('', '');
+      setStatusLine('接続設定を入力してください');
+      updateSettingsLock();
+    }
+
+    async function saveSettings() {
+      const newPin = document.getElementById('pinNew').value.trim();
+      if (newPin && newPin.length < 4) {
+        setSettingsStatus('error', '暗証番号は4桁以上にしてください。');
+        return;
+      }
+      const previousEndpoint = `${app.config.url}\n${app.config.key}`;
+      app.config.url = document.getElementById('apiUrl').value.trim();
+      app.config.key = document.getElementById('apiKey').value.trim();
+      app.config.deviceName = document.getElementById('deviceName').value.trim();
+      localStorage.setItem(STORAGE.url, app.config.url);
+      localStorage.setItem(STORAGE.key, app.config.key);
+      localStorage.setItem(STORAGE.deviceName, app.config.deviceName);
+      if (!hasConfig()) {
+        setSettingsStatus('error', 'API URLとAPIキーの両方を入力してください。');
+        return;
+      }
+      if (previousEndpoint !== `${app.config.url}\n${app.config.key}`) {
+        localStorage.removeItem(STORAGE.state);
+        app.users = [];
+        app.usersByHash = {};
+        app.records = [];
+      }
+      if (newPin) {
+        localStorage.setItem(STORAGE.pin, await sha256Hex(newPin));
+        document.getElementById('pinNew').value = '';
+        app.settingsUnlocked = true;
+        setSettingsStatus('ok', '保存しました。次回から設定を開くには暗証番号が必要です。');
+      } else {
+        setSettingsStatus('ok', '保存しました。接続テストで確認できます。');
+      }
+      refreshState();
+    }
+
+    async function testConnection() {
+      app.config.url = document.getElementById('apiUrl').value.trim();
+      app.config.key = document.getElementById('apiKey').value.trim();
+      if (!hasConfig()) {
+        setSettingsStatus('error', 'API URLとAPIキーの両方を入力してください。');
+        return;
+      }
+      setSettingsStatus('', '接続を確認しています…');
+      try {
+        await api('ping', {});
+        const state = await api('scanState', { businessDate: todayStr() });
+        const users = Array.isArray(state.users) ? state.users : [];
+        if (!users.length) {
+          throw new Error('接続先に利用者情報がありません。利用者シートとGASのデプロイを確認してください。');
+        }
+        applyState(state, false);
+        cacheState(state);
+        setSettingsStatus('ok', `接続できました。利用者 ${users.length}名を確認しました。`);
+      } catch (error) {
+        setSettingsStatus('error', friendlyError(error));
+      }
+    }
+
+    function setSettingsStatus(kind, message) {
+      const el = document.getElementById('settingsStatus');
+      el.className = kind;
+      el.textContent = message;
+    }
+
+    // ---- 通信 ----
+
+    // Content-Typeヘッダーを付けない(text/plainのまま)ことでCORSプリフライトを回避する。
+    // GASは302でgoogleusercontent.comへ転送し、そちらがAccess-Control-Allow-Origin:*を返す。
+    async function api(action, payload) {
+      if (!hasConfig()) {
+        throw new Error('接続設定が未入力です。設定タブでURLとAPIキーを入力してください。');
+      }
+      let response;
+      try {
+        response = await fetch(app.config.url, {
+          method: 'POST',
+          body: JSON.stringify({ key: app.config.key, action: action, payload: payload || {} })
+        });
+      } catch (error) {
+        throw new Error('通信できません。電波状況とURLを確認してください。');
+      }
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (error) {
+        throw new Error('サーバーの応答を解釈できません。デプロイのアクセス権が「全員」になっているか、URLが/execで終わっているか確認してください。');
+      }
+      if (!data || data.ok === false) {
+        throw new Error((data && data.error) || 'サーバーでエラーが発生しました。');
+      }
+      return data;
+    }
+
+    // ---- 状態取得(オフラインファースト) ----
+
+    function loadCachedState() {
+      const cached = safeJson(localStorage.getItem(STORAGE.state), null);
+      if (cached && Array.isArray(cached.users)) {
+        applyState(cached, true);
+      }
+    }
+
+    function applyState(state, fromCache) {
+      app.users = (Array.isArray(state.users) ? state.users : [])
+        .filter((user) => user && user.userId && user.displayName)
+        .map((user) => Object.assign({}, user, { userId: normalizeClientUserId(user.userId) }));
+      app.records = ((state.businessDate === todayStr() ? state.records : []) || [])
+        .map((record) => Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
+      app.usersByHash = indexUsersByQrHashes(app.users);
+      const suffix = fromCache ? '(前回取得分)' : '';
+      setStatusLine(`利用者 ${app.users.length}名 / ${state.businessDate || todayStr()}${suffix}`);
+      renderUsers();
+      renderToday();
+    }
+
+    function cacheState(state) {
+      localStorage.setItem(STORAGE.state, JSON.stringify({
+        users: state.users || [],
+        records: state.records || [],
+        businessDate: state.businessDate || todayStr()
+      }));
+    }
+
+    function indexUsersByQrHashes(users) {
+      const indexed = {};
+      users.forEach((user) => {
+        [user.qrTokenHash].concat(user.qrTokenHashes || []).forEach((hash) => {
+          const normalized = String(hash || '').trim().toLowerCase();
+          if (/^[0-9a-f]{64}$/.test(normalized)) indexed[normalized] = user;
+        });
+      });
+      return indexed;
+    }
+
+    function qrValueCandidates(rawValue) {
+      const candidates = [];
+      const add = (value) => {
+        const text = String(value === undefined || value === null ? '' : value).replace(/^\uFEFF/, '').trim();
+        if (text && !candidates.includes(text)) candidates.push(text);
+        if (/^\d{1,8}$/.test(text)) {
+          const padded = text.padStart(8, '0');
+          if (!candidates.includes(padded)) candidates.push(padded);
+        }
+      };
+      add(rawValue);
+      try {
+        const url = new URL(String(rawValue).trim());
+        ['qr', 'token', 'userId', 'id'].forEach((key) => add(url.searchParams.get(key)));
+        add(decodeURIComponent(url.pathname.split('/').filter(Boolean).pop() || ''));
+      } catch (error) {}
+      return candidates;
+    }
+
+    function normalizeClientUserId(value) {
+      const text = String(value === undefined || value === null ? '' : value).trim();
+      return /^\d{1,8}$/.test(text) ? text.padStart(8, '0') : text;
+    }
+
+    async function findUserByQrValue(rawValue) {
+      const candidates = qrValueCandidates(rawValue);
+      for (const candidate of candidates) {
+        const hash = await sha256Hex(candidate);
+        if (app.usersByHash[hash]) return { user: app.usersByHash[hash], hash };
+      }
+      return null;
+    }
+
+    async function refreshState() {
+      try {
+        const state = await api('scanState', { businessDate: todayStr() });
+        applyState(state, false);
+        cacheState(state);
+        syncQueue();
+      } catch (error) {
+        if (!app.users.length) {
+          showResult('danger', '利用者情報を取得できません', friendlyError(error));
+        } else {
+          setStatusLine(`利用者 ${app.users.length}名(前回取得分・オフライン)`);
+        }
+      }
+    }
+
+    function setStatusLine(text) {
+      document.getElementById('statusLine').textContent = text;
+    }
+
+    // ---- カメラ ----
+
+    async function toggleCamera() {
+      if (app.scanning) {
+        stopCamera();
+        return;
+      }
+      await startCamera();
+    }
+
+    const CAMERA_PLACEHOLDER_HTML = '「カメラ開始」を押してください。<br>起動しない場合は「カメラ撮影で読む」か手入力が使えます。';
+
+    function getUserMediaCompat(constraints) {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        return navigator.mediaDevices.getUserMedia(constraints);
+      }
+      const legacy = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      if (legacy) {
+        return new Promise((resolve, reject) => legacy.call(navigator, constraints, resolve, reject));
+      }
+      const error = new Error('camera API unavailable');
+      error.name = 'NotSupportedError';
+      return Promise.reject(error);
+    }
+
+    async function startCamera() {
+      if (app.scanning) return;
+      const video = document.getElementById('video');
+      const placeholder = document.getElementById('cameraPlaceholder');
+      try {
+        if (!window.isSecureContext) {
+          const error = new Error('insecure context');
+          error.name = 'SecurityError';
+          throw error;
+        }
+        placeholder.innerHTML = 'カメラを起動しています…';
+
+        // 背面カメラ優先で試し、失敗したら条件を緩めて再試行する
+        const constraintsList = [
+          { video: { facingMode: { exact: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false },
+          { video: { facingMode: 'environment' }, audio: false },
+          { video: true, audio: false }
+        ];
+        let stream = null;
+        let lastError = null;
+        for (const constraints of constraintsList) {
+          try {
+            stream = await getUserMediaCompat(constraints);
+            break;
+          } catch (error) {
+            lastError = error;
+            // 権限拒否は条件を変えても直らないので即中断
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError' || error.name === 'SecurityError') break;
+          }
+        }
+        if (!stream) throw lastError || new Error('カメラを取得できません。');
+
+        app.stream = stream;
+        video.setAttribute('playsinline', '');
+        video.muted = true;
+        video.srcObject = stream;
+        // iOSは非表示(display:none)のvideoの再生を拒否することがあるため、先に表示する
+        video.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        await new Promise((resolve) => {
+          if (video.readyState >= 1) { resolve(); return; }
+          video.addEventListener('loadedmetadata', resolve, { once: true });
+          setTimeout(resolve, 3000);
+        });
+        await video.play();
+
+        app.scanning = true;
+        app.detector = null;
+        if ('BarcodeDetector' in window) {
+          try {
+            app.detector = new BarcodeDetector({ formats: ['qr_code'] });
+          } catch (error) {
+            app.detector = null;
+          }
+        }
+        document.getElementById('scanOverlay').classList.remove('hidden');
+        document.getElementById('cameraToggle').textContent = '停止';
+        // 一定時間読み取りがなければ自動停止する(電池と映しっぱなし防止)
+        app.lastReadAt = Date.now();
+        clearInterval(app.idleTimer);
+        app.idleTimer = setInterval(() => {
+          if (!app.scanning) return;
+          if (Date.now() - app.lastReadAt > IDLE_STOP_MS) {
+            stopCamera();
+            document.getElementById('cameraPlaceholder').innerHTML =
+              '30秒間読み取りがなかったため、カメラを自動停止しました。<br>「カメラ開始」でいつでも再開できます。';
+          }
+        }, 1000);
+        scanLoop();
+      } catch (error) {
+        stopCamera();
+        showCameraError(error);
+      }
+    }
+
+    function showCameraError(error) {
+      const name = (error && error.name) || '';
+      let hint;
+      if (name === 'NotAllowedError' || name === 'PermissionDeniedError') {
+        hint = 'カメラの使用が許可されていません。Safariのアドレスバー左の「ぁあ」→「Webサイトの設定」→「カメラ」を「許可」にしてから、ページを再読み込みしてください。';
+      } else if (name === 'SecurityError') {
+        hint = 'このページはhttpsで開く必要があります。ホスティング先のURLがhttps://で始まっているか確認してください。「カメラ撮影で読む」は使える場合があります。';
+      } else if (name === 'NotSupportedError') {
+        hint = 'このブラウザでは連続カメラ機能を利用できません。iPhone/iPadではSafariを使うか、「カメラ撮影で読む」を使用してください。';
+      } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+        hint = '利用できるカメラが見つかりません。「カメラ撮影で読む」を使ってください。';
+      } else if (name === 'NotReadableError' || name === 'AbortError') {
+        hint = '他のアプリがカメラを使用中の可能性があります。他のアプリを閉じてから「連続カメラ再試行」を押してください。';
+      } else {
+        hint = '連続カメラを開始できません。「カメラ撮影で読む」を押すと、iPhoneのカメラでQRを撮影して記録できます。';
+      }
+      showResult('warning', '連続カメラを開始できません', name ? `${hint}(${name})` : hint);
+    }
+
+    function stopCamera() {
+      app.scanning = false;
+      app.frozen = false;
+      clearInterval(app.idleTimer);
+      clearTimeout(app.freezeTimer);
+      if (app.stream) {
+        app.stream.getTracks().forEach((track) => track.stop());
+      }
+      app.stream = null;
+      const video = document.getElementById('video');
+      video.srcObject = null;
+      video.classList.add('hidden');
+      document.getElementById('scanOverlay').classList.add('hidden');
+      document.getElementById('scanFlash').className = 'scan-flash hidden';
+      const placeholder = document.getElementById('cameraPlaceholder');
+      placeholder.innerHTML = CAMERA_PLACEHOLDER_HTML;
+      placeholder.classList.remove('hidden');
+      document.getElementById('cameraToggle').textContent = 'カメラ開始';
+    }
+
+    // 読み取り結果を映像の静止+全画面表示で知らせる。FREEZE_MS後に自動再開する。
+    function freezeScanFeedback(kind, mainText, subText) {
+      if (!app.scanning) return;
+      const video = document.getElementById('video');
+      const flash = document.getElementById('scanFlash');
+      app.frozen = true;
+      try { video.pause(); } catch (error) {}
+      flash.className = `scan-flash ${kind}`;
+      flash.innerHTML = `${escapeHtml(mainText)}${subText ? `<small>${escapeHtml(subText)}</small>` : ''}`;
+      clearTimeout(app.freezeTimer);
+      app.freezeTimer = setTimeout(() => {
+        flash.className = 'scan-flash hidden';
+        app.frozen = false;
+        if (app.scanning) {
+          video.play().catch(() => {});
+        }
+      }, FREEZE_MS);
+    }
+
+    async function scanLoop() {
+      if (!app.scanning) return;
+      if (app.frozen) {
+        requestAnimationFrame(scanLoop);
+        return;
+      }
+      const video = document.getElementById('video');
+      try {
+        let value = '';
+        if (app.detector) {
+          const codes = await app.detector.detect(video);
+          value = codes[0] && codes[0].rawValue;
+        } else if (window.jsQR && video.readyState === video.HAVE_ENOUGH_DATA) {
+          // jsQRは重いので解析間隔を空ける
+          const now = performance.now();
+          if (!app.lastJsQrAt || now - app.lastJsQrAt > 160) {
+            app.lastJsQrAt = now;
+            value = scanWithJsQr(video);
+          }
+        }
+        if (value) {
+          handleQrValue(value);
+        }
+      } catch (error) {
+        app.detector = null;
+      }
+      requestAnimationFrame(scanLoop);
+    }
+
+    function scanWithJsQr(video) {
+      const canvas = document.getElementById('qrCanvas');
+      const size = 640;
+      canvas.width = size;
+      canvas.height = Math.round(size * video.videoHeight / Math.max(video.videoWidth, 1));
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      return code && code.data;
+    }
+
+    function readQrFromPhoto(event) {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+      if (!window.jsQR) {
+        showResult('danger', 'QR読取ライブラリ未読込', 'ネットワークを確認してから再度開いてください。');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.getElementById('qrCanvas');
+          const maxSize = 1200;
+          const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+          if (code && code.data) {
+            handleQrValue(code.data);
+          } else {
+            beep('error');
+            showResult('danger', 'QRを読み取れません', 'QRが画面内に大きく入るように、もう一度撮影してください。');
+          }
+        };
+        image.onerror = () => showResult('danger', '画像を読めません', 'もう一度撮影してください。');
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ---- 読み取り処理 ----
+
+    async function handleQrValue(rawValue) {
+      const now = Date.now();
+      app.lastReadAt = now;
+      if (app.lastScan.value === rawValue && now - app.lastScan.at < REPEAT_SUPPRESS_MS) {
+        return;
+      }
+      app.lastScan = { value: rawValue, at: now };
+      if (!app.users.length) {
+        await refreshState();
+        if (!app.users.length) {
+          beep('error');
+          showResult('danger', '利用者情報が未取得です', '設定の「接続テスト」で利用者件数が表示されることを確認してください。');
+          return;
+        }
+      }
+      let match;
+      try {
+        match = await findUserByQrValue(rawValue);
+      } catch (error) {
+        showResult('danger', '読み取り処理エラー', 'このページはhttpsで開く必要があります。');
+        return;
+      }
+      if (!match) {
+        beep('error');
+        freezeScanFeedback('danger', '読み取りエラー', '登録のないQRです');
+        showResult('danger', '利用者が見つかりません', '利用者一覧を更新しても直らない場合は、QRを再印刷してください。');
+        addRecent({ label: '不明なQR', status: 'エラー', serviceType: app.mode });
+        return;
+      }
+      const user = match.user;
+
+      // 情報確認モード: 記録せず利用者情報だけ表示する
+      if (app.mode === 'info') {
+        beep(user.alertLevel === 'critical' ? 'warning' : 'success');
+        freezeScanFeedback('info', user.displayName, '情報確認(記録していません)');
+        showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, '情報確認です。記録はしていません。', user);
+        addRecent({ label: user.displayName, status: '確認', serviceType: 'info' });
+        return;
+      }
+
+      const businessDate = todayStr();
+      const localKey = `${businessDate}:${user.userId}:${app.mode}`;
+      if (isLocallyRecorded(localKey)) {
+        beep('duplicate');
+        freezeScanFeedback('warning', `${user.displayName}`, `${SERVICE_META[app.mode].label}は記録済みです`);
+        showUserResult('warning', `${user.displayName} は記録済み`, `${SERVICE_META[app.mode].label}はすでに受付済みです。`, user);
+        addRecent({ label: user.displayName, status: '重複', serviceType: app.mode });
+        return;
+      }
+
+      const event = {
+        eventId: nextEventId(),
+        clientEventSeq: app.clientSeq,
+        deviceId: app.deviceId,
+        occurredAtClient: new Date().toISOString(),
+        businessDate,
+        userId: user.userId,
+        qrTokenHash: user.qrTokenHash || match.hash,
+        serviceType: app.mode,
+        source: 'scan',
+        localKey,
+        localStatus: 'pending'
+      };
+      app.queue.push(event);
+      saveQueue();
+      beep(user.alertLevel === 'critical' ? 'warning' : 'success');
+      freezeScanFeedback('success', `✓ ${user.displayName}`, `${SERVICE_META[app.mode].label}を受付しました`);
+      showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, `${SERVICE_META[app.mode].label}を受付しました。`, user);
+      addRecent({ label: user.displayName, status: '受付', serviceType: app.mode });
+      renderSync();
+      renderToday();
+      syncQueue();
+    }
+
+    function isLocallyRecorded(localKey) {
+      if (app.queue.some((event) => event.localKey === localKey && event.localStatus !== 'rejected')) {
+        return true;
+      }
+      const parts = localKey.split(':');
+      const record = app.records.find((item) => item.businessDate === parts[0] && normalizeClientUserId(item.userId) === normalizeClientUserId(parts[1]));
+      if (!record) return false;
+      const actual = safeJson(record.actualFlags, {});
+      return Boolean(actual[parts[2]]);
+    }
+
+    // ---- 同期キュー ----
+
+    async function syncQueue() {
+      if (app.syncing || !navigator.onLine || !hasConfig() || app.queue.length === 0) {
+        renderSync();
+        return;
+      }
+      const pending = app.queue.filter((event) => event.localStatus !== 'rejected').slice(0, 25);
+      if (!pending.length) {
+        renderSync();
+        return;
+      }
+      app.syncing = true;
+      try {
+        const response = await api('syncEvents', {
+          events: pending,
+          deviceId: app.deviceId,
+          deviceName: app.config.deviceName || app.deviceId,
+          clientBatch: {
+            syncBatchId: 'syn_' + randomId(),
+            deviceId: app.deviceId,
+            sentAtClient: new Date().toISOString(),
+            businessDate: todayStr()
+          }
+        });
+        const byEvent = Object.fromEntries((response.results || []).map((item) => [item.eventId, item]));
+        app.queue = app.queue.filter((event) => {
+          const result = byEvent[event.eventId];
+          if (!result) return true;
+          if (result.status === 'accepted' || result.status === 'duplicate') return false;
+          event.localStatus = 'rejected';
+          return true;
+        });
+        saveQueue();
+        app.syncing = false;
+        await refreshStateQuiet();
+      } catch (error) {
+        // 次回の再送に任せるが、原因は画面上部に出して分かるようにする
+        setStatusLine(`同期エラー: ${friendlyError(error)}`);
+      } finally {
+        app.syncing = false;
+        renderSync();
+        renderToday();
+      }
+    }
+
+    async function refreshStateQuiet() {
+      try {
+        const state = await api('scanState', { businessDate: todayStr() });
+        applyState(state, false);
+        cacheState(state);
+      } catch (error) {}
+    }
+
+    function nextEventId() {
+      app.clientSeq += 1;
+      localStorage.setItem(STORAGE.seq, String(app.clientSeq));
+      return `${app.deviceId}_${Date.now()}_${app.clientSeq}`;
+    }
+
+    function loadQueue() {
+      app.queue = safeJson(localStorage.getItem(STORAGE.queue), []).map((event) => Object.assign({}, event, {
+        userId: normalizeClientUserId(event.userId)
+      }));
+    }
+
+    function saveQueue() {
+      localStorage.setItem(STORAGE.queue, JSON.stringify(app.queue));
+    }
+
+    function renderSync() {
+      const pending = app.queue.filter((item) => item.localStatus !== 'rejected').length;
+      const rejected = app.queue.filter((item) => item.localStatus === 'rejected').length;
+      const pill = document.getElementById('syncPill');
+      pill.textContent = rejected ? `未同期 ${pending} / 要確認 ${rejected}` : pending ? `未同期 ${pending}` : '同期済み';
+      pill.classList.toggle('pending', pending > 0 || rejected > 0);
+      pill.classList.toggle('offline', !navigator.onLine);
+    }
+
+    // ---- 表示 ----
+
+    function showResult(kind, title, message) {
+      const panel = document.getElementById('resultPanel');
+      panel.className = `result ${kind}`;
+      panel.innerHTML = `<h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p>`;
+      void panel.offsetWidth;
+      panel.classList.add('pop');
+    }
+
+    // スキャン結果に利用者の基本情報を添えて表示する
+    function showUserResult(kind, title, message, user) {
+      const panel = document.getElementById('resultPanel');
+      panel.className = `result ${kind}`;
+      const pattern = patternOf(user);
+      const rows = [];
+      if (user.kana) {
+        rows.push(`<div class="kv"><span class="k">ふりがな</span><span class="v">${escapeHtml(user.kana)}</span></div>`);
+      }
+      rows.push(`<div class="kv"><span class="k">注意レベル</span><span class="v">${alertBadgeHtml(user.alertLevel)}</span></div>`);
+      if (pattern.weekdays) {
+        rows.push(`<div class="kv"><span class="k">利用曜日</span><span class="v">${escapeHtml(pattern.weekdays)}</span></div>`);
+      }
+      if (pattern.bathWeekdays) {
+        rows.push(`<div class="kv"><span class="k">入浴曜日</span><span class="v">${escapeHtml(pattern.bathWeekdays)}</span></div>`);
+      }
+      if (user.alertCard) {
+        rows.push(`<div class="care-note">⚠ ${escapeHtml(user.alertCard)}</div>`);
+      }
+      if (user.detailMemo) {
+        rows.push(`<div class="kv"><span class="k">メモ</span><span class="v">${escapeHtml(user.detailMemo)}</span></div>`);
+      }
+      panel.innerHTML = `<h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p><div class="user-info">${rows.join('')}</div>`;
+      void panel.offsetWidth;
+      panel.classList.add('pop');
+    }
+
+    // ---- 利用者一覧 ----
+
+    const ALERT_META = {
+      normal: { label: '通常', cls: 'normal' },
+      notice: { label: '注意', cls: 'notice' },
+      critical: { label: '重要', cls: 'critical' }
+    };
+
+    function alertBadgeHtml(level) {
+      const meta = ALERT_META[level] || ALERT_META.normal;
+      return `<span class="alert-badge ${meta.cls}">${meta.label}</span>`;
+    }
+
+    function patternOf(user) {
+      const pattern = safeJson(user.defaultServicePattern, {});
+      return {
+        weekdays: user.serviceWeekdays || pattern.weekdays || '',
+        bathWeekdays: user.bathSchedule || pattern.bathWeekdays || '',
+        lunch: user.mealSchedule ? !['なし', '無し', '不要', '無'].includes(String(user.mealSchedule).trim()) : pattern.lunch !== false
+      };
+    }
+
+    function detailRow(label, value) {
+      const text = String(value === undefined || value === null ? '' : value).trim();
+      return text ? `<div class="kv"><span class="k">${escapeHtml(label)}</span><span class="v">${escapeHtml(text)}</span></div>` : '';
+    }
+
+    function detailSection(title, rows) {
+      const content = rows.filter(Boolean).join('');
+      return content ? `<div class="detail-heading">${escapeHtml(title)}</div>${content}` : '';
+    }
+
+    function kanaSort(a, b) {
+      return String(a.kana || a.displayName || '').localeCompare(String(b.kana || b.displayName || ''), 'ja');
+    }
+
+    // 検索用の正規化: 空白(全角含む)を除去し、カタカナをひらがなに、英字を小文字にそろえる。
+    // 「山田花子」「ヤマダ」「やまだは」のような入力でも取りこぼさないようにする。
+    function normalizeForSearch(text) {
+      return String(text || '')
+        .toLowerCase()
+        .replace(/[\s　]/g, '')
+        .replace(/[ァ-ヶ]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+    }
+
+    // ---- 今日の実績 ----
+
+    // サーバー確定分(records)と未送信キューを合算した、その利用者の今日のフラグ
+    function localFlagsFor(userId) {
+      const normalizedUserId = normalizeClientUserId(userId);
+      const record = app.records.find((item) => normalizeClientUserId(item.userId) === normalizedUserId);
+      const flags = Object.assign({}, record ? safeJson(record.actualFlags, {}) : {});
+      const businessDate = todayStr();
+      app.queue.forEach((event) => {
+        if (event.localStatus !== 'rejected' && event.businessDate === businessDate && normalizeClientUserId(event.userId) === normalizedUserId) {
+          flags[event.serviceType] = true;
+        }
+      });
+      return flags;
+    }
+
+    function renderToday() {
+      const list = document.getElementById('todayList');
+      document.getElementById('todayDate').textContent = todayStr();
+      if (!app.users.length) {
+        document.getElementById('todaySummary').textContent = '';
+        list.innerHTML = '<p class="note" style="margin:0">利用者情報が未取得です。オンラインの状態で開き直してください。</p>';
+        return;
+      }
+      const counts = { arrival: 0, bath: 0, lunch: 0 };
+      const users = app.users.slice().sort(kanaSort);
+      list.innerHTML = users.map((user) => {
+        const flags = localFlagsFor(user.userId);
+        Object.keys(counts).forEach((key) => {
+          if (flags[key]) counts[key]++;
+        });
+        const chips = Object.keys(SERVICE_META).map((key) => `<span class="flag ${flags[key] ? 'on' : ''}">${SERVICE_META[key].short}</span>`).join('');
+        return `<div class="row"><div><strong>${escapeHtml(user.displayName)}</strong><br><small>${escapeHtml(user.kana || '')}</small></div><div class="flags">${chips}</div></div>`;
+      }).join('');
+      document.getElementById('todaySummary').textContent =
+        `来所 ${counts.arrival} / 入浴 ${counts.bath} / 昼食 ${counts.lunch}`;
+    }
+
+    // 検索していないときに一覧へ出す人数。大人数施設でのスクロール地獄を防ぐ。
+    const USER_LIST_DEFAULT_COUNT = 5;
+
+    function renderUsers() {
+      const list = document.getElementById('userList');
+      const query = normalizeForSearch(document.getElementById('userSearch').value);
+      let users = app.users.slice();
+      if (query) {
+        users = users.filter((user) => normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query));
+      }
+      users.sort(kanaSort);
+      if (!users.length) {
+        list.innerHTML = `<p class="note" style="margin:0">${app.users.length ? '該当する利用者がいません。' : '利用者情報が未取得です。オンラインの状態で開き直してください。'}</p>`;
+        return;
+      }
+      let hiddenCount = 0;
+      if (!query && users.length > USER_LIST_DEFAULT_COUNT) {
+        hiddenCount = users.length - USER_LIST_DEFAULT_COUNT;
+        users = users.slice(0, USER_LIST_DEFAULT_COUNT);
+      }
+      list.innerHTML = users.map((user) => {
+        const open = app.expandedUserId === user.userId;
+        const pattern = patternOf(user);
+        const emergencyName = [user.emergencyContactName, user.emergencyContactRelation ? `(${user.emergencyContactRelation})` : ''].filter(Boolean).join(' ');
+        const detail = open ? `
+          <div class="user-card-detail">
+            ${detailSection('基本情報', [
+              detailRow('性別', user.gender),
+              detailRow('生年月日', user.birthDate),
+              detailRow('年齢', user.age === undefined || user.age === null || user.age === '' ? '' : `${user.age}歳`),
+              detailRow('介護度', user.careLevel)
+            ])}
+            ${detailSection('利用予定', [
+              detailRow('利用曜日', pattern.weekdays || '未設定'),
+              detailRow('入浴予定', user.bathSchedule || pattern.bathWeekdays || '未設定'),
+              detailRow('食事予定', user.mealSchedule || (pattern.lunch ? 'あり' : 'なし')),
+              detailRow('食事提供', user.mealProvided)
+            ])}
+            ${detailSection('支援情報', [
+              detailRow('アレルギー', user.allergies),
+              detailRow('食事形態', user.mealForm),
+              detailRow('移動方法', user.mobility),
+              detailRow('注意レベル', ALERT_META[user.alertLevel] ? ALERT_META[user.alertLevel].label : '通常'),
+              detailRow('備考', user.note || user.detailMemo)
+            ])}
+            ${user.alertCard ? `<div class="care-note">⚠ ${escapeHtml(user.alertCard)}</div>` : ''}
+            ${detailSection('連絡先', [
+              detailRow('緊急連絡先', emergencyName),
+              detailRow('緊急電話', user.emergencyContactPhone),
+              detailRow('住所', user.address),
+              detailRow('居宅支援', user.careSupportOffice),
+              detailRow('ケアマネ', user.careManagerName),
+              detailRow('CM連絡先', user.careManagerPhone)
+            ])}
+          </div>` : '';
+        return `<div class="user-card"><button class="user-card-head" data-user="${escapeHtml(user.userId)}"><span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
+      }).join('') + (hiddenCount ? `<p class="note" style="margin:4px 0 0">ほか ${hiddenCount} 名は、名前・ふりがなで検索すると表示されます。</p>` : '');
+      list.querySelectorAll('.user-card-head').forEach((head) => {
+        head.addEventListener('click', () => {
+          const id = head.dataset.user;
+          app.expandedUserId = app.expandedUserId === id ? '' : id;
+          renderUsers();
+        });
+      });
+    }
+
+    function addRecent(item) {
+      app.recent.unshift(Object.assign({ at: new Date() }, item));
+      app.recent = app.recent.slice(0, 5);
+      renderRecent();
+    }
+
+    function renderRecent() {
+      const list = document.getElementById('recentList');
+      list.innerHTML = app.recent.map((item) => {
+        const meta = MODE_META[item.serviceType] || MODE_META.arrival;
+        return `<div class="row"><div><strong>${escapeHtml(item.label)}</strong><br><small>${item.at.toLocaleTimeString()} / ${escapeHtml(item.status)}</small></div><span class="flag" style="background:${meta.color};color:#fff">${meta.short}</span></div>`;
+      }).join('') || '<p>まだ読み取りがありません。</p>';
+    }
+
+    // ---- ユーティリティ ----
+
+    async function sha256Hex(text) {
+      const buffer = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+    }
+
+    function beep(type) {
+      if (navigator.vibrate) {
+        navigator.vibrate(type === 'duplicate' ? [90, 60, 90] : type === 'error' ? [180, 80, 180] : 80);
+      }
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.frequency.value = type === 'success' ? 880 : type === 'duplicate' ? 440 : 220;
+        gain.gain.value = 0.04;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => {
+          osc.stop();
+          ctx.close();
+        }, type === 'success' ? 90 : 180);
+      } catch (error) {}
+    }
+
+    function safeJson(text, fallback) {
+      if (!text) return fallback;
+      if (typeof text === 'object') return text;
+      try { return JSON.parse(text); } catch (error) { return fallback; }
+    }
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function friendlyError(error) {
+      return error && error.message ? error.message : String(error);
+    }
+  </script>
+</body>
+</html>
