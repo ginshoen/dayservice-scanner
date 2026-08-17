@@ -507,6 +507,31 @@
   </style>
 </head>
 <body>
+  <div id="loginScreen" class="hidden" style="position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#e8eef6 0%,#eef2f7 260px);overflow:auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))">
+    <div style="max-width:420px;margin:0 auto">
+      <div style="text-align:center;margin-bottom:18px">
+        <strong style="font-size:20px">QRスキャナー</strong>
+        <p style="color:var(--muted);font-size:13px;margin:6px 0 0">職員を選んでPINを入力してください</p>
+      </div>
+      <div class="panel">
+        <h2>職員を選ぶ</h2>
+        <div class="list" id="loginStaffList"></div>
+        <div id="loginPinArea" class="hidden" style="margin-top:14px">
+          <label>PIN<input id="loginPin" type="password" inputmode="numeric" autocomplete="off" placeholder="4桁以上の数字"></label>
+          <div class="grid-2" style="margin-top:10px">
+            <button id="loginSubmit" class="primary">ログイン</button>
+            <button id="loginCancel">職員を選び直す</button>
+          </div>
+        </div>
+        <p id="loginMessage" style="min-height:20px;margin:12px 0 0;font-size:14px;color:var(--danger)"></p>
+        <div class="grid-2" style="margin-top:12px">
+          <button id="loginReload">職員一覧を再取得</button>
+          <button id="loginToSettings">接続設定を開く</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <header class="topbar">
       <div class="toprow">
@@ -514,7 +539,10 @@
           <strong>QRスキャナー</strong>
           <span id="statusLine">読み込み中</span>
         </div>
-        <div class="sync-pill" id="syncPill">未同期 0</div>
+        <div style="display:flex;align-items:center;gap:8px;flex:0 0 auto">
+          <div class="sync-pill" id="syncPill">未同期 0</div>
+          <button id="logoutButton" style="min-height:34px;padding:6px 10px;font-size:12px">職員切替</button>
+        </div>
       </div>
     </header>
 
@@ -666,6 +694,7 @@
       info: { label: '確認', short: '確', color: '#475569', colorDark: '#334155' }
     });
 
+    const LOGIN_FREE_ACTIONS = ['ping', 'staffList', 'login'];
     const IDLE_STOP_MS = 30000;
     const REPEAT_SUPPRESS_MS = 2600;
     const FREEZE_MS = 1500;
@@ -679,7 +708,9 @@
       seq: 'ds_scanner_seq',
       state: 'ds_scanner_state',
       pin: 'ds_scanner_pin',
-      photos: 'ds_scanner_photos'
+      photos: 'ds_scanner_photos',
+      token: 'ds_scanner_token',
+      staffName: 'ds_scanner_staff_name'
     };
 
     // 顔写真は端末に少しだけ残して、電波が悪いときも直近の人はすぐ出せるようにする
@@ -703,6 +734,10 @@
       syncing: false,
       expandedUserId: '',
       settingsUnlocked: false,
+      token: localStorage.getItem('ds_scanner_token') || '',
+      staffName: localStorage.getItem('ds_scanner_staff_name') || '',
+      loginStaff: [],
+      loginStaffId: '',
       photoCache: {},
       photoRequestSeq: 0,
       frozen: false,
@@ -730,12 +765,15 @@
       renderUsers();
       renderToday();
       fillSettingsForm();
-      if (hasConfig()) {
-        showView('scanView');
-        refreshState();
-      } else {
+      if (!hasConfig()) {
         showView('settingsView');
         setStatusLine('接続設定を入力してください');
+      } else if (!app.token) {
+        showLogin('');
+      } else {
+        showView('scanView');
+        setStatusLine(`${app.staffName} でログイン中`);
+        refreshState();
       }
       window.addEventListener('online', syncQueue);
       setInterval(syncQueue, 15000);
@@ -785,6 +823,27 @@
       document.getElementById('testConnection').addEventListener('click', testConnection);
       document.getElementById('userSearch').addEventListener('input', renderUsers);
       document.getElementById('refreshToday').addEventListener('click', refreshState);
+      document.getElementById('loginSubmit').addEventListener('click', submitLogin);
+      document.getElementById('loginCancel').addEventListener('click', () => {
+        app.loginStaffId = '';
+        renderLoginStaff();
+      });
+      document.getElementById('loginPin').addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          submitLogin();
+        }
+      });
+      document.getElementById('loginReload').addEventListener('click', () => showLogin(''));
+      document.getElementById('loginToSettings').addEventListener('click', () => {
+        document.getElementById('loginScreen').classList.add('hidden');
+        showView('settingsView');
+      });
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        stopCamera();
+        clearSession();
+        showLogin('職員を切り替えます。');
+      });
       document.getElementById('unlockSettings').addEventListener('click', unlockSettings);
       document.getElementById('resetSettings').addEventListener('click', resetSettings);
       document.getElementById('pinInput').addEventListener('keydown', (event) => {
@@ -924,9 +983,13 @@
         app.settingsUnlocked = true;
         setSettingsStatus('ok', '保存しました。次回から設定を開くには暗証番号が必要です。');
       } else {
-        setSettingsStatus('ok', '保存しました。接続テストで確認できます。');
+        setSettingsStatus('ok', '保存しました。');
       }
-      refreshState();
+      if (app.token) {
+        refreshState();
+      } else {
+        showLogin('接続設定を保存しました。職員を選んでログインしてください。');
+      }
     }
 
     async function testConnection() {
@@ -966,11 +1029,16 @@
       if (!hasConfig()) {
         throw new Error('接続設定が未入力です。設定タブでURLとAPIキーを入力してください。');
       }
+      const body = Object.assign({}, payload || {});
+      // ログインが要る操作にはトークンを添える(staffList/ping/loginでは無視される)
+      if (app.token) {
+        body.token = app.token;
+      }
       let response;
       try {
         response = await fetch(app.config.url, {
           method: 'POST',
-          body: JSON.stringify({ key: app.config.key, action: action, payload: payload || {} })
+          body: JSON.stringify({ key: app.config.key, action: action, payload: body })
         });
       } catch (error) {
         throw new Error('通信できません。電波状況とURLを確認してください。');
@@ -983,9 +1051,108 @@
         throw new Error('サーバーの応答を解釈できません。デプロイのアクセス権が「全員」になっているか、URLが/execで終わっているか確認してください。');
       }
       if (!data || data.ok === false) {
-        throw new Error((data && data.error) || 'サーバーでエラーが発生しました。');
+        const message = (data && data.error) || 'サーバーでエラーが発生しました。';
+        // ログイン不要の操作(職員一覧など)では再ログイン処理を走らせない。
+        // ここを緩めると「ログイン画面を出す→通信→また期限切れ」で無限ループになる。
+        if (message.indexOf('SESSION_EXPIRED') !== -1 && LOGIN_FREE_ACTIONS.indexOf(action) === -1) {
+          handleSessionExpired();
+          throw new Error('ログインの有効期限が切れました。');
+        }
+        throw new Error(message);
       }
       return data;
+    }
+
+    // ---- 職員ログイン ----
+
+    async function showLogin(message) {
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('loginMessage').textContent = message || '';
+      document.getElementById('loginPin').value = '';
+      app.loginStaffId = '';
+      renderLoginStaff();
+      try {
+        const result = await api('staffList', {});
+        app.loginStaff = result.staff || [];
+      } catch (error) {
+        app.loginStaff = [];
+        const message = friendlyError(error);
+        document.getElementById('loginMessage').textContent = message.indexOf('SESSION_EXPIRED') !== -1
+          ? '職員一覧を取得できませんでした。「職員一覧を再取得」を押してください。'
+          : message;
+      }
+      renderLoginStaff();
+    }
+
+    function renderLoginStaff() {
+      const list = document.getElementById('loginStaffList');
+      const pinArea = document.getElementById('loginPinArea');
+      if (!app.loginStaff.length) {
+        list.innerHTML = '<p class="note" style="margin:0">職員一覧を取得できていません。接続設定を確認するか、「職員一覧を再取得」を押してください。</p>';
+        pinArea.classList.add('hidden');
+        return;
+      }
+      if (app.loginStaffId) {
+        const staff = app.loginStaff.find((item) => item.staffId === app.loginStaffId);
+        list.innerHTML = `<div class="row"><div><strong>${escapeHtml(staff.displayName)}</strong><br><small>${escapeHtml(staff.jobTitle || '')}</small></div></div>`;
+        pinArea.classList.remove('hidden');
+        document.getElementById('loginPin').focus();
+        return;
+      }
+      pinArea.classList.add('hidden');
+      list.innerHTML = app.loginStaff.map((staff) => (
+        `<button class="row" data-staff="${escapeHtml(staff.staffId)}" style="width:100%;text-align:left;font-weight:400"><span><strong>${escapeHtml(staff.displayName)}</strong><br><small>${escapeHtml(staff.jobTitle || staff.kana || '')}</small></span></button>`
+      )).join('');
+      list.querySelectorAll('[data-staff]').forEach((button) => {
+        button.addEventListener('click', () => {
+          app.loginStaffId = button.dataset.staff;
+          document.getElementById('loginMessage').textContent = '';
+          renderLoginStaff();
+        });
+      });
+    }
+
+    async function submitLogin() {
+      const pin = document.getElementById('loginPin').value.trim();
+      if (!app.loginStaffId || !pin) {
+        document.getElementById('loginMessage').textContent = '職員を選び、PINを入力してください。';
+        return;
+      }
+      document.getElementById('loginMessage').textContent = '確認しています…';
+      try {
+        const result = await api('login', { staffId: app.loginStaffId, pin: pin });
+        app.token = result.token;
+        app.staffName = (result.actor && result.actor.name) || '';
+        localStorage.setItem(STORAGE.token, app.token);
+        localStorage.setItem(STORAGE.staffName, app.staffName);
+        document.getElementById('loginPin').value = '';
+        document.getElementById('loginMessage').textContent = '';
+        document.getElementById('loginScreen').classList.add('hidden');
+        showView('scanView');
+        setStatusLine(`${app.staffName} でログイン中`);
+        refreshState();
+      } catch (error) {
+        document.getElementById('loginMessage').textContent = friendlyError(error);
+      }
+    }
+
+    function clearSession() {
+      app.token = '';
+      app.staffName = '';
+      localStorage.removeItem(STORAGE.token);
+      localStorage.removeItem(STORAGE.staffName);
+    }
+
+    // 記録は端末に残したまま、ログインだけやり直してもらう
+    function handleSessionExpired() {
+      if (app.handlingSessionExpiry) return;
+      app.handlingSessionExpiry = true;
+      stopCamera();
+      clearSession();
+      showLogin('ログインの有効期限が切れました。もう一度ログインしてください。未送信の記録は残っています。')
+        .finally(() => {
+          app.handlingSessionExpiry = false;
+        });
     }
 
     // ---- 状態取得(オフラインファースト) ----
