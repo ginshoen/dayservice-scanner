@@ -424,6 +424,24 @@
     .user-info .kv { display: flex; gap: 10px; align-items: baseline; }
     .user-info .k { flex: 0 0 74px; color: var(--muted); font-size: 12px; font-weight: 700; }
     .user-info .v { flex: 1; color: #1d2939; line-height: 1.55; }
+    .user-photo {
+      width: 104px;
+      height: 104px;
+      border-radius: 14px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, .7);
+      border: 1px solid rgba(15, 28, 46, .12);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.4;
+      padding: 4px;
+      flex: 0 0 auto;
+    }
+    img.user-photo { padding: 0; }
     .user-info .care-note {
       background: rgba(255, 255, 255, .65);
       border: 1px solid rgba(181, 71, 8, .25);
@@ -660,8 +678,12 @@
       queue: 'ds_scanner_queue',
       seq: 'ds_scanner_seq',
       state: 'ds_scanner_state',
-      pin: 'ds_scanner_pin'
+      pin: 'ds_scanner_pin',
+      photos: 'ds_scanner_photos'
     };
+
+    // 顔写真は端末に少しだけ残して、電波が悪いときも直近の人はすぐ出せるようにする
+    const PHOTO_CACHE_LIMIT = 30;
 
     const app = {
       mode: 'arrival',
@@ -681,6 +703,8 @@
       syncing: false,
       expandedUserId: '',
       settingsUnlocked: false,
+      photoCache: {},
+      photoRequestSeq: 0,
       frozen: false,
       freezeTimer: null,
       idleTimer: null,
@@ -700,6 +724,7 @@
       buildModeButtons();
       loadQueue();
       loadCachedState();
+      app.photoCache = safeJson(localStorage.getItem(STORAGE.photos), {}) || {};
       renderSync();
       renderRecent();
       renderUsers();
@@ -1326,7 +1351,7 @@
       if (app.mode === 'info') {
         beep(user.alertLevel === 'critical' ? 'warning' : 'success');
         freezeScanFeedback('info', user.displayName, '情報確認(記録していません)');
-        showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, '情報確認です。記録はしていません。', user);
+        showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, '情報確認です。記録はしていません。', user, { showPhoto: true });
         addRecent({ label: user.displayName, status: '確認', serviceType: 'info' });
         return;
       }
@@ -1466,11 +1491,21 @@
     }
 
     // スキャン結果に利用者の基本情報を添えて表示する
-    function showUserResult(kind, title, message, user) {
+    function showUserResult(kind, title, message, user, options) {
       const panel = document.getElementById('resultPanel');
       panel.className = `result ${kind}`;
       const pattern = patternOf(user);
       const rows = [];
+      if (options && options.showPhoto) {
+        const cached = app.photoCache[user.userId];
+        if (cached) {
+          rows.push(`<img class="user-photo" id="scanPhoto" alt="${escapeHtml(user.displayName)}の写真" src="${cached}">`);
+        } else if (user.photoFileId) {
+          rows.push('<div class="user-photo" id="scanPhoto">写真を<br>読み込み中</div>');
+        } else {
+          rows.push('<div class="user-photo" id="scanPhoto">写真<br>未登録</div>');
+        }
+      }
       if (user.kana) {
         rows.push(`<div class="kv"><span class="k">ふりがな</span><span class="v">${escapeHtml(user.kana)}</span></div>`);
       }
@@ -1490,6 +1525,56 @@
       panel.innerHTML = `<h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p><div class="user-info">${rows.join('')}</div>`;
       void panel.offsetWidth;
       panel.classList.add('pop');
+      if (options && options.showPhoto && user.photoFileId && !app.photoCache[user.userId]) {
+        loadUserPhoto(user);
+      }
+    }
+
+    // 写真はDrive上で非公開のまま、必要になった人の分だけAPI経由で取り寄せる
+    async function loadUserPhoto(user) {
+      const requestSeq = ++app.photoRequestSeq;
+      const applyTo = (html, isImage) => {
+        // 表示中の相手が変わっていたら書き換えない
+        if (requestSeq !== app.photoRequestSeq) return;
+        const box = document.getElementById('scanPhoto');
+        if (!box) return;
+        if (isImage) {
+          const image = new Image();
+          image.className = 'user-photo';
+          image.id = 'scanPhoto';
+          image.alt = `${user.displayName}の写真`;
+          image.src = html;
+          box.replaceWith(image);
+        } else {
+          box.innerHTML = html;
+        }
+      };
+      try {
+        const result = await api('userPhoto', { userId: user.userId });
+        if (!result.dataUri) {
+          applyTo('写真<br>未登録', false);
+          return;
+        }
+        app.photoCache[user.userId] = result.dataUri;
+        savePhotoCache();
+        applyTo(result.dataUri, true);
+      } catch (error) {
+        applyTo('写真を<br>取得できません', false);
+      }
+    }
+
+    function savePhotoCache() {
+      const ids = Object.keys(app.photoCache);
+      while (ids.length > PHOTO_CACHE_LIMIT) {
+        delete app.photoCache[ids.shift()];
+      }
+      try {
+        localStorage.setItem(STORAGE.photos, JSON.stringify(app.photoCache));
+      } catch (error) {
+        // 端末の保存容量を超えたら写真キャッシュは諦める(記録の保存を優先する)
+        app.photoCache = {};
+        try { localStorage.removeItem(STORAGE.photos); } catch (ignored) {}
+      }
     }
 
     // ---- 利用者一覧 ----
