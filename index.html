@@ -630,8 +630,12 @@
         <div id="settingsBody">
         <div class="panel">
           <h2>接続設定</h2>
+          <button id="scanSetupQr" class="primary" style="width:100%;margin-bottom:12px">設定QRを読み取る(かんたん設定)</button>
+          <p class="note" style="margin-bottom:14px">
+            管理者用アプリの「今日」タブ →「スキャナー連携情報」に表示される設定QRを読み取ると、下の項目が自動で入力されます。
+          </p>
           <p class="note">
-            管理者用アプリの「今日」タブ →「スキャナー連携情報」に表示されるURLとAPIキーを入力してください。
+            手入力する場合は、管理者用アプリに表示されるURLとAPIキーを入力してください。
             URLはアクセス権「全員」でデプロイしたウェブアプリのもの(https://script.google.com/macros/s/…/exec)を使います。
             APIキーは施設外に共有しないでください。
           </p>
@@ -694,6 +698,7 @@
       info: { label: '確認', short: '確', color: '#475569', colorDark: '#334155' }
     });
 
+    const SETUP_QR_PREFIX = 'DSCFG1:';
     const LOGIN_FREE_ACTIONS = ['ping', 'staffList', 'login'];
     const IDLE_STOP_MS = 30000;
     const REPEAT_SUPPRESS_MS = 2600;
@@ -754,6 +759,7 @@
     document.addEventListener('DOMContentLoaded', init);
 
     function init() {
+      applySetupLink();
       bindNavigation();
       bindActions();
       buildModeButtons();
@@ -769,7 +775,7 @@
         showView('settingsView');
         setStatusLine('接続設定を入力してください');
       } else if (!app.token) {
-        showLogin('');
+        showLogin(app.setupLinkApplied ? '接続設定を読み込みました。職員を選んでログインしてください。' : '');
       } else {
         showView('scanView');
         setStatusLine(`${app.staffName} でログイン中`);
@@ -844,6 +850,7 @@
         clearSession();
         showLogin('職員を切り替えます。');
       });
+      document.getElementById('scanSetupQr').addEventListener('click', startSetupQrScan);
       document.getElementById('unlockSettings').addEventListener('click', unlockSettings);
       document.getElementById('resetSettings').addEventListener('click', resetSettings);
       document.getElementById('pinInput').addEventListener('keydown', (event) => {
@@ -1061,6 +1068,67 @@
         throw new Error(message);
       }
       return data;
+    }
+
+    // ---- かんたん設定(設定QR / 設定リンク) ----
+
+    // 管理画面の「設定リンク」で開かれたときは、URLの#cfg=…から接続設定を取り込む。
+    // #以降はサーバーに送られないため、キーが通信ログに残らない。
+    function applySetupLink() {
+      const match = String(location.hash || '').match(/[#&]cfg=([A-Za-z0-9_-]+)/);
+      if (!match) return;
+      try {
+        const json = decodeURIComponent(escape(atob(match[1].replace(/-/g, '+').replace(/_/g, '/'))));
+        if (applySetupPayload(SETUP_QR_PREFIX + json)) {
+          app.setupLinkApplied = true;
+        }
+      } catch (error) {
+        // 壊れたリンクは無視して通常の設定画面を出す
+      }
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    function applySetupPayload(text) {
+      const raw = String(text || '');
+      if (raw.indexOf(SETUP_QR_PREFIX) !== 0) return false;
+      const config = safeJson(raw.slice(SETUP_QR_PREFIX.length), null);
+      if (!config || !config.u || !config.k) return false;
+      app.config.url = String(config.u);
+      app.config.key = String(config.k);
+      localStorage.setItem(STORAGE.url, app.config.url);
+      localStorage.setItem(STORAGE.key, app.config.key);
+      fillSettingsForm();
+      return true;
+    }
+
+    async function startSetupQrScan() {
+      app.setupScanMode = true;
+      setSettingsStatus('', '設定QRにカメラを向けてください。');
+      showView('scanView');
+      document.getElementById('modeTitle').textContent = '設定QRを読み取り中';
+      document.getElementById('modeSubtitle').textContent = '管理画面の設定QRにカメラを向けてください';
+      await startCamera();
+      if (!app.scanning) {
+        app.setupScanMode = false;
+        showView('settingsView');
+        setSettingsStatus('error', 'カメラを開始できませんでした。手入力で設定してください。');
+      }
+    }
+
+    function finishSetupQrScan(text) {
+      app.setupScanMode = false;
+      stopCamera();
+      setMode(app.mode);
+      if (applySetupPayload(text)) {
+        beep('success');
+        showView('settingsView');
+        setSettingsStatus('ok', '接続設定を読み取りました。続けて職員ログインへ進みます。');
+        showLogin('接続設定を読み取りました。職員を選んでログインしてください。');
+      } else {
+        beep('error');
+        showView('settingsView');
+        setSettingsStatus('error', '設定QRではありませんでした。管理画面の「スキャナー連携情報」のQRを読み取ってください。');
+      }
     }
 
     // ---- 職員ログイン ----
@@ -1486,6 +1554,10 @@
     async function handleQrValue(rawValue) {
       const now = Date.now();
       app.lastReadAt = now;
+      if (app.setupScanMode) {
+        finishSetupQrScan(rawValue);
+        return;
+      }
       if (app.lastScan.value === rawValue && now - app.lastScan.at < REPEAT_SUPPRESS_MS) {
         return;
       }
