@@ -471,6 +471,44 @@
       text-align: left;
       font-weight: 400;
     }
+    .user-card-head .head-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+    .list-photo {
+      width: 76px;
+      height: 76px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #f1f4f8;
+      border: 1px solid var(--line);
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .detail-photo {
+      display: block;
+      width: min(240px, 70%);
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      margin: 4px auto 8px;
+      background: #f1f4f8;
+      min-height: 60px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      padding: 0;
+    }
+    span.detail-photo { padding: 22px 8px; }
     .user-card-head .name { display: grid; gap: 2px; min-width: 0; }
     .user-card-head .name strong { font-size: 16px; }
     .user-card-head .name small { color: var(--muted); }
@@ -753,7 +791,7 @@
     };
 
     // 顔写真は端末に少しだけ残して、電波が悪いときも直近の人はすぐ出せるようにする
-    const PHOTO_CACHE_LIMIT = 30;
+    const PHOTO_CACHE_LIMIT = 60;
 
     const app = {
       mode: 'arrival',
@@ -798,8 +836,10 @@
       bindActions();
       buildModeButtons();
       loadQueue();
-      loadCachedState();
+      // 写真キャッシュは、一覧描画(loadCachedState)より先に復元する。
+      // 後だと起動のたびにキャッシュ済み写真を無駄に再取得してしまう。
       app.photoCache = safeJson(localStorage.getItem(STORAGE.photos), {}) || {};
+      loadCachedState();
       renderSync();
       renderRecent();
       renderUsers();
@@ -1519,7 +1559,7 @@
         let value = '';
         if (app.detector) {
           const codes = await app.detector.detect(video);
-          value = codes[0] && codes[0].rawValue;
+          value = pickCenteredCode(codes, video);
         } else if (window.jsQR && video.readyState === video.HAVE_ENOUGH_DATA) {
           // jsQRは重いので解析間隔を空ける
           const now = performance.now();
@@ -1537,13 +1577,69 @@
       requestAnimationFrame(scanLoop);
     }
 
+    // 読み取り対象は「画面に見えているコーナーブラケット枠の中」だけ。
+    // 名札の印刷シートのように複数のQRが写り込んでも、狙った中央の1枚だけを読む。
+    // 映像はobject-fit:coverで上下または左右が切り落とされて表示されるため、
+    // まず表示されている範囲を映像座標で求め、その内側に枠を重ねる。
+    const SCAN_FRAME_INSET = { x: 0.16, y: 0.13 };
+
+    function getScanRegion(video) {
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
+      if (!videoWidth || !videoHeight) return null;
+      const box = video.parentElement;
+      const boxWidth = box ? box.clientWidth : 0;
+      const boxHeight = box ? box.clientHeight : 0;
+      let visibleX = 0;
+      let visibleY = 0;
+      let visibleWidth = videoWidth;
+      let visibleHeight = videoHeight;
+      if (boxWidth && boxHeight) {
+        const scale = Math.max(boxWidth / videoWidth, boxHeight / videoHeight);
+        visibleWidth = boxWidth / scale;
+        visibleHeight = boxHeight / scale;
+        visibleX = (videoWidth - visibleWidth) / 2;
+        visibleY = (videoHeight - visibleHeight) / 2;
+      }
+      return {
+        x: visibleX + visibleWidth * SCAN_FRAME_INSET.x,
+        y: visibleY + visibleHeight * SCAN_FRAME_INSET.y,
+        width: visibleWidth * (1 - SCAN_FRAME_INSET.x * 2),
+        height: visibleHeight * (1 - SCAN_FRAME_INSET.y * 2)
+      };
+    }
+
+    function pickCenteredCode(codes, video) {
+      const region = getScanRegion(video);
+      if (!region || !codes || !codes.length) return '';
+      const centerX = region.x + region.width / 2;
+      const centerY = region.y + region.height / 2;
+      let best = null;
+      let bestDistance = Infinity;
+      for (const code of codes) {
+        const box = code.boundingBox;
+        if (!box) continue;
+        const cx = box.x + box.width / 2;
+        const cy = box.y + box.height / 2;
+        if (cx < region.x || cx > region.x + region.width || cy < region.y || cy > region.y + region.height) continue;
+        const distance = (cx - centerX) * (cx - centerX) + (cy - centerY) * (cy - centerY);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          best = code;
+        }
+      }
+      return (best && best.rawValue) || '';
+    }
+
     function scanWithJsQr(video) {
+      const region = getScanRegion(video);
+      if (!region || region.width < 1 || region.height < 1) return '';
       const canvas = document.getElementById('qrCanvas');
       const size = 640;
       canvas.width = size;
-      canvas.height = Math.round(size * video.videoHeight / Math.max(video.videoWidth, 1));
+      canvas.height = Math.max(1, Math.round(size * region.height / region.width));
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, region.x, region.y, region.width, region.height, 0, 0, canvas.width, canvas.height);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, imageData.width, imageData.height);
       return code && code.data;
@@ -1561,26 +1657,38 @@
       reader.onload = () => {
         const image = new Image();
         image.onload = () => {
-          const canvas = document.getElementById('qrCanvas');
-          const maxSize = 1200;
-          const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
-          canvas.width = Math.max(1, Math.round(image.width * scale));
-          canvas.height = Math.max(1, Math.round(image.height * scale));
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height);
-          if (code && code.data) {
-            handleQrValue(code.data);
+          // 誤読防止のため、写真の中央部分に写ったQRだけを読む。
+          // シートの隣のQR(別人)を全体走査で拾ってしまわないよう、全体フォールバックはしない。
+          const value = decodePhotoRegion(image, { left: 0.2, top: 0.2, width: 0.6, height: 0.6 });
+          if (value) {
+            handleQrValue(value);
           } else {
             beep('error');
-            showResult('danger', 'QRを読み取れません', 'QRが画面内に大きく入るように、もう一度撮影してください。');
+            showResult('danger', 'QRを読み取れません', 'QRが写真の中央に大きく写るように、もう一度撮影してください。');
           }
         };
         image.onerror = () => showResult('danger', '画像を読めません', 'もう一度撮影してください。');
         image.src = reader.result;
       };
       reader.readAsDataURL(file);
+    }
+
+    function decodePhotoRegion(image, region) {
+      const canvas = document.getElementById('qrCanvas');
+      const sourceX = image.width * region.left;
+      const sourceY = image.height * region.top;
+      const sourceWidth = image.width * region.width;
+      const sourceHeight = image.height * region.height;
+      if (!sourceWidth || !sourceHeight) return '';
+      const maxSize = 1200;
+      const scale = Math.min(1, maxSize / Math.max(sourceWidth, sourceHeight));
+      canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+      canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+      return (code && code.data) || '';
     }
 
     // ---- 読み取り処理 ----
@@ -1741,7 +1849,14 @@
     }
 
     function saveQueue() {
-      localStorage.setItem(STORAGE.queue, JSON.stringify(app.queue));
+      try {
+        localStorage.setItem(STORAGE.queue, JSON.stringify(app.queue));
+      } catch (error) {
+        // 容量不足のときは写真キャッシュを捨ててでも、スキャン記録の保存を優先する
+        app.photoCache = {};
+        try { localStorage.removeItem(STORAGE.photos); } catch (ignored) {}
+        localStorage.setItem(STORAGE.queue, JSON.stringify(app.queue));
+      }
     }
 
     function renderSync() {
@@ -1836,10 +1951,20 @@
       }
     }
 
+    // 写真キャッシュの保存上限(バイト)。記録キューの保存領域を圧迫しないための予防線。
+    const PHOTO_CACHE_MAX_BYTES = 2500000;
+
     function savePhotoCache() {
-      const ids = Object.keys(app.photoCache);
+      let ids = Object.keys(app.photoCache);
       while (ids.length > PHOTO_CACHE_LIMIT) {
         delete app.photoCache[ids.shift()];
+      }
+      ids = Object.keys(app.photoCache);
+      let totalBytes = ids.reduce((sum, id) => sum + String(app.photoCache[id] || '').length, 0);
+      while (totalBytes > PHOTO_CACHE_MAX_BYTES && ids.length) {
+        const id = ids.shift();
+        totalBytes -= String(app.photoCache[id] || '').length;
+        delete app.photoCache[id];
       }
       try {
         localStorage.setItem(STORAGE.photos, JSON.stringify(app.photoCache));
@@ -2085,6 +2210,7 @@
         const emergencyName = [user.emergencyContactName, user.emergencyContactRelation ? `(${user.emergencyContactRelation})` : ''].filter(Boolean).join(' ');
         const detail = open ? `
           <div class="user-card-detail">
+            ${photoSlotHtml(user, 'detail-photo')}
             ${detailSection('基本情報', [
               detailRow('性別', user.gender),
               detailRow('生年月日', user.birthDate),
@@ -2114,7 +2240,7 @@
               detailRow('CM連絡先', user.careManagerPhone)
             ])}
           </div>` : '';
-        return `<div class="user-card"><button class="user-card-head" data-user="${escapeHtml(user.userId)}"><span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
+        return `<div class="user-card"><button class="user-card-head" data-user="${escapeHtml(user.userId)}"><span class="head-left">${photoSlotHtml(user, 'list-photo')}<span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
       }).join('') + (hiddenCount ? `<p class="note" style="margin:4px 0 0">ほか ${hiddenCount} 名は、名前・ふりがなで検索すると表示されます。</p>` : '');
       list.querySelectorAll('.user-card-head').forEach((head) => {
         head.addEventListener('click', () => {
@@ -2123,6 +2249,106 @@
           renderUsers();
         });
       });
+      hydrateUserPhotos();
+    }
+
+    // ---- 一覧の顔写真(キャッシュ優先・1件ずつ取得) ----
+
+    function photoSlotHtml(user, cls) {
+      const cached = app.photoCache[user.userId];
+      if (cached) {
+        return `<img class="${cls}" data-photo-user="${escapeHtml(user.userId)}" alt="" src="${cached}">`;
+      }
+      if (!user.photoFileId || (app.photoMissing && app.photoMissing[user.userId])) {
+        return `<span class="${cls}" data-photo-user="${escapeHtml(user.userId)}">写真<br>未登録</span>`;
+      }
+      return `<span class="${cls} photo-pending" data-photo-user="${escapeHtml(user.userId)}">…</span>`;
+    }
+
+    function cssId(value) {
+      return (window.CSS && CSS.escape) ? CSS.escape(String(value)) : String(value);
+    }
+
+    function fetchUserPhotoOnce(user) {
+      if (!user || !user.photoFileId) return Promise.resolve('');
+      if (!app.token) return Promise.resolve('');
+      if (app.photoCache[user.userId]) return Promise.resolve(app.photoCache[user.userId]);
+      if (!app.photoPromises) app.photoPromises = {};
+      if (!app.photoPromises[user.userId]) {
+        app.photoPromises[user.userId] = api('userPhoto', { userId: user.userId })
+          .then((result) => {
+            delete app.photoPromises[user.userId];
+            if (result.dataUri) {
+              app.photoCache[user.userId] = result.dataUri;
+              savePhotoCache();
+            } else {
+              // Drive側に写真の実体がない。再描画のたびに取得し直さないよう覚えておく
+              if (!app.photoMissing) app.photoMissing = {};
+              app.photoMissing[user.userId] = true;
+            }
+            return result.dataUri || '';
+          })
+          .catch(() => {
+            delete app.photoPromises[user.userId];
+            return '';
+          });
+      }
+      return app.photoPromises[user.userId];
+    }
+
+    function applyPhotoToSlots(userId, dataUri) {
+      document.querySelectorAll(`[data-photo-user="${cssId(userId)}"]`).forEach((slot) => {
+        if (slot.tagName === 'IMG') {
+          slot.src = dataUri;
+          return;
+        }
+        const img = document.createElement('img');
+        img.className = slot.className.replace('photo-pending', '').trim();
+        img.dataset.photoUser = userId;
+        img.alt = '';
+        img.src = dataUri;
+        slot.replaceWith(img);
+      });
+    }
+
+    function markPhotoUnavailable(userId, html) {
+      document.querySelectorAll(`span[data-photo-user="${cssId(userId)}"]`).forEach((slot) => {
+        slot.classList.remove('photo-pending');
+        slot.innerHTML = html;
+      });
+    }
+
+    // 一覧に表示中の分だけを、通信を詰まらせないよう1件ずつ順番に取得する。
+    // ログアウト・セッション切れ中は取得しない(ログイン画面の邪魔をしない)。
+    // 1回の呼び出しで処理するのは15枠まで(検索で大量ヒットしたときの取得しすぎ防止。
+    // 続きは次の再描画時に取得される)。
+    async function hydrateUserPhotos() {
+      if (app.photoHydrating) return;
+      app.photoHydrating = true;
+      try {
+        let processed = 0;
+        while (processed < 15) {
+          if (!app.token) break;
+          const slot = document.querySelector('.photo-pending[data-photo-user]');
+          if (!slot) break;
+          processed++;
+          const userId = slot.dataset.photoUser;
+          slot.classList.remove('photo-pending');
+          const user = app.users.find((item) => String(item.userId) === String(userId));
+          if (!user || !user.photoFileId) {
+            markPhotoUnavailable(userId, '写真<br>未登録');
+            continue;
+          }
+          const dataUri = app.photoCache[userId] || await fetchUserPhotoOnce(user);
+          if (dataUri) {
+            applyPhotoToSlots(userId, dataUri);
+          } else if (app.photoCache[userId] === undefined) {
+            markPhotoUnavailable(userId, '写真<br>未取得');
+          }
+        }
+      } finally {
+        app.photoHydrating = false;
+      }
     }
 
     function addRecent(item) {
