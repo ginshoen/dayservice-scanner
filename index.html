@@ -503,6 +503,40 @@
       line-height: 1.55;
       white-space: pre-wrap;
     }
+    .status-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-left: 6px;
+    }
+    .status-chip.cancel { background: #fef3f2; color: #b42318; }
+    .status-chip.half { background: #eff8ff; color: #175cd3; }
+    .status-chip.refused { background: #fffaeb; color: #b54708; }
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: rgba(15, 28, 46, .45);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .sheet {
+      width: 100%;
+      max-width: 520px;
+      background: #fff;
+      border-radius: 20px 20px 0 0;
+      padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+      max-height: 88vh;
+      overflow: auto;
+      animation: sheetup .2s ease;
+    }
+    @keyframes sheetup { from { transform: translateY(16px); opacity: .6; } to { transform: none; opacity: 1; } }
+    .sheet h3 { margin: 0 0 4px; font-size: 19px; }
+    .sheet .sub { margin: 0 0 14px; color: var(--muted); font-size: 13px; }
+    .sheet .list button { width: 100%; text-align: left; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -599,7 +633,7 @@
             <button id="refreshToday">更新</button>
           </div>
           <div class="list" id="todayList"></div>
-          <p class="note" style="margin:12px 0 0">未送信の読み取りも反映されています。表示が古い場合は「更新」を押してください。</p>
+          <p class="note" style="margin:12px 0 0">利用者をタップすると、当日キャンセル・入浴拒否・午前で終了を記録できます。未送信の読み取りも反映されています。</p>
         </div>
       </section>
 
@@ -1885,18 +1919,144 @@
         list.innerHTML = '<p class="note" style="margin:0">利用者情報が未取得です。オンラインの状態で開き直してください。</p>';
         return;
       }
-      const counts = { arrival: 0, bath: 0, lunch: 0 };
+      const counts = { arrival: 0, bath: 0, lunch: 0, cancelled: 0 };
       const users = app.users.slice().sort(kanaSort);
       list.innerHTML = users.map((user) => {
+        const record = recordFor(user.userId);
+        const cancelled = Boolean(record && record.attendanceStatus === 'cancelled');
         const flags = localFlagsFor(user.userId);
-        Object.keys(counts).forEach((key) => {
-          if (flags[key]) counts[key]++;
-        });
-        const chips = Object.keys(SERVICE_META).map((key) => `<span class="flag ${flags[key] ? 'on' : ''}">${SERVICE_META[key].short}</span>`).join('');
-        return `<div class="row"><div><strong>${escapeHtml(user.displayName)}</strong><br><small>${escapeHtml(user.kana || '')}</small></div><div class="flags">${chips}</div></div>`;
+        if (cancelled) {
+          counts.cancelled++;
+        } else {
+          ['arrival', 'bath', 'lunch'].forEach((key) => {
+            if (flags[key]) counts[key]++;
+          });
+        }
+        const chips = cancelled
+          ? '<span class="status-chip cancel">当日キャンセル</span>'
+          : `<span class="flags">${Object.keys(SERVICE_META).map((key) => `<span class="flag ${flags[key] ? 'on' : ''}">${SERVICE_META[key].short}</span>`).join('')}</span>`;
+        const marks = [];
+        if (!cancelled && record && record.bathStatus === 'refused') marks.push('<span class="status-chip refused">入浴拒否</span>');
+        if (!cancelled && record && record.usageActual === 'half_am') marks.push('<span class="status-chip half">午前のみ</span>');
+        const reason = cancelled && record.cancelReason ? ` / ${escapeHtml(record.cancelReason)}` : '';
+        return `<button class="row" data-day-user="${escapeHtml(user.userId)}" style="width:100%;text-align:left;font-weight:400"><span><strong>${escapeHtml(user.displayName)}</strong>${marks.join('')}<br><small>${escapeHtml(user.kana || '')}${reason}</small></span>${chips}</button>`;
       }).join('');
+      list.querySelectorAll('[data-day-user]').forEach((button) => {
+        button.addEventListener('click', () => openDaySheet(button.dataset.dayUser));
+      });
       document.getElementById('todaySummary').textContent =
-        `来所 ${counts.arrival} / 入浴 ${counts.bath} / 昼食 ${counts.lunch}`;
+        `来所 ${counts.arrival} / 入浴 ${counts.bath} / 昼食 ${counts.lunch} / キャンセル ${counts.cancelled}`;
+    }
+
+    function recordFor(userId) {
+      return app.records.find((item) => String(item.userId) === String(userId)) || null;
+    }
+
+    // ---- 当日の状況記録(キャンセル・入浴拒否・午前で終了) ----
+
+    const CANCEL_REASONS = ['体調不良', '入院', '受診', '家族都合', 'その他'];
+
+    function openDaySheet(userId) {
+      const user = app.users.find((item) => String(item.userId) === String(userId));
+      if (!user) return;
+      app.daySheetUserId = userId;
+      const record = recordFor(userId) || {};
+      const cancelled = record.attendanceStatus === 'cancelled';
+      const refused = record.bathStatus === 'refused';
+      const halfDay = record.usageActual === 'half_am';
+      const buttons = [];
+      if (cancelled) {
+        buttons.push({ label: '当日キャンセルを取り消す', patch: { attendanceStatus: 'planned' } });
+      } else {
+        buttons.push({ label: '当日キャンセルにする', action: 'cancel' });
+        buttons.push(refused
+          ? { label: '入浴拒否を取り消す', patch: { bathStatus: '' } }
+          : { label: '入浴拒否を記録する', patch: { bathStatus: 'refused' } });
+        buttons.push(halfDay
+          ? { label: '午前で終了を取り消す(1日利用に戻す)', patch: { usageActual: 'full' } }
+          : { label: '午前で終了にする', patch: { usageActual: 'half_am' } });
+      }
+      renderSheet(user.displayName, statusSummaryText(record), buttons);
+    }
+
+    function statusSummaryText(record) {
+      if (!record || !record.userId) return '今日の記録: まだありません';
+      if (record.attendanceStatus === 'cancelled') {
+        return '今日の記録: 当日キャンセル' + (record.cancelReason ? `(${record.cancelReason})` : '');
+      }
+      const parts = [];
+      if (record.usageActual === 'half_am') parts.push('午前のみ');
+      if (record.bathStatus === 'refused') parts.push('入浴拒否');
+      return '今日の記録: ' + (parts.length ? parts.join(' / ') : '通常');
+    }
+
+    function renderSheet(title, subtitle, buttons) {
+      closeSheet();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sheet-backdrop';
+      backdrop.id = 'daySheet';
+      const sheet = document.createElement('div');
+      sheet.className = 'sheet';
+      const heading = document.createElement('h3');
+      heading.textContent = title;
+      const sub = document.createElement('p');
+      sub.className = 'sub';
+      sub.textContent = subtitle;
+      const list = document.createElement('div');
+      list.className = 'list';
+      buttons.forEach((item) => {
+        const button = document.createElement('button');
+        button.textContent = item.label;
+        button.addEventListener('click', () => {
+          if (item.action === 'cancel') {
+            openCancelReasonSheet(title);
+          } else {
+            applyDayStatus(item.patch);
+          }
+        });
+        list.appendChild(button);
+      });
+      const close = document.createElement('button');
+      close.textContent = '閉じる';
+      close.style.marginTop = '10px';
+      close.style.width = '100%';
+      close.addEventListener('click', closeSheet);
+      sheet.append(heading, sub, list, close);
+      backdrop.appendChild(sheet);
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) closeSheet();
+      });
+      document.body.appendChild(backdrop);
+    }
+
+    function openCancelReasonSheet(name) {
+      renderSheet(name, 'キャンセル理由を選んでください', CANCEL_REASONS.map((reason) => ({
+        label: reason,
+        patch: { attendanceStatus: 'cancelled', cancelReason: reason }
+      })));
+    }
+
+    function closeSheet() {
+      const existing = document.getElementById('daySheet');
+      if (existing) existing.remove();
+    }
+
+    async function applyDayStatus(patch) {
+      const userId = app.daySheetUserId;
+      closeSheet();
+      if (!userId) return;
+      try {
+        const result = await api('setDailyStatus', Object.assign({
+          businessDate: todayStr(),
+          userId: userId
+        }, patch));
+        app.records = app.records.filter((item) => String(item.userId) !== String(userId));
+        if (result.record) app.records.push(result.record);
+        renderToday();
+        beep('success');
+      } catch (error) {
+        alert(friendlyError(error));
+      }
     }
 
     // 検索していないときに一覧へ出す人数。大人数施設でのスクロール地獄を防ぐ。
