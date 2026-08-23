@@ -509,6 +509,8 @@
       padding: 0;
     }
     span.detail-photo { padding: 22px 8px; }
+    /* 詳細を開いているカードは大きい写真だけ見せる(一覧側の写真と二重にしない) */
+    .user-card.open .list-photo { display: none; }
     .user-card-head .name { display: grid; gap: 2px; min-width: 0; }
     .user-card-head .name strong { font-size: 16px; }
     .user-card-head .name small { color: var(--muted); }
@@ -810,6 +812,9 @@
       detector: null,
       syncing: false,
       expandedUserId: '',
+      userListLimit: 5,
+      lastUserQuery: '',
+      userListAutoLoadArmed: false,
       settingsUnlocked: false,
       token: localStorage.getItem('ds_scanner_token') || '',
       staffName: localStorage.getItem('ds_scanner_staff_name') || '',
@@ -856,6 +861,8 @@
         refreshState();
       }
       window.addEventListener('online', syncQueue);
+      window.addEventListener('touchmove', armUserListAutoLoad, { passive: true });
+      window.addEventListener('wheel', armUserListAutoLoad, { passive: true });
       setInterval(syncQueue, 15000);
     }
 
@@ -2184,12 +2191,19 @@
       }
     }
 
-    // 検索していないときに一覧へ出す人数。大人数施設でのスクロール地獄を防ぐ。
+    // 検索していないときの初期表示人数。下へスクロールすると自動で続きが表示される。
     const USER_LIST_DEFAULT_COUNT = 5;
+    const USER_LIST_LOAD_STEP = 10;
 
     function renderUsers() {
       const list = document.getElementById('userList');
       const query = normalizeForSearch(document.getElementById('userSearch').value);
+      // 検索を始めた/やめたら、表示件数を初期値に戻す
+      if (query !== app.lastUserQuery) {
+        app.lastUserQuery = query;
+        app.userListLimit = USER_LIST_DEFAULT_COUNT;
+        app.userListAutoLoadArmed = false;
+      }
       let users = app.users.slice();
       if (query) {
         users = users.filter((user) => normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query));
@@ -2200,9 +2214,9 @@
         return;
       }
       let hiddenCount = 0;
-      if (!query && users.length > USER_LIST_DEFAULT_COUNT) {
-        hiddenCount = users.length - USER_LIST_DEFAULT_COUNT;
-        users = users.slice(0, USER_LIST_DEFAULT_COUNT);
+      if (!query && users.length > app.userListLimit) {
+        hiddenCount = users.length - app.userListLimit;
+        users = users.slice(0, app.userListLimit);
       }
       list.innerHTML = users.map((user) => {
         const open = app.expandedUserId === user.userId;
@@ -2240,8 +2254,8 @@
               detailRow('CM連絡先', user.careManagerPhone)
             ])}
           </div>` : '';
-        return `<div class="user-card"><button class="user-card-head" data-user="${escapeHtml(user.userId)}"><span class="head-left">${photoSlotHtml(user, 'list-photo')}<span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
-      }).join('') + (hiddenCount ? `<p class="note" style="margin:4px 0 0">ほか ${hiddenCount} 名は、名前・ふりがなで検索すると表示されます。</p>` : '');
+        return `<div class="user-card${open ? ' open' : ''}"><button class="user-card-head" data-user="${escapeHtml(user.userId)}"><span class="head-left">${photoSlotHtml(user, 'list-photo')}<span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
+      }).join('') + (hiddenCount ? `<p class="note" id="userListSentinel" style="margin:4px 0 0;text-align:center;padding:10px 0;cursor:pointer">下にスクロールすると続きが表示されます(あと ${hiddenCount} 名)<br><span style="font-size:11px">表示されないときはここをタップ</span></p>` : '');
       list.querySelectorAll('.user-card-head').forEach((head) => {
         head.addEventListener('click', () => {
           const id = head.dataset.user;
@@ -2249,7 +2263,43 @@
           renderUsers();
         });
       });
+      setupUserListSentinel();
       hydrateUserPhotos();
+    }
+
+    function loadMoreUsers() {
+      app.userListLimit += USER_LIST_LOAD_STEP;
+      renderUsers();
+    }
+
+    // 初期5名を保つため、実際にスクロールされるまでは自動追加を開始しない。
+    function armUserListAutoLoad() {
+      if (app.userListAutoLoadArmed) return;
+      app.userListAutoLoadArmed = true;
+      setupUserListSentinel();
+    }
+
+    // 一覧末尾の案内が画面に近づいたら表示件数を増やす(スクロールで続きを読み込む)。
+    // 保険として案内のタップでも読み込めるようにしておく。
+    function setupUserListSentinel() {
+      const sentinel = document.getElementById('userListSentinel');
+      if (!app.userListObserver && 'IntersectionObserver' in window) {
+        app.userListObserver = new IntersectionObserver((entries) => {
+          if (app.userListAutoLoadArmed && entries.some((entry) => entry.isIntersecting)) {
+            app.userListAutoLoadArmed = false;
+            loadMoreUsers();
+          }
+        }, { rootMargin: '250px' });
+      }
+      if (app.userListObserver) {
+        app.userListObserver.disconnect();
+      }
+      if (sentinel) {
+        sentinel.addEventListener('click', loadMoreUsers);
+        if (app.userListObserver) {
+          app.userListObserver.observe(sentinel);
+        }
+      }
     }
 
     // ---- 一覧の顔写真(キャッシュ優先・1件ずつ取得) ----
