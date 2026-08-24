@@ -382,6 +382,28 @@
     }
     .row strong { font-size: 16px; }
     .row small { color: var(--muted); }
+    .kana-group {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: #fff;
+    }
+    .kana-group-toggle {
+      width: 100%;
+      min-height: 56px;
+      padding: 11px 14px;
+      border-radius: 0;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+    }
+    .kana-group-toggle .kana-label { font-size: 18px; color: #1d2939; }
+    .kana-group-meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .kana-chevron { font-size: 18px; transition: transform .18s ease; }
+    .kana-group.open .kana-chevron { transform: rotate(90deg); }
+    .kana-group-users { display: grid; gap: 8px; padding: 8px; border-top: 1px solid var(--line); background: #f8fafc; }
     .flag {
       width: 34px;
       height: 34px;
@@ -682,7 +704,7 @@
         <div class="panel">
           <h2>利用者一覧</h2>
           <input id="userSearch" placeholder="名前・ふりがなで検索" autocomplete="off">
-          <p class="note" style="margin:10px 0 12px">タップすると詳細を表示します。情報は最後にオンラインで取得した時点のものです。</p>
+          <p class="note" style="margin:10px 0 12px">「あ行・か行…」を選んでから、利用者をタップしてください。検索も使えます。</p>
           <div class="list" id="userList"></div>
         </div>
       </section>
@@ -816,9 +838,8 @@
       detector: null,
       syncing: false,
       expandedUserId: '',
-      userListLimit: 5,
+      expandedKanaGroup: '',
       lastUserQuery: '',
-      userListAutoLoadArmed: false,
       settingsUnlocked: false,
       token: localStorage.getItem('ds_scanner_token') || '',
       staffName: localStorage.getItem('ds_scanner_staff_name') || '',
@@ -859,8 +880,6 @@
         restoreSession();
       }
       window.addEventListener('online', syncQueue);
-      window.addEventListener('touchmove', armUserListAutoLoad, { passive: true });
-      window.addEventListener('wheel', armUserListAutoLoad, { passive: true });
       setInterval(syncQueue, 15000);
     }
 
@@ -2283,18 +2302,40 @@
       app.records.push(record);
     }
 
-    // 検索していないときの初期表示人数。下へスクロールすると自動で続きが表示される。
-    const USER_LIST_DEFAULT_COUNT = 5;
-    const USER_LIST_LOAD_STEP = 10;
+    const KANA_GROUPS = [
+      { key: 'a', label: 'あ行', chars: 'あいうえおぁぃぅぇぉゔ' },
+      { key: 'ka', label: 'か行', chars: 'かきくけこがぎぐげご' },
+      { key: 'sa', label: 'さ行', chars: 'さしすせそざじずぜぞ' },
+      { key: 'ta', label: 'た行', chars: 'たちつてとだぢづでどっ' },
+      { key: 'na', label: 'な行', chars: 'なにぬねの' },
+      { key: 'ha', label: 'は行', chars: 'はひふへほばびぶべぼぱぴぷぺぽ' },
+      { key: 'ma', label: 'ま行', chars: 'まみむめも' },
+      { key: 'ya', label: 'や行', chars: 'やゆよゃゅょ' },
+      { key: 'ra', label: 'ら行', chars: 'らりるれろ' },
+      { key: 'wa', label: 'わ行', chars: 'わゐゑをん' },
+      { key: 'other', label: 'その他', chars: '' }
+    ];
+
+    function kanaGroupKey(user) {
+      const source = String((user && (user.kana || user.displayName)) || '').replace(/[\s　]/g, '');
+      if (!source) return 'other';
+      const first = source.charAt(0).replace(/[ァ-ヶ]/, (char) => String.fromCharCode(char.charCodeAt(0) - 0x60));
+      const group = KANA_GROUPS.find((item) => item.chars.indexOf(first) !== -1);
+      return group ? group.key : 'other';
+    }
+
+    function usersGroupedByKana(users) {
+      const grouped = Object.fromEntries(KANA_GROUPS.map((group) => [group.key, []]));
+      users.forEach((user) => grouped[kanaGroupKey(user)].push(user));
+      return grouped;
+    }
 
     function renderUsers() {
       const list = document.getElementById('userList');
       const query = normalizeForSearch(document.getElementById('userSearch').value);
-      // 検索を始めた/やめたら、表示件数を初期値に戻す
       if (query !== app.lastUserQuery) {
         app.lastUserQuery = query;
-        app.userListLimit = USER_LIST_DEFAULT_COUNT;
-        app.userListAutoLoadArmed = false;
+        app.expandedUserId = '';
       }
       let users = app.users.slice();
       if (query) {
@@ -2305,12 +2346,7 @@
         list.innerHTML = `<p class="note" style="margin:0">${app.users.length ? '該当する利用者がいません。' : '利用者情報が未取得です。オンラインの状態で開き直してください。'}</p>`;
         return;
       }
-      let hiddenCount = 0;
-      if (!query && users.length > app.userListLimit) {
-        hiddenCount = users.length - app.userListLimit;
-        users = users.slice(0, app.userListLimit);
-      }
-      list.innerHTML = users.map((user) => {
+      const renderCards = (items) => items.map((user) => {
         const open = app.expandedUserId === user.userId;
         const pattern = patternOf(user);
         const emergencyName = [user.emergencyContactName, user.emergencyContactRelation ? `(${user.emergencyContactRelation})` : ''].filter(Boolean).join(' ');
@@ -2347,7 +2383,24 @@
             ])}
           </div>` : '';
         return `<div class="user-card${open ? ' open' : ''}"><button class="user-card-head" data-user="${escapeHtml(user.userId)}"><span class="head-left">${photoSlotHtml(user, 'list-photo')}<span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
-      }).join('') + (hiddenCount ? `<p class="note" id="userListSentinel" style="margin:4px 0 0;text-align:center;padding:10px 0;cursor:pointer">下にスクロールすると続きが表示されます(あと ${hiddenCount} 名)<br><span style="font-size:11px">表示されないときはここをタップ</span></p>` : '');
+      }).join('');
+      if (query) {
+        list.innerHTML = renderCards(users);
+      } else {
+        const grouped = usersGroupedByKana(users);
+        list.innerHTML = KANA_GROUPS.filter((group) => grouped[group.key].length).map((group) => {
+          const open = app.expandedKanaGroup === group.key;
+          return `<div class="kana-group${open ? ' open' : ''}"><button class="kana-group-toggle" data-kana-group="${group.key}" aria-expanded="${open}"><span class="kana-label">${group.label}</span><span class="kana-group-meta"><span>${grouped[group.key].length}名</span><span class="kana-chevron">›</span></span></button>${open ? `<div class="kana-group-users">${renderCards(grouped[group.key])}</div>` : ''}</div>`;
+        }).join('');
+      }
+      list.querySelectorAll('[data-kana-group]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.kanaGroup;
+          app.expandedKanaGroup = app.expandedKanaGroup === key ? '' : key;
+          app.expandedUserId = '';
+          renderUsers();
+        });
+      });
       list.querySelectorAll('.user-card-head').forEach((head) => {
         head.addEventListener('click', () => {
           const id = head.dataset.user;
@@ -2355,43 +2408,7 @@
           renderUsers();
         });
       });
-      setupUserListSentinel();
       hydrateUserPhotos();
-    }
-
-    function loadMoreUsers() {
-      app.userListLimit += USER_LIST_LOAD_STEP;
-      renderUsers();
-    }
-
-    // 初期5名を保つため、実際にスクロールされるまでは自動追加を開始しない。
-    function armUserListAutoLoad() {
-      if (app.userListAutoLoadArmed) return;
-      app.userListAutoLoadArmed = true;
-      setupUserListSentinel();
-    }
-
-    // 一覧末尾の案内が画面に近づいたら表示件数を増やす(スクロールで続きを読み込む)。
-    // 保険として案内のタップでも読み込めるようにしておく。
-    function setupUserListSentinel() {
-      const sentinel = document.getElementById('userListSentinel');
-      if (!app.userListObserver && 'IntersectionObserver' in window) {
-        app.userListObserver = new IntersectionObserver((entries) => {
-          if (app.userListAutoLoadArmed && entries.some((entry) => entry.isIntersecting)) {
-            app.userListAutoLoadArmed = false;
-            loadMoreUsers();
-          }
-        }, { rootMargin: '250px' });
-      }
-      if (app.userListObserver) {
-        app.userListObserver.disconnect();
-      }
-      if (sentinel) {
-        sentinel.addEventListener('click', loadMoreUsers);
-        if (app.userListObserver) {
-          app.userListObserver.observe(sentinel);
-        }
-      }
     }
 
     // ---- 一覧の顔写真(キャッシュ優先・1件ずつ取得) ----
