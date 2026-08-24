@@ -1823,8 +1823,8 @@
           return true;
         });
         saveQueue();
-        app.syncing = false;
-        await refreshStateQuiet();
+        mergeReturnedRecords(response.records || []);
+        cacheCurrentState();
       } catch (error) {
         // 次回の再送に任せるが、原因は画面上部に出して分かるようにする
         setStatusLine(`同期エラー: ${friendlyError(error)}`);
@@ -1841,6 +1841,20 @@
         applyState(state, false);
         cacheState(state);
       } catch (error) {}
+    }
+
+    function mergeReturnedRecords(records) {
+      (records || []).forEach((record) => {
+        const normalized = Object.assign({}, record, { userId: normalizeClientUserId(record.userId) });
+        app.records = app.records.filter((item) =>
+          !(item.businessDate === normalized.businessDate && normalizeClientUserId(item.userId) === normalized.userId)
+        );
+        app.records.push(normalized);
+      });
+    }
+
+    function cacheCurrentState() {
+      cacheState({ users: app.users, records: app.records, businessDate: todayStr() });
     }
 
     function nextEventId() {
@@ -2081,7 +2095,7 @@
     }
 
     function recordFor(userId) {
-      return app.records.find((item) => String(item.userId) === String(userId)) || null;
+      return app.records.find((item) => normalizeClientUserId(item.userId) === normalizeClientUserId(userId)) || null;
     }
 
     // ---- 当日の状況記録(キャンセル・入浴拒否・午前で終了) ----
@@ -2177,18 +2191,52 @@
       const userId = app.daySheetUserId;
       closeSheet();
       if (!userId) return;
+      // サーバー応答を待たずに表示へ反映し、失敗時だけ元に戻す。
+      const previousRecords = app.records.slice();
+      applyDayStatusLocally(userId, patch);
+      renderToday();
       try {
         const result = await api('setDailyStatus', Object.assign({
           businessDate: todayStr(),
           userId: userId
         }, patch));
-        app.records = app.records.filter((item) => String(item.userId) !== String(userId));
-        if (result.record) app.records.push(result.record);
+        if (result.record) mergeReturnedRecords([result.record]);
+        cacheCurrentState();
         renderToday();
         beep('success');
       } catch (error) {
+        app.records = previousRecords;
+        renderToday();
         alert(friendlyError(error));
       }
+    }
+
+    function applyDayStatusLocally(userId, patch) {
+      const existing = recordFor(userId);
+      const record = Object.assign({
+        businessDate: todayStr(),
+        userId: userId,
+        actualFlags: '{}',
+        attendanceStatus: 'planned',
+        usageActual: '',
+        bathStatus: '',
+        cancelReason: '',
+        confirmedStatus: 'draft'
+      }, existing || {});
+      if (patch.attendanceStatus !== undefined) {
+        record.attendanceStatus = patch.attendanceStatus === 'cancelled' ? 'cancelled' : (patch.attendanceStatus || 'planned');
+        if (record.attendanceStatus === 'cancelled') {
+          record.cancelReason = patch.cancelReason || '';
+          record.usageActual = '';
+        } else {
+          record.cancelReason = '';
+          record.cancelNote = '';
+        }
+      }
+      if (patch.bathStatus !== undefined) record.bathStatus = patch.bathStatus || '';
+      if (patch.usageActual !== undefined) record.usageActual = patch.usageActual || '';
+      app.records = app.records.filter((item) => normalizeClientUserId(item.userId) !== normalizeClientUserId(userId));
+      app.records.push(record);
     }
 
     // 検索していないときの初期表示人数。下へスクロールすると自動で続きが表示される。
