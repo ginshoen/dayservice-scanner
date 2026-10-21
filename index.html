@@ -1399,9 +1399,350 @@
     }
 
     .hidden { display: none !important; }
+
+
+    /* @@GIN_UI BEGIN@@ 共通UI/gin-ui.css の写し。直すときは 共通UI 側を直して node 共通UI/sync.js */
+/*
+ * 共通UI: 色・文字・部品(壱番館・弐番館・ヘルパー共通)
+ * 正本は 共通UI/gin-ui.css。各アプリへは `node 共通UI/sync.js` で書き写す。
+ * 方針: Google Workspace 風(白い面・細い線・丸いボタン)に、淡いさくら色を合わせる。
+ *       重い効果(すりガラス、大きな影、長いアニメーション)は使わない。
+ */
+:root {
+  /* 面と線 */
+  --gin-bg: #fbf7fa;
+  --gin-surface: #ffffff;
+  --gin-surface-2: #f8f2f6;
+  --gin-surface-3: #f2e9ef;
+  --gin-line: #ebe1e8;
+  --gin-line-strong: #d9cbd4;
+  /* 文字 */
+  --gin-text: #2d2630;
+  --gin-text-sub: #5f5563;
+  --gin-text-aux: #7a6f80;
+  /* 主色: さくら */
+  --gin-primary: #b04a73;
+  --gin-primary-strong: #933a5f;
+  --gin-primary-soft: #fde8f0;
+  --gin-primary-soft-2: #f9d5e3;
+  --gin-primary-ink: #8a3358;
+  /* 淡い補助色(背景 / 文字) */
+  --gin-lav: #efe8fb;   --gin-lav-ink: #5b4a8f;
+  --gin-mint: #e3f5ec;  --gin-mint-ink: #2c6e4f;
+  --gin-peach: #fff0e2; --gin-peach-ink: #94531a;
+  --gin-sky: #e5f1fb;   --gin-sky-ink: #2b5f8e;
+  --gin-lemon: #fff8d6; --gin-lemon-ink: #7a6000;
+  --gin-danger: #c62f45; --gin-danger-soft: #fdeaec; --gin-danger-ink: #a42437;
+  /* 形 */
+  --gin-radius: 16px;
+  --gin-radius-sm: 12px;
+  --gin-pill: 999px;
+  --gin-shadow: 0 1px 2px rgba(70, 40, 60, .08), 0 1px 3px 1px rgba(70, 40, 60, .04);
+  --gin-tap: 44px;
+  --gin-font: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+}
+
+/* ---- 戻るボタン(どの画面も同じ形・同じ場所) ---- */
+.gin-back {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  min-height: var(--gin-tap);
+  padding: 0 14px 0 8px;
+  border: 1px solid var(--gin-line-strong);
+  border-radius: var(--gin-pill);
+  background: var(--gin-surface);
+  color: var(--gin-primary-ink);
+  font: 700 15px/1 var(--gin-font);
+  cursor: pointer;
+  flex: 0 0 auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.gin-back::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  margin: 0 6px 0 6px;
+  border-left: 2.5px solid currentColor;
+  border-bottom: 2.5px solid currentColor;
+  transform: rotate(45deg);
+}
+.gin-back:hover { background: var(--gin-primary-soft); }
+.gin-back:active { background: var(--gin-primary-soft-2); }
+.gin-back:focus-visible { outline: 3px solid var(--gin-primary-soft-2); outline-offset: 2px; }
+.gin-can-back .gin-back,
+.gin-back.gin-back--always { display: inline-flex; }
+
+/* ---- 共通の部品 ---- */
+.gin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--gin-tap);
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--gin-pill);
+  font: 700 15px/1.2 var(--gin-font);
+  cursor: pointer;
+}
+.gin-btn--filled { background: var(--gin-primary); color: #fff; }
+.gin-btn--filled:hover { background: var(--gin-primary-strong); }
+.gin-btn--tonal { background: var(--gin-primary-soft); color: var(--gin-primary-ink); }
+.gin-btn--tonal:hover { background: var(--gin-primary-soft-2); }
+.gin-btn--outline { background: var(--gin-surface); color: var(--gin-primary-ink); border-color: var(--gin-line-strong); }
+.gin-btn--outline:hover { background: var(--gin-primary-soft); }
+
+/* ---- タッチで選ぶ部品（gin-pick.js） ---- */
+.gin-pick-hidden { display: none !important; }
+.gin-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 2px; }
+.gin-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: var(--gin-tap);
+  padding: 0 16px;
+  border: 1px solid var(--gin-line-strong);
+  border-radius: var(--gin-pill);
+  background: var(--gin-surface);
+  color: var(--gin-text);
+  font: 600 15px/1.2 var(--gin-font);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: none; /* 押したらすぐ色が変わるように */
+}
+.gin-chip:hover { background: var(--gin-surface-2); }
+.gin-chip[aria-pressed="true"] {
+  border-color: var(--gin-primary);
+  background: var(--gin-primary-soft);
+  color: var(--gin-primary-ink);
+  font-weight: 700;
+}
+.gin-chip[aria-pressed="true"]::before { content: "✓"; font-size: 13px; }
+.gin-chip:focus-visible { outline: 3px solid var(--gin-primary-soft-2); outline-offset: 2px; }
+.gin-chip--day { min-width: 48px; padding: 0 10px; font-size: 17px; }
+.gin-chip--day[aria-pressed="true"]::before { content: none; }
+.gin-chips--phrases .gin-chip { min-height: 38px; padding: 0 12px; font-size: 14px; font-weight: 500; }
+.gin-pick-other { margin-top: 2px; }
+.gin-pick-note { margin: 4px 0; color: var(--gin-text-aux); font-size: 13px; }
+.gin-day-usage { display: grid; gap: 6px; margin-top: 4px; }
+.gin-day-usage-row { display: flex; align-items: center; gap: 10px; }
+.gin-day-usage-row .gin-chips { margin: 0; }
+.gin-day-usage-day {
+  display: inline-grid; place-items: center; flex: 0 0 auto;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--gin-lav); color: var(--gin-lav-ink); font-weight: 700;
+}
+.gin-stepper { display: flex; align-items: center; gap: 8px; }
+.gin-stepper > input { width: 5.5em; min-width: 0; text-align: center; font-size: 18px; }
+.gin-stepper-btn { width: var(--gin-tap); padding: 0; font-size: 22px; }
+.gin-stepper-btn[aria-pressed]::before { content: none; }
+
+/* ---- 軽さ: 重い効果を止める ---- */
+.gin-app *, .gin-app *::before, .gin-app *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gin-app *, .gin-app *::before, .gin-app *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media print {
+  .gin-back { display: none !important; }
+}
+    /* @@GIN_UI END@@ */
+
+    /* ===== 共通デザイン（さくら）: 壱番館用の当てはめ。Scanner.html と Index.html で同じ内容 ===== */
+    :root {
+      --ink: var(--gin-text); --text: var(--gin-text); --muted: var(--gin-text-sub); --line: var(--gin-line);
+      --bg: var(--gin-bg); --panel: var(--gin-surface);
+      --brand: var(--gin-primary); --brand-2: var(--gin-primary-strong); --brand-soft: var(--gin-primary-soft);
+      --card-shadow: var(--gin-shadow); --lift-shadow: var(--gin-shadow); --shadow: var(--gin-shadow);
+      --radius: var(--gin-radius); --radius-sm: var(--gin-radius-sm);
+      font-family: var(--gin-font);
+    }
+    body { background: var(--gin-bg); color: var(--gin-text); }
+    #loginScreen { background: linear-gradient(180deg, #fde8f0 0%, var(--gin-bg) 280px) !important; }
+    /* ヘッダー: 白い面。左に「戻る」 */
+    .topbar { background: var(--gin-surface); color: var(--gin-text); border-bottom: 1px solid var(--gin-line); box-shadow: none; }
+    .topbar .brand { gap: 8px; }
+    .topbar .title strong { color: var(--gin-text); }
+    .topbar .title span { color: var(--gin-text-aux); }
+    .brand-mark { background: var(--gin-primary-soft); border: 1px solid var(--gin-primary-soft-2); color: var(--gin-primary-ink); }
+    .brand-mark.large { background: var(--gin-primary-soft); color: var(--gin-primary-ink); border: 0; box-shadow: none; }
+    .gin-can-back .topbar .brand-mark { display: none; }
+    .topbar .gin-back { min-height: 40px; }
+    .topbar .brand, .topbar .title { min-width: 0; }
+    .topbar .title strong, .topbar .title span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sync-pill { background: var(--gin-mint); color: var(--gin-mint-ink); border: 1px solid transparent; }
+    .sync-pill::before { background: #57b98a; box-shadow: none; }
+    .sync-pill.pending { background: var(--gin-lemon); color: var(--gin-lemon-ink); }
+    .sync-pill.offline { background: var(--gin-danger-soft); color: var(--gin-danger-ink); }
+    #logoutButton { background: var(--gin-surface); color: var(--gin-primary-ink); border: 1px solid var(--gin-line-strong); border-radius: var(--gin-pill); }
+    /* 見出し・カード: 飾りの光や影をやめて軽くする */
+    .page-heading { background: var(--gin-surface); border: 1px solid var(--gin-line); box-shadow: none; border-radius: var(--gin-radius); }
+    .page-heading::after { content: none; }
+    .eyebrow { color: var(--gin-primary); }
+    .heading-actions button, #refreshToday { border: 1px solid var(--gin-line-strong); background: var(--gin-surface); color: var(--gin-primary-ink); box-shadow: none; border-radius: var(--gin-pill); }
+    #openNotebook { color: #fff; background: var(--gin-primary); border: 0; box-shadow: none; border-radius: var(--gin-pill); }
+    .panel, .scan-primary, .result, .row, .user-card, .metric, .day-row { box-shadow: none; }
+    .panel, .scan-primary, .result { border-color: var(--gin-line); }
+    .day-row:hover:not(:disabled) { box-shadow: 0 0 0 2px var(--gin-primary-soft-2); }
+    .user-card.open { box-shadow: 0 0 0 2px var(--gin-primary-soft-2); border-color: var(--gin-primary-soft-2) !important; }
+    /* ボタン: 主ボタンはさくら色。選択中は淡いピンク */
+    button.primary { background: var(--gin-primary); color: #fff; box-shadow: none; }
+    button.primary:hover { background: var(--gin-primary-strong); }
+    button.primary:active { box-shadow: none; }
+    .filter-bar button[aria-pressed="true"] { color: var(--gin-primary-ink); background: var(--gin-primary-soft); border-color: var(--gin-primary-soft-2); box-shadow: none; }
+    .kana-index .kana-group-toggle[aria-expanded="true"] { background: var(--gin-primary-soft) !important; border-color: var(--gin-primary-soft-2) !important; }
+    .kana-index .kana-group-toggle[aria-expanded="true"] .kana-label { color: var(--gin-primary-ink) !important; }
+    .material-search { box-shadow: none; border-color: var(--gin-line-strong) !important; }
+    input:focus, select:focus, textarea:focus { border-color: var(--gin-primary) !important; box-shadow: 0 0 0 3px var(--gin-primary-soft-2) !important; outline: none; }
+    /* 下のタブ: 選んでいるタブは淡いピンク */
+    .tabbar { background: var(--gin-surface) !important; border-top: 1px solid var(--gin-line) !important; box-shadow: none !important; }
+    .tabbar button { color: var(--gin-text-sub) !important; }
+    .tabbar button.active { color: var(--gin-primary-ink) !important; background: var(--gin-primary-soft) !important; box-shadow: none !important; }
+    /* 今日の予定・予定の変更 */
+    .plan-bar { background: var(--gin-lav) !important; border: 1px solid #e0d6f5 !important; box-shadow: none !important; }
+    .plan-bar-count { color: var(--gin-text); }
+    .plan-bar-count b { color: var(--gin-lav-ink); }
+    .plan-bar button { background: var(--gin-primary) !important; color: #fff; box-shadow: none !important; border-radius: var(--gin-pill); }
+    .plan-person { background: var(--gin-surface-2); border-color: var(--gin-line); }
+    /* シート */
+    .sheet, .care-sheet { box-shadow: 0 -2px 12px rgba(70, 40, 60, .12); }
+    @media (hover: none) {
+      .day-row:hover:not(:disabled) { box-shadow: none; }
+    }
   </style>
+  <script>
+    /* @@GIN_NAV BEGIN@@ 共通UI/gin-nav.js の写し。直すときは 共通UI 側を直して node 共通UI/sync.js */
+/*
+ * 共通UI: 画面の「戻る」(GinNav)
+ * 壱番館・弐番館・ヘルパーで同じものを使う。正本は 共通UI/gin-nav.js。
+ * 各アプリへは `node 共通UI/sync.js` で書き写す(アプリ側を直接直さない)。
+ *
+ * 使い方
+ *   GinNav.push('view', function () { 前の画面に戻す処理 });  // 画面を進めたとき
+ *   GinNav.back();          // 画面の「戻る」ボタン。スマホ・ブラウザの戻る操作も同じ動きになる
+ *   GinNav.closed('sheet'); // シートなどを ✕ で閉じたとき(履歴を1つ消す)
+ *   GinNav.reset();         // ログアウトなどで履歴を捨てる
+ *   GinNav.onChange(fn);    // 戻れるかどうかが変わったとき(戻るボタンの表示切替に使う)
+ *
+ * しくみ: ブラウザの履歴に「何段目か」(gin) を記録し、戻る操作で届いた段数まで
+ * アプリ内の履歴を巻き戻す。GAS(iframe)では google.script.history を使う。
+ * ブラウザの履歴が動かない環境でも、戻るボタンは0.45秒後にアプリ内だけで戻る。
+ */
+(function (w) {
+  'use strict';
+  if (w.GinNav) return;
+  var gs = w.google && w.google.script;
+  var gasHistory = gs && gs.history ? gs.history : null; // 後でアプリが window.google を差し替えても使えるよう先に確保
+  var stack = [];
+  var listeners = [];
+  var fallbackTimer = null;
+  var selfBack = 0;      // アプリ自身が呼んだ history.back() の数(届いたら何もしない)
+  var selfBackTimer = null;
+  var deferred = 0;      // selfBack 待ちの間に進んだ画面の数(届いてから履歴へ積む)
+
+  function depthOf(state) {
+    return state && typeof state.gin === 'number' ? state.gin : 0;
+  }
+  function notify() {
+    var d = stack.length;
+    if (w.document && w.document.documentElement) {
+      w.document.documentElement.classList.toggle('gin-can-back', d > 0);
+    }
+    listeners.forEach(function (fn) { try { fn(d); } catch (e) { console.error(e); } });
+  }
+  function pushBrowser(depth) {
+    try {
+      if (gasHistory) gasHistory.push({ gin: depth });
+      else if (w.history && w.history.pushState) w.history.pushState({ gin: depth }, '', w.location.href);
+    } catch (e) { /* 履歴が使えない環境ではアプリ内だけで戻る */ }
+  }
+  function flushDeferred() {
+    var base = stack.length - deferred;
+    for (var i = 1; i <= deferred; i++) pushBrowser(base + i);
+    deferred = 0;
+  }
+  function unwindTo(depth) {
+    // 戻す処理の中で積み直す画面(未保存の確認など)があるので、回数を先に決めて戻す
+    var count = stack.length - depth;
+    for (var i = 0; i < count && stack.length; i++) {
+      var entry = stack.pop();
+      try { if (entry.undo) entry.undo(); } catch (e) { console.error(e); }
+    }
+    if (count > 0) notify();
+  }
+  function onBrowserBack(state) {
+    if (selfBack > 0) {
+      selfBack--;
+      if (!selfBack) { clearTimeout(selfBackTimer); flushDeferred(); }
+      return;
+    }
+    if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+    unwindTo(depthOf(state));
+  }
+
+  if (gasHistory && gasHistory.setChangeHandler) {
+    try { gasHistory.setChangeHandler(function (e) { onBrowserBack(e && e.state); }); } catch (e) { gasHistory = null; }
+  }
+  if (!gasHistory) {
+    w.addEventListener('popstate', function (e) { onBrowserBack(e.state); });
+  }
+
+  w.GinNav = {
+    /** 新しい画面へ進んだ。undo は「この画面を閉じて前に戻す」処理 */
+    push: function (key, undo) {
+      stack.push({ key: key, undo: undo });
+      if (selfBack) deferred++;
+      else pushBrowser(stack.length);
+      notify();
+    },
+    /** 戻るボタン。戻れたら true */
+    back: function () {
+      if (!stack.length) return false;
+      var before = stack.length;
+      if (fallbackTimer) clearTimeout(fallbackTimer);
+      fallbackTimer = setTimeout(function () {
+        fallbackTimer = null;
+        if (stack.length === before) unwindTo(before - 1); // ブラウザの履歴が動かなかった
+      }, 450);
+      try { w.history.back(); } catch (e) { clearTimeout(fallbackTimer); fallbackTimer = null; unwindTo(before - 1); }
+      return true;
+    },
+    /** 画面の ✕ や「閉じる」で閉じた。いちばん上が key のときだけ履歴を1つ消す */
+    closed: function (key) {
+      if (!stack.length || stack[stack.length - 1].key !== key) return;
+      stack.pop();
+      notify();
+      selfBack++;
+      clearTimeout(selfBackTimer);
+      selfBackTimer = setTimeout(function () { selfBack = 0; flushDeferred(); }, 600);
+      try { w.history.back(); } catch (e) { selfBack = 0; }
+    },
+    /** いちばん上が key か */
+    isTop: function (key) {
+      return !!stack.length && stack[stack.length - 1].key === key;
+    },
+    /** 履歴をすべて捨てる(ログアウトなど)。ブラウザ側に残った分は戻っても何もしない */
+    reset: function () {
+      stack = [];
+      notify();
+    },
+    depth: function () { return stack.length; },
+    onChange: function (fn) { listeners.push(fn); fn(stack.length); }
+  };
+  notify();
+})(window);
+    /* @@GIN_NAV END@@ */
+  </script>
 </head>
-<body>
+<body class="gin-app">
   <div id="loginScreen" class="hidden" style="position:fixed;inset:0;z-index:100;background:linear-gradient(180deg,#e8eef6 0%,#eef2f7 260px);overflow:auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))">
     <div style="max-width:420px;margin:0 auto">
       <div class="login-hero">
@@ -1433,6 +1774,7 @@
     <header class="topbar">
       <div class="toprow">
         <div class="brand">
+          <button class="gin-back" type="button" onclick="GinNav.back()" aria-label="前の画面に戻る">戻る</button>
           <span class="brand-mark" aria-hidden="true">壱</span>
           <div class="title">
             <strong>デイサービス</strong>
@@ -1783,7 +2125,7 @@
 
     function bindNavigation() {
       document.querySelectorAll('.tabbar button').forEach((button) => {
-        button.addEventListener('click', () => showView(button.dataset.view));
+        button.addEventListener('click', () => showView(button.dataset.view, { push: true }));
       });
     }
 
@@ -1858,8 +2200,13 @@
       });
     }
 
-    function showView(id) {
+    // options.push: タブなど利用者が画面を切り替えたとき。「戻る」で前の画面に戻れるよう履歴に積む
+    function showView(id, options) {
       const previous = document.querySelector('.view.active');
+      if (options && options.push && previous && previous.id !== id) {
+        const previousId = previous.id;
+        GinNav.push('view', () => showView(previousId));
+      }
       if (previous) app.viewScroll[previous.id] = window.scrollY;
       if (id !== 'scanView' && (app.scanning || app.cameraStarting)) stopCamera();
       document.querySelectorAll('.view').forEach((view) => view.classList.remove('active'));
@@ -2237,6 +2584,7 @@
       document.getElementById('loginMessage').textContent = '';
       document.getElementById('loginScreen').classList.add('hidden');
       showView('scanView');
+      GinNav.reset();
       setStatusLine(`${app.staffName} でログイン中`);
       refreshState();
     }
@@ -2252,6 +2600,7 @@
     }
 
     function clearSession() {
+      GinNav.reset();
       app.token = '';
       app.staffName = '';
       app.staffRole = 'staff';
@@ -3328,10 +3677,12 @@
     }
 
     function renderSheet(title, subtitle, buttons) {
-      closeSheet();
+      const previousSheet = document.getElementById('daySheet');
+      if (previousSheet) previousSheet.remove(); // キャンセル理由へ切り替えるときは履歴を積み直さない
       const backdrop = document.createElement('div');
       backdrop.className = 'sheet-backdrop';
       backdrop.id = 'daySheet';
+      if (!GinNav.isTop('daySheet')) GinNav.push('daySheet', closeSheet);
       const sheet = document.createElement('div');
       sheet.className = 'sheet';
       const heading = document.createElement('h3');
@@ -3380,6 +3731,7 @@
     function closeSheet() {
       const existing = document.getElementById('daySheet');
       if (existing) existing.remove();
+      if (existing) GinNav.closed('daySheet');
     }
 
     async function applyDayStatus(patch) {
@@ -3561,7 +3913,8 @@
     function openCareForm(host, userId) {
       const user = host.findUser(userId);
       if (!user) return;
-      closeCareForm(true);
+      const previousCare = document.getElementById('careSheet');
+      if (previousCare) previousCare.remove(); // 次の方へ進むときは、戻る履歴を積み直さない
       careUi.host = host;
       careUi.userId = user.userId;
       careUi.saving = false;
@@ -3570,6 +3923,7 @@
       const backdrop = document.createElement('div');
       backdrop.className = 'sheet-backdrop';
       backdrop.id = 'careSheet';
+      if (!GinNav.isTop('careSheet')) GinNav.push('careSheet', careSheetBack);
       backdrop.innerHTML = `
         <form class="sheet care-sheet" novalidate role="dialog" aria-modal="true" aria-labelledby="careTitle">
           <div class="care-head">
@@ -3823,6 +4177,18 @@
       if (!force && careIsDirty()) return;
       existing.remove();
       careUi.saving = false;
+      GinNav.closed('careSheet');
+    }
+
+    // スマホ・ブラウザの「戻る」でケア記録を閉じる。未保存の入力があれば閉じずに確認を出す
+    function careSheetBack() {
+      if (!document.getElementById('careSheet')) return;
+      if (careUi.saving || careIsDirty()) {
+        GinNav.push('careSheet', careSheetBack);
+        requestCloseCareForm();
+        return;
+      }
+      closeCareForm(true);
     }
 
     // ---- 連絡帳 ----
@@ -3871,7 +4237,8 @@
       })).filter((entry) => entry.user);
       const missingCount = entries.filter((entry) =>
         careNotebookRows(entry.care, entry.bathStatus).some((row) => !row.note && !row.value)).length;
-      closeCareNotebook();
+      const previousNotebook = document.getElementById('careNotebook');
+      if (previousNotebook) previousNotebook.remove();
       const overlay = document.createElement('div');
       overlay.id = 'careNotebook';
       overlay.className = 'nb-overlay';
@@ -3890,6 +4257,7 @@
           '<div class="empty-state"><strong>連絡帳を作成できる方がいません</strong>来所を記録した方、またはケア記録を入力した方が表示されます。</div>'}</div>`;
       document.body.appendChild(overlay);
       document.body.classList.add('notebook-open');
+      if (!GinNav.isTop('careNotebook')) GinNav.push('careNotebook', closeCareNotebook);
       overlay.querySelector('[data-nb-close]').addEventListener('click', closeCareNotebook);
       overlay.querySelector('[data-nb-print]').addEventListener('click', printCareNotebook);
       overlay.addEventListener('keydown', (event) => {
@@ -3923,6 +4291,7 @@
       const existing = document.getElementById('careNotebook');
       if (existing) existing.remove();
       document.body.classList.remove('notebook-open');
+      if (existing) GinNav.closed('careNotebook');
     }
 
     // ===== 日ごとの利用予定(臨時の追加・お休み・振替)。Scanner.html と Index.html で同じ処理 =====
@@ -3960,7 +4329,8 @@
     }
 
     function openPlanSheet(host, options) {
-      closePlanSheet();
+      const previousPlan = document.getElementById('planSheet');
+      if (previousPlan) previousPlan.remove();
       planUi.host = host;
       planUi.date = (options && options.date) || host.businessDate();
       planUi.userId = (options && options.userId) || '';
@@ -3969,6 +4339,7 @@
       const backdrop = document.createElement('div');
       backdrop.className = 'sheet-backdrop';
       backdrop.id = 'planSheet';
+      if (!GinNav.isTop('planSheet')) GinNav.push('planSheet', closePlanSheet);
       backdrop.innerHTML = `
         <div class="sheet plan-sheet" role="dialog" aria-modal="true" aria-labelledby="planTitle">
           <div class="care-head">
@@ -4003,6 +4374,7 @@
       const existing = document.getElementById('planSheet');
       if (existing) existing.remove();
       planUi.saving = false;
+      if (existing) GinNav.closed('planSheet');
     }
 
     function showPlanStatus(message, isError) {
