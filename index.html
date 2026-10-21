@@ -1676,6 +1676,7 @@
       state: 'ds_scanner_state',
       pin: 'ds_scanner_pin',
       photos: 'ds_scanner_photos',
+      photoIds: 'ds_scanner_photo_ids',
       token: 'ds_scanner_token',
       staffName: 'ds_scanner_staff_name',
       staffRole: 'ds_scanner_staff_role'
@@ -1719,6 +1720,7 @@
       loginStaff: [],
       loginStaffId: '',
       photoCache: {},
+      photoIds: {},
       photoRequestSeq: 0,
       frozen: false,
       freezeTimer: null,
@@ -1741,6 +1743,7 @@
       // 写真キャッシュは、一覧描画(loadCachedState)より先に復元する。
       // 後だと起動のたびにキャッシュ済み写真を無駄に再取得してしまう。
       app.photoCache = safeJson(localStorage.getItem(STORAGE.photos), {}) || {};
+      app.photoIds = safeJson(localStorage.getItem(STORAGE.photoIds), {}) || {};
       loadCachedState();
       renderSync();
       renderRecent();
@@ -2282,6 +2285,7 @@
       app.users = (Array.isArray(state.users) ? state.users : [])
         .filter((user) => user && user.userId && user.displayName)
         .map((user) => Object.assign({}, user, { userId: normalizeClientUserId(user.userId) }));
+      dropReplacedPhotos();
       if (!keepLocalRecords) {
         app.records = ((state.businessDate === todayStr() ? state.records : []) || [])
           .map((record) => Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
@@ -3004,6 +3008,7 @@
           return;
         }
         app.photoCache[user.userId] = result.dataUri;
+        app.photoIds[user.userId] = String(user.photoFileId || '');
         savePhotoCache();
         applyTo(result.dataUri, true);
       } catch (error) {
@@ -3013,6 +3018,29 @@
 
     // 写真キャッシュの保存上限(バイト)。記録キューの保存領域を圧迫しないための予防線。
     const PHOTO_CACHE_MAX_BYTES = 2500000;
+
+    // 管理画面で写真を差し替えたら、端末に残っている古い写真は使わずに取り直す
+    function dropReplacedPhotos() {
+      let changed = false;
+      app.users.forEach((user) => {
+        const current = String(user.photoFileId || '');
+        const known = app.photoIds[user.userId];
+        if (known === undefined) {
+          if (app.photoCache[user.userId]) {
+            app.photoIds[user.userId] = current;
+            changed = true;
+          }
+          return;
+        }
+        if (known !== current) {
+          delete app.photoCache[user.userId];
+          delete app.photoIds[user.userId];
+          if (app.photoMissing) delete app.photoMissing[user.userId];
+          changed = true;
+        }
+      });
+      if (changed) savePhotoCache();
+    }
 
     function savePhotoCache() {
       let ids = Object.keys(app.photoCache);
@@ -3026,8 +3054,12 @@
         totalBytes -= String(app.photoCache[id] || '').length;
         delete app.photoCache[id];
       }
+      Object.keys(app.photoIds).forEach((id) => {
+        if (!app.photoCache[id]) delete app.photoIds[id];
+      });
       try {
         localStorage.setItem(STORAGE.photos, JSON.stringify(app.photoCache));
+        localStorage.setItem(STORAGE.photoIds, JSON.stringify(app.photoIds));
       } catch (error) {
         // 端末の保存容量を超えたら写真キャッシュは諦める(記録の保存を優先する)
         app.photoCache = {};
@@ -4280,6 +4312,7 @@
             delete app.photoPromises[user.userId];
             if (result.dataUri) {
               app.photoCache[user.userId] = result.dataUri;
+              app.photoIds[user.userId] = String(user.photoFileId || '');
               savePhotoCache();
             } else {
               // Drive側に写真の実体がない。再描画のたびに取得し直さないよう覚えておく
