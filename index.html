@@ -1634,7 +1634,7 @@
  *
  * しくみ: ブラウザの履歴に「何段目か」(gin) を記録し、戻る操作で届いた段数まで
  * アプリ内の履歴を巻き戻す。GAS(iframe)では google.script.history を使う。
- * ブラウザの履歴が動かない環境でも、戻るボタンは0.45秒後にアプリ内だけで戻る。
+ * 戻るボタンは画面をすぐ戻し、ブラウザの履歴は後から1つ戻して合わせる(GASでは履歴の応答を待つと遅いため)。
  */
 (function (w) {
   'use strict';
@@ -1643,7 +1643,6 @@
   var gasHistory = gs && gs.history ? gs.history : null; // 後でアプリが window.google を差し替えても使えるよう先に確保
   var stack = [];
   var listeners = [];
-  var fallbackTimer = null;
   var selfBack = 0;      // アプリ自身が呼んだ history.back() の数(届いたら何もしない)
   var selfBackTimer = null;
   var deferred = 0;      // selfBack 待ちの間に進んだ画面の数(届いてから履歴へ積む)
@@ -1663,6 +1662,14 @@
       if (gasHistory) gasHistory.push({ gin: depth });
       else if (w.history && w.history.pushState) w.history.pushState({ gin: depth }, '', w.location.href);
     } catch (e) { /* 履歴が使えない環境ではアプリ内だけで戻る */ }
+  }
+  // アプリが戻した分、ブラウザの履歴も1つ戻す。届いた戻るは onBrowserBack で読み捨てる。
+  // 履歴が動かない環境のために、1秒たったら読み捨てをやめる。
+  function syncBrowserBack() {
+    selfBack++;
+    clearTimeout(selfBackTimer);
+    selfBackTimer = setTimeout(function () { selfBack = 0; flushDeferred(); }, 1000);
+    try { w.history.back(); } catch (e) { selfBack = 0; clearTimeout(selfBackTimer); flushDeferred(); }
   }
   function flushDeferred() {
     var base = stack.length - deferred;
@@ -1684,7 +1691,6 @@
       if (!selfBack) { clearTimeout(selfBackTimer); flushDeferred(); }
       return;
     }
-    if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
     unwindTo(depthOf(state));
   }
 
@@ -1703,16 +1709,11 @@
       else pushBrowser(stack.length);
       notify();
     },
-    /** 戻るボタン。戻れたら true */
+    /** 戻るボタン。画面はすぐ戻す。戻れたら true */
     back: function () {
       if (!stack.length) return false;
-      var before = stack.length;
-      if (fallbackTimer) clearTimeout(fallbackTimer);
-      fallbackTimer = setTimeout(function () {
-        fallbackTimer = null;
-        if (stack.length === before) unwindTo(before - 1); // ブラウザの履歴が動かなかった
-      }, 450);
-      try { w.history.back(); } catch (e) { clearTimeout(fallbackTimer); fallbackTimer = null; unwindTo(before - 1); }
+      syncBrowserBack();
+      unwindTo(stack.length - 1);
       return true;
     },
     /** 画面の ✕ や「閉じる」で閉じた。いちばん上が key のときだけ履歴を1つ消す */
@@ -1720,10 +1721,7 @@
       if (!stack.length || stack[stack.length - 1].key !== key) return;
       stack.pop();
       notify();
-      selfBack++;
-      clearTimeout(selfBackTimer);
-      selfBackTimer = setTimeout(function () { selfBack = 0; flushDeferred(); }, 600);
-      try { w.history.back(); } catch (e) { selfBack = 0; }
+      syncBrowserBack();
     },
     /** いちばん上が key か */
     isTop: function (key) {
@@ -2555,6 +2553,19 @@
     }
 
     async function restoreSession() {
+      // 主任・管理者はログイン確認を待たずに管理画面への引き継ぎを始める(引き継ぎ自体がログインを確かめる)。
+      // 以前は「ログイン確認」→「引き継ぎ」を順に呼び、開くたびに往復1回分待っていた。
+      if (app.staffRole === 'leader' || app.staffRole === 'admin') {
+        try {
+          await openManagerApp();
+          return;
+        } catch (error) {
+          if (!app.token) return; // ログイン切れはログイン画面を出し済み
+          // 権限が変わった場合などは、従来どおりログイン確認から進める
+        }
+      }
+      // 職員は、ログイン確認と今日の一覧の取得を同時に始める(順番に待たない)
+      app.statePrefetch = api('scanState', { businessDate: todayStr() }).catch(() => null);
       let actor;
       try {
         const result = await api('sessionInfo', {});
@@ -2715,7 +2726,9 @@
       button.textContent = '更新中…';
       try {
         const revision = app.recordsRevision;
-        const state = await api('scanState', { businessDate: todayStr() });
+        const prefetch = app.statePrefetch;
+        app.statePrefetch = null;
+        const state = (prefetch && await prefetch) || await api('scanState', { businessDate: todayStr() });
         // 更新開始後の入力や、保存中の表示を古い一覧応答で上書きしない。
         const keepLocalRecords = revision !== app.recordsRevision || app.pendingDayChanges.size > 0;
         applyState(state, false, keepLocalRecords);
