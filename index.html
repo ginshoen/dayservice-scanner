@@ -1398,6 +1398,163 @@
       .plan-bar button { width: 100%; }
     }
 
+    /* @@DS_EXTRA_CSS BEGIN@@ shared/ds-extra.css の写し。直すときは shared 側を直して node デイサービスアプリ/scripts/sync-shared.js */
+    /* ===== 記録一覧・実費(Scanner.html と Index.html で共通。元は shared/ds-extra.css) ===== */
+    .status-chip.fee { background: #fdf2f8; color: #a0306a; }
+    .ds-list .nb-toolbar { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .ds-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; max-width: 860px; margin: 0 auto; padding: 10px 12px; background: #eef1f5; }
+    .ds-tabs button { min-height: 44px; padding: 6px 4px; font-size: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 999px; }
+    .ds-tabs button[aria-selected="true"] { color: #fff; background: var(--c); border-color: var(--c); font-weight: 700; }
+    .ds-list-body { max-width: 860px; margin: 0 auto; padding: 4px 12px 40px; }
+    .ds-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
+    .ds-counts.single { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .ds-counts span { padding: 10px 8px; border-radius: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); color: #3d4f6b; font-size: 13px; text-align: center; }
+    .ds-counts span b { display: block; color: var(--c, #2f5bd3); font-size: 24px; line-height: 1.1; }
+    .ds-counts.single span b { color: var(--c); }
+    .ds-counts span.wait b { color: #b54708; }
+    .ds-note, .ds-legend { margin: 6px 0; color: var(--muted, #5a6b83); font-size: 12.5px; line-height: 1.6; }
+    .ds-table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 14px; }
+    .ds-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
+    .ds-table col.name { width: 28%; }
+    .ds-table th, .ds-table td { padding: 8px 6px; border-bottom: 1px solid #edf1f6; text-align: center; vertical-align: middle; }
+    .ds-table thead th { position: sticky; top: 0; background: #f7f9fc; color: var(--c, #3d4f6b); font-size: 13px; }
+    .ds-table tbody th { text-align: left; font-weight: 600; overflow-wrap: anywhere; }
+    .ds-table tbody th small { display: block; color: #175cd3; font-size: 11px; font-weight: 400; }
+    .ds-cell b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+    .ds-cell small { display: block; color: var(--muted, #5a6b83); font-size: 11px; line-height: 1.4; }
+    .ds-cell small.ds-how { color: #8a96a8; }
+    .ds-cell.missing { color: #b54708; font-weight: 700; background: #fffaeb; }
+    .ds-cell.empty { color: #b8c2cf; }
+    .ds-cell.refused { color: #b54708; font-size: 13px; }
+    .ds-table tr.is-cancelled th { color: #8a96a8; }
+    .ds-table tr.is-cancelled td { color: #b42318; background: #fef3f2; }
+    .ds-heading { margin: 16px 0 8px; color: #1c2b45; font-size: 15px; }
+    .ds-rows { gap: 6px; }
+    .ds-row { display: grid; grid-template-columns: 4.2em auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-left: 4px solid var(--c, #2f5bd3); border-radius: 12px; }
+    .ds-row.muted { grid-template-columns: auto minmax(0, 1fr); border-left-color: #d0d7e2; background: #fafbfc; }
+    .ds-time { color: var(--c, #2f5bd3); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .ds-person { display: grid; min-width: 0; }
+    .ds-person strong { font-size: 16px; }
+    .ds-person small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .ds-empty { margin: 4px 0; color: #8a96a8; font-size: 14px; }
+    .ds-fee-sheet { max-width: 560px; padding-top: 0; padding-bottom: 0; }
+    .ds-fee-help { margin: 12px 0 4px; padding: 8px 10px; border-radius: 10px; background: #f7f9fd; color: #3d4f6b; font-size: 12.5px; line-height: 1.6; }
+    .ds-fee-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+    .ds-fee-items button { display: grid; gap: 2px; min-height: 60px; padding: 8px; text-align: center; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 14px; }
+    .ds-fee-items button strong { font-size: 16px; }
+    .ds-fee-items button small { color: var(--muted, #5a6b83); font-size: 12.5px; font-weight: 400; }
+    .ds-fee-items button[aria-pressed="true"] { background: #fdf2f8; border: 2px solid #c2417f; }
+    .ds-fee-items button[aria-pressed="true"] strong::before { content: '✓ '; color: #c2417f; }
+    .ds-fee-confirm { margin: 12px 0 0; padding: 12px; border-radius: 14px; background: #fdf2f8; border: 1px solid #f5c9de; }
+    .ds-fee-line { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .ds-fee-line strong { flex: 1 1 auto; font-size: 17px; }
+    .ds-fee-line em { color: var(--muted, #5a6b83); font-size: 13px; font-style: normal; }
+    .ds-stepper { display: inline-grid; grid-template-columns: 48px 3em 48px; align-items: center; text-align: center; }
+    .ds-stepper button { min-height: 48px; padding: 0; font-size: 22px; background: #fff; border: 1px solid #e6b8cf; }
+    .ds-stepper b { font-size: 22px; }
+    .ds-fee-amount { margin: 8px 0; font-size: 15px; text-align: right; }
+    .ds-fee-amount b { color: #a0306a; font-size: 20px; }
+    .ds-fee-actions { display: grid; grid-template-columns: 2fr 1fr; gap: 8px; }
+    .ds-fee-actions button { min-height: 50px; font-size: 16px; }
+    .ds-fee-heading { margin: 16px 0 6px; font-size: 14px; color: #185abc; }
+    .ds-fee-records { gap: 6px; }
+    .ds-fee-record { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 8px; padding: 8px 10px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 12px; }
+    .ds-fee-record span { display: grid; min-width: 0; }
+    .ds-fee-record small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .ds-fee-record > b { font-variant-numeric: tabular-nums; }
+    .ds-fee-cancel { min-height: 40px; padding: 4px 10px; font-size: 13px; color: #b42318; background: #fff; border: 1px solid #f3c3bd; }
+    .ds-fee-cancel-confirm { display: flex !important; flex-wrap: wrap; align-items: center; gap: 6px; grid-column: 1 / -1; color: #b42318; font-size: 13px; }
+    .ds-fee-cancel-confirm button { min-height: 40px; padding: 4px 12px; font-size: 13px; }
+    .ds-fee-cancel-confirm button:first-of-type { color: #fff; background: #b42318; border-color: #b42318; }
+    .ds-fee-totals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0 0; }
+    .ds-fee-totals div { display: grid; gap: 2px; padding: 10px 12px; border-radius: 14px; background: #f7f9fd; }
+    .ds-fee-totals span { color: var(--muted, #5a6b83); font-size: 12.5px; }
+    .ds-fee-totals b { color: #1c2b45; font-size: 18px; }
+    .care-actions.single { grid-template-columns: 1fr; }
+    @media (max-width: 480px) {
+      .ds-table th, .ds-table td { padding: 7px 3px; }
+      .ds-cell b { font-size: 15px; }
+      .ds-cell small.ds-how { display: none; }
+      .ds-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 8px; }
+      .ds-tabs button { font-size: 13px; }
+      .ds-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ds-counts.single { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media print {
+      @page { size: A4 portrait; margin: 10mm; }
+      body.dslist-open { background: #fff !important; }
+      body.dslist-open > *:not(#dsRecordList) { display: none !important; }
+      body.dslist-open #dsRecordList { position: static; overflow: visible; background: #fff; }
+      #dsRecordList .nb-toolbar button, #dsRecordList .ds-tabs, #dsRecordList .ds-note, #dsRecordList .ds-legend { display: none !important; }
+      #dsRecordList .nb-toolbar { position: static; display: block; border: 0; text-align: left; }
+      #dsRecordList .ds-table-wrap { overflow: visible; border: 0; }
+      #dsRecordList .ds-table { min-width: 0; font-size: 12px; }
+      #dsRecordList .ds-table th, #dsRecordList .ds-table td { border: 1px solid #9aa5b1; }
+    }
+    /* 今日の画面の見出しボタン(記録一覧・実費・連絡帳・更新)がスマホで横にはみ出さないように */
+    #todayView .page-heading, #adminView .daily-heading { flex-wrap: wrap; }
+    .heading-actions { flex-wrap: wrap; justify-content: flex-end; }
+    @media (max-width: 600px) {
+      #todayView .heading-actions { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      #todayView .heading-actions button { padding-inline: 4px; font-size: 13px; }
+    }
+    /* 名前から記録(QRが読めないとき。現場画面だけ) */
+    .manual-open { width: 100%; margin-top: 10px; min-height: 50px; font-size: 16px; background: #fff; border: 1.5px dashed #9fb3d9; color: #1c3f8f; }
+    .manual-sheet { max-width: 560px; padding-top: 0; }
+    .manual-services { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 12px 0 0; }
+    .manual-services button { min-height: 48px; font-size: 15px; background: #fff; border: 1px solid var(--line, #e3e9f2); }
+    .manual-services button[aria-pressed="true"] { color: #fff; background: var(--c); border-color: var(--c); font-weight: 700; }
+    .manual-time { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; margin: 12px 0 4px; }
+    .manual-time span { color: var(--muted, #5a6b83); font-size: 14px; font-weight: 600; }
+    .manual-time input { min-width: 0; min-height: 48px; font-size: 18px; }
+    .manual-time button { min-height: 48px; padding: 6px 14px; }
+    .manual-done { margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; background: #ecfdf3; color: #146c43; font-size: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .manual-done.error { background: #fef3f2; color: #b42318; }
+    .manual-done button { min-height: 40px; padding: 4px 12px; font-size: 13px; background: #fff; }
+    .manual-row-state { white-space: nowrap; }
+    /* 実費の集計(管理画面の「月次」)と品目の設定 */
+    .fee-print-title { display: none; }
+    .fee-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 6px 0 12px; }
+    .fee-cards div { display: grid; gap: 2px; padding: 12px; border-radius: 14px; background: #fdf2f8; border: 1px solid #f5d3e4; text-align: center; }
+    .fee-cards span { color: #7a3a5c; font-size: 12.5px; }
+    .fee-cards b { color: #a0306a; font-size: 22px; }
+    .fee-sub { margin: 14px 0 8px; font-size: 15px; color: #1c2b45; }
+    .fee-bars { display: grid; gap: 8px; }
+    .fee-bar { display: grid; grid-template-columns: minmax(5em, 9em) minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: 14px; }
+    .fee-bar-name { display: grid; min-width: 0; }
+    .fee-bar-name small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .fee-bar-track { height: 14px; border-radius: 999px; background: #f3e8ee; overflow: hidden; }
+    .fee-bar-track i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #e58bb5, #c2417f); }
+    .fee-bar b { font-variant-numeric: tabular-nums; }
+    .fee-users { display: grid; gap: 8px; }
+    .fee-user { background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 14px; }
+    .fee-user summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 52px; padding: 10px 12px; cursor: pointer; list-style: none; }
+    .fee-user summary::-webkit-details-marker { display: none; }
+    .fee-user summary span { display: grid; min-width: 0; }
+    .fee-user summary small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .fee-user summary b { flex: 0 0 auto; color: #a0306a; font-size: 17px; }
+    .fee-user[open] summary { border-bottom: 1px solid var(--line, #e3e9f2); }
+    .fee-cats { margin: 8px 12px 0; color: #3d4f6b; font-size: 12.5px; }
+    .fee-table { width: calc(100% - 24px); margin: 8px 12px 12px; border-collapse: collapse; font-size: 13px; }
+    .fee-table th, .fee-table td { padding: 6px 4px; border-bottom: 1px solid #edf1f6; text-align: left; }
+    .fee-table th { color: var(--muted, #5a6b83); font-weight: 600; }
+    .fee-item-row { display: flex !important; align-items: center; justify-content: space-between; gap: 10px; }
+    .fee-item-row span { display: grid; min-width: 0; }
+    .fee-item-row small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .fee-item-row.is-off { opacity: .6; }
+    @media (max-width: 480px) {
+      .fee-cards b { font-size: 18px; }
+      .fee-bar { grid-template-columns: minmax(4.5em, 7em) minmax(0, 1fr) auto; gap: 6px; }
+    }
+    @media print {
+      body.fee-printing > *:not(.app) { display: none !important; }
+      body.fee-printing .app > *:not(main), body.fee-printing main > *:not(#exportView), body.fee-printing #exportView > *:not(#feeSummaryPanel) { display: none !important; }
+      body.fee-printing #feeSummaryPanel > *:not(#feeSummary) { display: none !important; }
+      body.fee-printing .fee-print-title { display: block; }
+      body.fee-printing .fee-user { break-inside: avoid; page-break-inside: avoid; }
+    }
+    /* @@DS_EXTRA_CSS END@@ */
+
     .hidden { display: none !important; }
 
 
@@ -1816,6 +1973,7 @@
         </div>
 
         <button class="primary" id="cameraToggle">2. カメラを開始</button>
+        <button type="button" class="manual-open" id="openManualRecord">QRが読めないとき：名前から記録</button>
         <details class="scan-fallback">
           <summary>カメラが使えないとき</summary>
           <div class="scan-fallback-body">
@@ -1847,7 +2005,7 @@
       </section>
 
       <section id="todayView" class="view">
-        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
+        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
         <div class="plan-bar" aria-live="polite">
           <div><span class="plan-bar-count" id="planBarCount">今日の予定</span><span class="plan-bar-detail" id="planBarDetail"></span></div>
           <button id="openPlanSheet">予定の変更・追加</button>
@@ -2036,6 +2194,8 @@
       usersByHash: {},
       records: [],
       careRecords: [],
+      feeItems: [],
+      feeRecords: [],
       todayVisibleIds: [],
       recordsRevision: 0,
       pendingDayChanges: new Map(),
@@ -2134,6 +2294,7 @@
         document.getElementById('photoQrInput').click();
       });
       document.getElementById('photoQrInput').addEventListener('change', readQrFromPhoto);
+      document.getElementById('openManualRecord').addEventListener('click', openManualRecord);
       document.getElementById('manualSubmit').addEventListener('click', () => {
         const value = document.getElementById('manualQr').value.trim();
         if (value) handleQrValue(value);
@@ -2165,6 +2326,8 @@
       }));
       document.getElementById('refreshToday').addEventListener('click', refreshState);
       document.getElementById('openNotebook').addEventListener('click', () => openCareNotebook(scannerCareHost, notebookUserIds()));
+      document.getElementById('openRecordList').addEventListener('click', () => openRecordList(scannerDsHost));
+      document.getElementById('openFeePicker').addEventListener('click', () => openFeePicker(scannerDsHost));
       document.getElementById('openPlanSheet').addEventListener('click', () => openPlanSheet(scannerPlanHost));
       document.getElementById('loginSubmit').addEventListener('click', submitLogin);
       document.getElementById('loginCancel').addEventListener('click', () => {
@@ -2658,6 +2821,11 @@
         app.careRecords = (state.businessDate === todayStr() ? state.careRecords : [])
           .map((care) => Object.assign({}, care, { userId: normalizeClientUserId(care.userId) }));
       }
+      if (Array.isArray(state.feeItems)) app.feeItems = state.feeItems;
+      if (Array.isArray(state.feeRecords) && !dsFeeUi.saving) {
+        app.feeRecords = (state.businessDate === todayStr() ? state.feeRecords : [])
+          .map((record) => Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
+      }
       app.usersByHash = indexUsersByQrHashes(app.users);
       const suffix = fromCache ? '(前回取得分)' : '';
       setStatusLine(`利用者 ${app.users.length}名 / ${state.businessDate || todayStr()}${suffix}`);
@@ -2671,6 +2839,8 @@
         records: state.records || [],
         careRecords: state.careRecords || [],
         plans: state.plans || [],
+        feeItems: state.feeItems || [],
+        feeRecords: state.feeRecords || [],
         businessDate: state.businessDate || todayStr()
       }));
     }
@@ -3172,6 +3342,198 @@
       return Boolean(actual[parts[2]]);
     }
 
+    // ---- 名前から記録(QRが読めないとき) ----
+    // 名札が無い・汚れている・カメラが使えないときに、利用者を選んで記録する。
+    // QRと同じ送信待ちの列に入れるので電波がなくても記録でき、読取履歴には「入力元 manual」で残る。
+    const manualUi = { service: 'arrival', time: '', query: '', message: '', error: false, last: null, undoing: false };
+
+    function openManualRecord() {
+      manualUi.service = DS_SERVICES.includes(app.mode) ? app.mode : 'arrival';
+      manualUi.time = dsNowTime();
+      manualUi.query = '';
+      manualUi.message = '';
+      manualUi.error = false;
+      manualUi.last = null;
+      const previous = document.getElementById('manualSheet');
+      if (previous) previous.remove();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sheet-backdrop';
+      backdrop.id = 'manualSheet';
+      if (!GinNav.isTop('manualSheet')) GinNav.push('manualSheet', closeManualRecord);
+      backdrop.innerHTML = `
+        <div class="sheet manual-sheet" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+          <div class="care-head">
+            <div><h3 id="manualTitle" tabindex="-1">名前から記録</h3><p class="sub">QRが読めないときに使います（${escapeHtml(careDateLabel(todayStr()))}）</p></div>
+            <button type="button" class="care-close" data-manual-close aria-label="閉じる">×</button>
+          </div>
+          <div id="manualBody"></div>
+        </div>`;
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) closeManualRecord();
+      });
+      document.body.appendChild(backdrop);
+      backdrop.querySelector('[data-manual-close]').addEventListener('click', closeManualRecord);
+      renderManualRecord();
+      backdrop.querySelector('#manualTitle').focus({ preventScroll: true });
+    }
+
+    function closeManualRecord() {
+      const existing = document.getElementById('manualSheet');
+      if (!existing) return;
+      existing.remove();
+      GinNav.closed('manualSheet');
+    }
+
+    function manualRecordedTime(userId, service) {
+      return dsTimeText(careRecordWithPendingScans(userId)[DS_TIME_FIELDS[service]]);
+    }
+
+    function renderManualRecord() {
+      const body = document.getElementById('manualBody');
+      if (!body) return;
+      const service = manualUi.service;
+      const label = DS_SERVICE_LABELS[service];
+      const query = normalizeForSearch(manualUi.query);
+      const businessDate = todayStr();
+      // 名前を入れないときは、今日の予定がある方・来所した方だけを出す
+      const users = app.users.slice().sort(kanaSort).filter((user) => {
+        if (query) return normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query);
+        const plan = planFor(app.plans, user.userId);
+        return Boolean(plan && plan.planned) || Boolean(localFlagsFor(user.userId).arrival);
+      });
+      const searchFocused = document.activeElement && document.activeElement.id === 'manualSearch';
+      body.innerHTML = `
+        <p class="care-choice-label">1. 記録する内容</p>
+        <div class="manual-services" role="group" aria-label="記録する内容">${DS_SERVICES.map((key) =>
+          `<button type="button" data-manual-service="${key}" aria-pressed="${String(key === service)}" style="--c:${DS_SERVICE_COLORS[key]}">${DS_SERVICE_LABELS[key]}</button>`).join('')}</div>
+        <div class="manual-time"><span>2. 時刻</span><input type="time" id="manualTime" value="${escapeHtml(manualUi.time)}" aria-label="${label}の時刻"><button type="button" data-manual-now>今</button></div>
+        <p class="care-choice-label">3. 利用者を押すと、${label}を記録します</p>
+        ${manualUi.message ? `<div class="manual-done${manualUi.error ? ' error' : ''}" role="status">${escapeHtml(manualUi.message)}${manualUi.last && !manualUi.error ? `<button type="button" data-manual-undo ${manualUi.undoing ? 'disabled' : ''}>取り消す</button>` : ''}</div>` : ''}
+        <div class="material-search plan-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="manualSearch" placeholder="名前・ふりがなで探す" aria-label="利用者を検索" autocomplete="off" type="search" value="${escapeHtml(manualUi.query)}">
+          <span></span>
+        </div>
+        <div class="list plan-results">${users.map((user) => {
+          const record = recordFor(user.userId);
+          const cancelled = Boolean(record && record.attendanceStatus === 'cancelled');
+          const done = isLocallyRecorded(`${businessDate}:${user.userId}:${service}`);
+          const state = cancelled ? 'キャンセル' : (done ? `記録済み ${manualRecordedTime(user.userId, service)}` : '記録する');
+          return `<button type="button" class="row plan-pick-row" data-manual-user="${escapeHtml(user.userId)}" ${done || cancelled ? 'disabled' : ''}>${avatarHtml(user)}<span class="plan-pick-name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span><span class="plan-badge manual-row-state ${done ? 'planned' : (cancelled ? 'none' : 'added')}">${escapeHtml(state)}</span></button>`;
+        }).join('') || `<div class="empty-state"><strong>${query ? '該当する利用者がいません' : '今日の予定の方がいません'}</strong>名前を入力して探してください。</div>`}</div>`;
+      body.querySelectorAll('[data-manual-service]').forEach((button) => button.addEventListener('click', () => {
+        manualUi.service = button.dataset.manualService;
+        manualUi.message = '';
+        manualUi.last = null;
+        renderManualRecord();
+      }));
+      body.querySelector('#manualTime').addEventListener('change', (event) => { manualUi.time = event.target.value; });
+      body.querySelector('[data-manual-now]').addEventListener('click', () => {
+        manualUi.time = dsNowTime();
+        body.querySelector('#manualTime').value = manualUi.time;
+      });
+      const search = body.querySelector('#manualSearch');
+      search.addEventListener('input', () => {
+        manualUi.query = search.value;
+        renderManualRecord();
+      });
+      if (searchFocused) {
+        const input = document.getElementById('manualSearch');
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+      body.querySelectorAll('[data-manual-user]').forEach((button) => button.addEventListener('click', () => manualRecordUser(button.dataset.manualUser)));
+      const undo = body.querySelector('[data-manual-undo]');
+      if (undo) undo.addEventListener('click', undoManualRecord);
+    }
+
+    function manualRecordUser(userId) {
+      const user = app.users.find((item) => normalizeClientUserId(item.userId) === normalizeClientUserId(userId));
+      if (!user) return;
+      const service = manualUi.service;
+      const label = DS_SERVICE_LABELS[service];
+      const time = careToHalfWidth(document.getElementById('manualTime').value || manualUi.time);
+      if (!/^\d{2}:\d{2}$/.test(time)) {
+        manualUi.message = '時刻を選んでください。';
+        manualUi.error = true;
+        renderManualRecord();
+        return;
+      }
+      manualUi.time = time;
+      const businessDate = todayStr();
+      const localKey = `${businessDate}:${user.userId}:${service}`;
+      if (isLocallyRecorded(localKey)) {
+        manualUi.message = `${user.displayName}様の${label}はすでに記録済みです。`;
+        manualUi.error = true;
+        renderManualRecord();
+        return;
+      }
+      const event = {
+        eventId: nextEventId(),
+        clientEventSeq: app.clientSeq,
+        deviceId: app.deviceId,
+        // 施設は日本時間。端末の時刻設定に左右されないよう時差を明示する
+        occurredAtClient: new Date(`${businessDate}T${time}:00+09:00`).toISOString(),
+        businessDate,
+        userId: user.userId,
+        qrTokenHash: user.qrTokenHash || '',
+        serviceType: service,
+        source: 'manual',
+        localKey,
+        localStatus: 'pending'
+      };
+      app.queue.push(event);
+      saveQueue();
+      beep('success');
+      addRecent({ label: user.displayName, status: '手入力', serviceType: service });
+      manualUi.message = `${user.displayName}様の${label}を ${time} で記録しました。`;
+      manualUi.error = false;
+      manualUi.last = { eventId: event.eventId, userId: user.userId, service, name: user.displayName };
+      renderManualRecord();
+      renderSync();
+      renderToday();
+      syncQueue();
+    }
+
+    // 押し間違いの取り消し。まだ送っていなければ送信待ちから消し、送った後ならサーバーの記録を取り消す。
+    async function undoManualRecord() {
+      const last = manualUi.last;
+      if (!last || manualUi.undoing) return;
+      manualUi.undoing = true;
+      renderManualRecord();
+      try {
+        for (let i = 0; i < 20 && app.syncing; i++) await new Promise((resolve) => setTimeout(resolve, 250));
+        const queued = app.queue.find((event) => event.eventId === last.eventId);
+        if (queued && !app.syncing) {
+          app.queue = app.queue.filter((event) => event.eventId !== last.eventId);
+          saveQueue();
+        } else {
+          // 送信済みなら、その1件が受け付けられていたときだけサーバー側で消す(他の端末の記録は消さない)
+          const result = await api('setDailyStatus', { businessDate: todayStr(), userId: last.userId, clearService: last.service, clearEventId: last.eventId });
+          if (result.record) mergeReturnedRecords([result.record]);
+          if (result.careRecord) mergeReturnedCareRecords([result.careRecord]);
+          cacheCurrentState();
+          if (result.notCleared) {
+            manualUi.message = `${last.name}様の${DS_SERVICE_LABELS[last.service]}は、ほかの端末で先に記録されていたので、その記録を残しました。違うときは、名前を押して出る画面から取り消してください。`;
+            manualUi.error = false;
+            manualUi.last = null;
+            return;
+          }
+        }
+        manualUi.message = `${last.name}様の${DS_SERVICE_LABELS[last.service]}の記録を取り消しました。`;
+        manualUi.error = false;
+        manualUi.last = null;
+      } catch (error) {
+        manualUi.message = `取り消せませんでした。${friendlyError(error)}`;
+        manualUi.error = true;
+      } finally {
+        manualUi.undoing = false;
+        renderSync();
+        renderToday();
+        renderManualRecord();
+      }
+    }
+
     // ---- 同期キュー ----
 
     async function syncQueue() {
@@ -3259,7 +3621,7 @@
     function cacheCurrentState() {
       // 保存前の仮表示を、次回起動時の確定データとして残さない。
       if (app.pendingDayChanges.size > 0) return;
-      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, businessDate: todayStr() });
+      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, businessDate: todayStr() });
     }
 
     function nextEventId() {
@@ -3539,6 +3901,7 @@
         const marks = [planBadgeHtml(plan, Boolean(flags.arrival))];
         if (!cancelled && record && record.bathStatus === 'refused') marks.push('<span class="status-chip refused">入浴拒否</span>');
         if (!cancelled && record && record.usageActual === 'half_am') marks.push('<span class="status-chip half">午前のみ</span>');
+        marks.push(feeBadgeHtml(scannerDsHost, user.userId));
         const reason = cancelled && record.cancelReason ? ` / ${escapeHtml(record.cancelReason)}` : '';
         const saving = app.pendingDayChanges.has(user.userId);
         const careLine = cancelled ? '' : careSummaryHtml(careRecordWithPendingScans(user.userId), scannerBathState(user.userId));
@@ -3565,13 +3928,13 @@
       return app.careRecords.find((item) => normalizeClientUserId(item.userId) === normalizeClientUserId(userId)) || null;
     }
 
-    // 未送信のQR(来所・送り)がある場合は、送信前でも読み取った時刻を表示する
+    // 未送信のQR・手入力がある場合は、送信前でも読み取った(選んだ)時刻を表示する
     function careRecordWithPendingScans(userId) {
       const care = Object.assign({}, careRecordFor(userId) || {});
       const normalizedUserId = normalizeClientUserId(userId);
       const businessDate = todayStr();
       app.queue.forEach((event) => {
-        const field = event.serviceType === 'arrival' ? 'arrivalTime' : (event.serviceType === 'departure' ? 'departureTime' : '');
+        const field = DS_TIME_FIELDS[event.serviceType] || '';
         if (!field || careHas(care[field]) || event.localStatus === 'rejected') return;
         if (event.businessDate !== businessDate || normalizeClientUserId(event.userId) !== normalizedUserId) return;
         const at = new Date(event.occurredAtClient);
@@ -3628,7 +3991,32 @@
       feedback: (text) => { document.getElementById('todayFeedback').textContent = text; }
     };
 
-    const scannerCareHost = {
+    // 記録一覧・実費(shared/ds-extra.js)へ渡す現場画面の接続部分
+    const scannerDsHost = {
+      businessDate: () => todayStr(),
+      users: () => app.users,
+      findUser: (userId) => app.users.find((user) => normalizeClientUserId(user.userId) === normalizeClientUserId(userId)) || null,
+      flags: (userId) => localFlagsFor(userId),
+      record: (userId) => recordFor(userId),
+      care: (userId) => careRecordWithPendingScans(userId),
+      plan: (userId) => planFor(app.plans, userId),
+      feeItems: () => app.feeItems,
+      feeRecords: () => app.feeRecords,
+      call: (name, payload) => api(name, payload),
+      addFeeRecordLocally: (record) => {
+        if (record) app.feeRecords.push(Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
+      },
+      removeFeeRecordLocally: (feeId) => {
+        app.feeRecords = app.feeRecords.filter((record) => record.feeId !== feeId);
+      },
+      canEditPast: () => false,
+      onFeeChanged: () => {
+        cacheCurrentState();
+        renderToday();
+      }
+    };
+
+    const scannerCareHost = Object.assign({}, scannerDsHost, {
       businessDate: () => todayStr(),
       findUser: (userId) => app.users.find((user) => normalizeClientUserId(user.userId) === normalizeClientUserId(userId)) || null,
       care: (userId) => careRecordWithPendingScans(userId),
@@ -3647,7 +4035,7 @@
       feedback: (text) => { document.getElementById('todayFeedback').textContent = text; },
       orderedUserIds: () => app.todayVisibleIds.slice(),
       openDayMenu: (userId) => openDaySheet(userId)
-    };
+    });
 
     // ---- 当日の状況記録(キャンセル・入浴拒否・午前で終了) ----
 
@@ -3673,6 +4061,11 @@
         buttons.push(halfDay
           ? { label: '午前で終了を取り消す(1日利用に戻す)', patch: { usageActual: 'full' } }
           : { label: '午前で終了にする', patch: { usageActual: 'half_am' } });
+        // 押し間違い・手入力の誤りの取り消し(QRの読み間違いも含む)
+        const flags = localFlagsFor(userId);
+        DS_SERVICES.filter((key) => flags[key]).forEach((key) => {
+          buttons.push({ label: `${DS_SERVICE_LABELS[key]}の記録を取り消す`, action: 'clear', service: key });
+        });
       }
       buttons.push({ label: '利用予定の変更（お休み・振替・臨時の追加）', action: 'plan' });
       renderSheet(user.displayName, statusSummaryText(record), buttons);
@@ -3711,6 +4104,10 @@
         button.addEventListener('click', () => {
           if (item.action === 'cancel') {
             openCancelReasonSheet(title);
+          } else if (item.action === 'clear') {
+            renderSheet(title, `${DS_SERVICE_LABELS[item.service]}の記録を取り消します。押し間違いのときだけ使ってください。`, [
+              { label: `${DS_SERVICE_LABELS[item.service]}の記録を取り消す`, patch: { clearService: item.service } }
+            ]);
           } else if (item.action === 'plan') {
             const userId = app.daySheetUserId;
             closeSheet();
@@ -3754,6 +4151,12 @@
       // サーバー応答を待たずに表示へ反映し、失敗時だけ元に戻す。
       const previousRecord = recordFor(userId);
       app.pendingDayChanges.set(userId, patch);
+      if (patch.clearService) {
+        // まだ送っていない同じ記録があれば、送らずに消す(送ると取り消しが打ち消される)
+        app.queue = app.queue.filter((event) => !(event.businessDate === todayStr() && normalizeClientUserId(event.userId) === normalizeClientUserId(userId) && event.serviceType === patch.clearService));
+        saveQueue();
+        renderSync();
+      }
       applyDayStatusLocally(userId, patch);
       renderToday();
       document.getElementById('todayFeedback').textContent = '変更を保存しています…';
@@ -3764,6 +4167,7 @@
         }, patch));
         app.pendingDayChanges.delete(userId);
         if (result.record) mergeReturnedRecords([result.record]);
+        if (result.careRecord) mergeReturnedCareRecords([result.careRecord]);
         cacheCurrentState();
         renderToday();
         document.getElementById('todayFeedback').textContent = '変更を保存しました。';
@@ -3817,6 +4221,13 @@
       }
       if (patch.bathStatus !== undefined) record.bathStatus = patch.bathStatus || '';
       if (patch.usageActual !== undefined) record.usageActual = patch.usageActual || '';
+      if (patch.clearService) {
+        const flags = safeJson(record.actualFlags, {});
+        delete flags[patch.clearService];
+        record.actualFlags = JSON.stringify(flags);
+        if (patch.clearService === 'bath') record.bathStatus = '';
+        if (patch.clearService === 'arrival' && record.attendanceStatus === 'attended') record.attendanceStatus = 'planned';
+      }
       app.records = app.records.filter((item) => normalizeClientUserId(item.userId) !== normalizeClientUserId(userId));
       app.records.push(record);
     }
@@ -3825,7 +4236,7 @@
     // 画面ごとの違い(通信方法・一覧の再描画)は host オブジェクトで受け取る。
     const CARE_FACILITY_NAME = 'デイサービス 壱番館';
     const CARE_FIELD_KEYS = [
-      'arrivalTime', 'departureTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
+      'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
       'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote'
     ];
     // サーバー(Code.gs の CARE_NUMBER_RULES)と同じ範囲。打ち間違い(365など)を保存前に止める。
@@ -3866,11 +4277,14 @@
       return `${year}年${month}月${day}日（${weekday}）`;
     }
 
+    // 時刻の欄。QRを読むと自動で入り、QRが読めなかったときは時刻を入れて保存すると記録になる
+    const CARE_TIME_KEYS = ['arrivalTime', 'departureTime', 'bathTime', 'lunchTime'];
+
     function careValuesFrom(care, bathStatus) {
       const values = {};
       CARE_FIELD_KEYS.forEach((key) => {
         const raw = care && careHas(care[key]) ? care[key] : '';
-        values[key] = key === 'arrivalTime' || key === 'departureTime' ? careTimeText(raw) : String(raw);
+        values[key] = CARE_TIME_KEYS.includes(key) ? careTimeText(raw) : String(raw);
       });
       values.bathStatus = bathStatus || '';
       return values;
@@ -3882,12 +4296,13 @@
       const parts = [];
       if (careHas(c.arrivalTime)) parts.push(['time', `到着 ${careTimeText(c.arrivalTime)}`]);
       if (careHas(c.departureTime)) parts.push(['time', `送り ${careTimeText(c.departureTime)}`]);
+      if (careHas(c.lunchTime)) parts.push(['meal', `昼食 ${careTimeText(c.lunchTime)}`]);
       if (careHas(c.temperature)) parts.push(['vital', `体温 ${c.temperature}`]);
       if (careHas(c.bpHigh) || careHas(c.bpLow)) parts.push(['vital', `血圧 ${c.bpHigh || '—'}/${c.bpLow || '—'}`]);
       if (careHas(c.mealMain)) parts.push(['meal', `主食 ${c.mealMain}割`]);
       if (careHas(c.mealSide)) parts.push(['meal', `副食 ${c.mealSide}割`]);
       if (careHas(c.fluidMl)) parts.push(['fluid', `水分 ${c.fluidMl}ml`]);
-      if (bathStatus === 'done') parts.push(['bath', c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : '入浴')]);
+      if (bathStatus === 'done') parts.push(['bath', (c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : '入浴')) + (careHas(c.bathTime) ? ` ${careTimeText(c.bathTime)}` : '')]);
       if (c.recreation === 'joined') parts.push(['rec', 'レク参加']);
       if (c.recreation === 'absent') parts.push(['rec', 'レク不参加']);
       return parts;
@@ -3944,7 +4359,7 @@
             <button type="button" class="care-close" data-care-close aria-label="閉じる">×</button>
           </div>
           <fieldset class="care-group"><legend>送迎</legend>
-            <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。違うときだけ直してください。</p>
+            <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押して保存すると、来所・送りの記録になります。</p>
             <div class="care-grid two">
               ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
               ${careTimeField('departureTime', '送り出発', v.departureTime)}
@@ -3959,6 +4374,9 @@
             </div>
           </fieldset>
           <fieldset class="care-group"><legend>昼食・おやつ（摂取量）</legend>
+            <div class="care-grid two care-time-row">
+              ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime)}
+            </div>
             <div class="care-grid three">
               ${careSelectField('mealMain', '主食', v.mealMain)}
               ${careSelectField('mealSide', '副食', v.mealSide)}
@@ -3972,6 +4390,9 @@
             </div>
           </fieldset>
           <fieldset class="care-group"><legend>入浴</legend>
+            <div class="care-grid two care-time-row">
+              ${careTimeField('bathTime', '入浴時刻', v.bathTime)}
+            </div>
             ${careChoice('bathStatus', '入ったかどうか', [['done', '入浴した'], ['refused', '入浴しなかった']], v.bathStatus)}
             ${careChoice('bathType', '入浴方法', [['general', '一般浴'], ['special', '特浴']], v.bathType)}
           </fieldset>
@@ -3985,6 +4406,7 @@
           </div>
           <div class="care-links">
             <button type="button" data-care-notebook>この方の連絡帳を見る</button>
+            ${host.call ? '<button type="button" data-care-fee>実費（おむつ・マスクなど）</button>' : ''}
             ${host.openDayMenu ? '<button type="button" data-care-day>キャンセル・午前終了など</button>' : ''}
           </div>
           <div class="care-actions">
@@ -4016,10 +4438,17 @@
         form.querySelector('.care-confirm').classList.add('hidden');
       });
       form.querySelector('[data-care-discard]').addEventListener('click', () => closeCareForm(true));
+      // 入浴時刻を入れたら「入浴した」も同時に選ぶ(入力の手間を減らす)
+      const selectBathDone = () => {
+        const bath = form.querySelector('[data-choice="bathStatus"]');
+        if (form.querySelector('[data-care="bathTime"]').value && bath.dataset.value !== 'done') bath.querySelector('[data-choice-value="done"]').click();
+      };
+      form.querySelector('[data-care="bathTime"]').addEventListener('change', selectBathDone);
       form.querySelectorAll('[data-care-now]').forEach((button) => button.addEventListener('click', () => {
         const now = new Date();
         form.querySelector(`[data-care="${button.dataset.careNow}"]`).value =
           `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        if (button.dataset.careNow === 'bathTime') selectBathDone();
       }));
       form.querySelectorAll('[data-care-add]').forEach((button) => button.addEventListener('click', () => {
         const input = form.querySelector('[data-care="fluidMl"]');
@@ -4039,6 +4468,10 @@
             const bath = form.querySelector('[data-choice="bathStatus"]');
             if (bath.dataset.value !== 'done') bath.querySelector('[data-choice-value="done"]').click();
           }
+          // 「入浴しなかった」を選んだら入浴時刻は空にする(誤って読み取った入浴の時刻を残さない)
+          if (group.dataset.choice === 'bathStatus' && next === 'refused') {
+            form.querySelector('[data-care="bathTime"]').value = '';
+          }
         }));
       });
       const notebookButton = form.querySelector('[data-care-notebook]');
@@ -4051,6 +4484,17 @@
         const userId = careUi.userId;
         closeCareForm(true);
         openCareNotebook(host, [userId]);
+      });
+      const feeButton = form.querySelector('[data-care-fee]');
+      if (feeButton) feeButton.addEventListener('click', () => {
+        if (careIsDirty()) {
+          showCareStatus('先に「保存」を押してから実費を記録してください。', true);
+          return;
+        }
+        const host = careUi.host;
+        const userId = careUi.userId;
+        closeCareForm(true);
+        openFeeSheet(host, userId);
       });
       const dayButton = form.querySelector('[data-care-day]');
       if (dayButton) dayButton.addEventListener('click', () => {
@@ -4086,7 +4530,7 @@
       return Boolean(document.getElementById('careSheet')) && Object.keys(careChangedFields(careCurrentValues())).length > 0;
     }
 
-    function careValidate(changed) {
+    function careValidate(changed, values) {
       for (const key of Object.keys(CARE_NUMBER_RULES)) {
         if (!(key in changed) || changed[key] === '') continue;
         const rule = CARE_NUMBER_RULES[key];
@@ -4096,10 +4540,13 @@
         }
         changed[key] = careToHalfWidth(changed[key]);
       }
-      for (const key of ['arrivalTime', 'departureTime']) {
+      for (const key of CARE_TIME_KEYS) {
         if (key in changed && changed[key] !== '' && !/^\d{1,2}:\d{2}$/.test(careToHalfWidth(changed[key]))) {
           return { key, message: '時刻は「9:30」の形で入力してください。' };
         }
+      }
+      if (values && ('bathTime' in changed || 'bathStatus' in changed) && values.bathTime && values.bathStatus !== 'done') {
+        return { key: 'bathTime', message: '入浴しなかったときは、入浴時刻を空にしてください。' };
       }
       return null;
     }
@@ -4126,7 +4573,7 @@
       const userId = careUi.userId;
       const values = careCurrentValues();
       const changed = careChangedFields(values);
-      const invalid = careValidate(changed);
+      const invalid = careValidate(changed, values);
       if (invalid) {
         showCareStatus(invalid.message, true);
         const field = document.querySelector(`#careSheet [data-care="${invalid.key}"]`);
@@ -4306,6 +4753,486 @@
       document.body.classList.remove('notebook-open');
       if (existing) GinNav.closed('careNotebook');
     }
+
+    /* @@DS_EXTRA_JS BEGIN@@ shared/ds-extra.js の写し。直すときは shared 側を直して node デイサービスアプリ/scripts/sync-shared.js */
+    // ===== 記録一覧・実費(Scanner.html と Index.html で共通) =====
+    // 直すときはこのファイルを直して node デイサービスアプリ/scripts/sync-shared.js で両方へ書き写す。
+    // 画面ごとの違いは host で受け取る:
+    //   businessDate() / users() / findUser(id) / flags(id) / record(id) / care(id) / plan(id)
+    //   feeItems() / feeRecords() / call(name, payload) / onFeeChanged() / canEditPast()
+    const DS_SERVICES = ['arrival', 'bath', 'lunch', 'departure'];
+    const DS_SERVICE_LABELS = { arrival: '来所', bath: '入浴', lunch: '昼食', departure: '送り' };
+    const DS_TIME_FIELDS = { arrival: 'arrivalTime', bath: 'bathTime', lunch: 'lunchTime', departure: 'departureTime' };
+    const DS_SERVICE_COLORS = { arrival: '#0f766e', bath: '#d97706', lunch: '#7c3aed', departure: '#0369a1' };
+    const DS_FEE_CATEGORY_LABELS = {
+      diaper: 'おむつ代',
+      daily: '日常生活費（身の回り品）',
+      hobby: '日常生活費（教養娯楽）',
+      meal: '食費',
+      other: 'その他'
+    };
+    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0 };
+    const dsFeeUi = { host: null, userId: '', itemId: '', quantity: 1, saving: false, monthTotal: null, monthSeq: 0, confirmCancel: '' };
+
+    function dsYen(value) {
+      return `${Math.round(Number(value) || 0).toLocaleString('ja-JP')}円`;
+    }
+
+    function dsTimeText(value) {
+      const match = String(value == null ? '' : value).match(/(?:^|T)(\d{1,2}):(\d{2})/);
+      return match ? `${match[1].padStart(2, '0')}:${match[2]}` : '';
+    }
+
+    function dsNowTime() {
+      const now = new Date();
+      return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function dsTodayJst() {
+      return new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Tokyo' });
+    }
+
+    // 実費を記録・取消できる日か(サーバーと同じ決まり: 先の日は不可、過去の日は主任以上)
+    function dsFeeEditable(host) {
+      const date = host.businessDate();
+      const today = dsTodayJst();
+      if (date > today) return false;
+      return date === today || Boolean(host.canEditPast && host.canEditPast());
+    }
+
+    // ---- 記録一覧 ----
+
+    // 1人分の「何を・何時に・どうやって・誰が」。時刻はケア記録(手で直した時刻)を優先する。
+    function dsEntryFor(host, user, events) {
+      const userId = normalizeClientUserId(user.userId);
+      const flags = host.flags(userId) || {};
+      const record = host.record(userId) || {};
+      const care = host.care(userId) || {};
+      const plan = host.plan(userId);
+      const cancelled = record.attendanceStatus === 'cancelled';
+      const services = {};
+      DS_SERVICES.forEach((key) => {
+        const latest = (events || []).filter((event) => event.userId === userId && event.serviceType === key).pop() || null;
+        const done = Boolean(flags[key]);
+        services[key] = {
+          done,
+          time: done ? (dsTimeText(care[DS_TIME_FIELDS[key]]) || (latest ? latest.time : '')) : '',
+          source: done && latest ? latest.source : '',
+          actor: done && latest ? latest.actor : ''
+        };
+      });
+      services.bath.refused = record.bathStatus === 'refused';
+      services.bath.detail = care.bathType === 'special' ? '特浴' : (care.bathType === 'general' ? '一般浴' : '');
+      const meal = [];
+      if (careHas(care.mealMain)) meal.push(`主食${care.mealMain}割`);
+      if (careHas(care.mealSide)) meal.push(`副食${care.mealSide}割`);
+      services.lunch.detail = meal.join(' ');
+      return {
+        user,
+        userId,
+        cancelled,
+        cancelReason: record.cancelReason || '',
+        planned: Boolean(plan && plan.planned),
+        halfDay: record.usageActual === 'half_am',
+        services
+      };
+    }
+
+    function dsListEntries(host) {
+      return host.users().slice().sort(kanaSort)
+        .map((user) => dsEntryFor(host, user, dsListUi.events))
+        .filter((entry) => entry.planned || entry.cancelled || DS_SERVICES.some((key) => entry.services[key].done));
+    }
+
+    function openRecordList(host) {
+      dsListUi.host = host;
+      dsListUi.events = null;
+      dsListUi.eventsError = false;
+      const seq = ++dsListUi.seq;
+      const previous = document.getElementById('dsRecordList');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsRecordList';
+      overlay.className = 'nb-overlay ds-list';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '記録一覧');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-ds-close>← 戻る</button>
+          <div class="nb-title"><strong>記録一覧</strong><span>${escapeHtml(careDateLabel(host.businessDate()))}</span></div>
+          <button type="button" class="primary" data-ds-print>印刷</button>
+        </div>
+        <div class="ds-tabs" role="tablist" aria-label="一覧の種類">
+          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]])).map(([key, label]) =>
+            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${DS_SERVICE_COLORS[key] || '#2f5bd3'}">${label}</button>`).join('')}
+        </div>
+        <div class="ds-list-body" id="dsListBody"></div>`;
+      document.body.appendChild(overlay);
+      document.body.classList.add('dslist-open');
+      if (!GinNav.isTop('dsRecordList')) GinNav.push('dsRecordList', closeRecordList);
+      overlay.querySelector('[data-ds-close]').addEventListener('click', closeRecordList);
+      overlay.querySelector('[data-ds-print]').addEventListener('click', () => {
+        dsListUi.tab = 'summary';
+        renderRecordList();
+        try { window.print(); } catch (error) {}
+      });
+      overlay.querySelectorAll('[data-ds-tab]').forEach((button) => button.addEventListener('click', () => {
+        dsListUi.tab = button.dataset.dsTab;
+        renderRecordList();
+      }));
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeRecordList();
+      });
+      renderRecordList();
+      overlay.querySelector('[data-ds-close]').focus({ preventScroll: true });
+      // 記録の方法(QR/手入力)と記録した職員は読取履歴から後で足す。届くまでは時刻だけで表示する。
+      host.call('serviceLog', { businessDate: host.businessDate() }).then((result) => {
+        if (seq !== dsListUi.seq || !document.getElementById('dsRecordList')) return;
+        dsListUi.events = ((result && result.events) || []).map((event) => Object.assign({}, event, { userId: normalizeClientUserId(event.userId) }));
+        renderRecordList();
+      }).catch(() => {
+        if (seq !== dsListUi.seq || !document.getElementById('dsRecordList')) return;
+        dsListUi.eventsError = true;
+        renderRecordList();
+      });
+    }
+
+    function closeRecordList() {
+      const existing = document.getElementById('dsRecordList');
+      if (existing) existing.remove();
+      document.body.classList.remove('dslist-open');
+      dsListUi.seq++;
+      if (existing) GinNav.closed('dsRecordList');
+    }
+
+    function dsHowText(service) {
+      if (!service.source) return '';
+      return `${service.source === 'manual' ? '手入力' : 'QR'}${service.actor ? `・${service.actor}` : ''}`;
+    }
+
+    function dsSummaryCell(entry, key) {
+      const service = entry.services[key];
+      if (entry.cancelled) return '';
+      if (key === 'bath' && service.refused) return '<td class="ds-cell refused">入浴拒否</td>';
+      if (!service.done) return `<td class="ds-cell ${entry.planned ? 'missing' : 'empty'}">${entry.planned ? '未' : '—'}</td>`;
+      const detail = service.detail ? `<small>${escapeHtml(service.detail)}</small>` : '';
+      const how = dsHowText(service) ? `<small class="ds-how">${escapeHtml(dsHowText(service))}</small>` : '';
+      return `<td class="ds-cell done"><b>${escapeHtml(service.time || '記録済')}</b>${detail}${how}</td>`;
+    }
+
+    function renderRecordList() {
+      const host = dsListUi.host;
+      const body = document.getElementById('dsListBody');
+      if (!host || !body) return;
+      document.querySelectorAll('#dsRecordList [data-ds-tab]').forEach((button) => {
+        button.setAttribute('aria-selected', String(button.dataset.dsTab === dsListUi.tab));
+      });
+      const entries = dsListEntries(host);
+      const note = dsListUi.eventsError
+        ? '<p class="ds-note">記録した職員の表示を読み込めませんでした（時刻は表示しています）。</p>'
+        : (dsListUi.events ? '' : '<p class="ds-note">記録した職員を読み込んでいます…</p>');
+      if (!entries.length) {
+        body.innerHTML = '<div class="empty-state"><strong>この日の予定・記録はありません</strong>予定のある方、記録のある方が表示されます。</div>';
+        return;
+      }
+      if (dsListUi.tab === 'summary') {
+        const counts = DS_SERVICES.map((key) => `<span style="--c:${DS_SERVICE_COLORS[key]}"><b>${entries.filter((entry) => !entry.cancelled && entry.services[key].done).length}</b>名 ${DS_SERVICE_LABELS[key]}</span>`).join('');
+        body.innerHTML = `
+          <div class="ds-counts">${counts}</div>
+          ${note}
+          <div class="ds-table-wrap"><table class="ds-table">
+            <colgroup><col class="name">${DS_SERVICES.map(() => '<col>').join('')}</colgroup>
+            <thead><tr><th scope="col">利用者</th>${DS_SERVICES.map((key) => `<th scope="col" style="--c:${DS_SERVICE_COLORS[key]}">${DS_SERVICE_LABELS[key]}</th>`).join('')}</tr></thead>
+            <tbody>${entries.map((entry) => `<tr class="${entry.cancelled ? 'is-cancelled' : ''}"><th scope="row">${escapeHtml(entry.user.displayName)}${entry.halfDay ? '<small>午前のみ</small>' : ''}</th>${entry.cancelled
+              ? `<td colspan="4" class="ds-cell refused">当日キャンセル${entry.cancelReason ? `（${escapeHtml(entry.cancelReason)}）` : ''}</td>`
+              : DS_SERVICES.map((key) => dsSummaryCell(entry, key)).join('')}</tr>`).join('')}</tbody>
+          </table></div>
+          <p class="ds-legend">「未」は予定があってまだ記録がない方です。記録の方法（QR・手入力）と記録した職員は、上の「来所」などを押すと見られます。時刻を直すときは、今日の一覧で利用者を押してケア記録の時刻を直してください。</p>`;
+        return;
+      }
+      const key = dsListUi.tab;
+      const active = entries.filter((entry) => !entry.cancelled);
+      const done = active.filter((entry) => entry.services[key].done)
+        .sort((a, b) => (a.services[key].time || '99:99').localeCompare(b.services[key].time || '99:99'));
+      const refused = key === 'bath' ? active.filter((entry) => entry.services.bath.refused) : [];
+      const waiting = active.filter((entry) => entry.planned && !entry.services[key].done && !(key === 'bath' && entry.services.bath.refused));
+      const row = (entry) => {
+        const service = entry.services[key];
+        const how = dsHowText(service);
+        return `<div class="ds-row" style="--c:${DS_SERVICE_COLORS[key]}"><span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${[service.detail, how].filter(Boolean).map(escapeHtml).join(' ・ ')}</small></span></div>`;
+      };
+      body.innerHTML = `
+        <div class="ds-counts single" style="--c:${DS_SERVICE_COLORS[key]}"><span><b>${done.length}</b>名 記録済み</span>${waiting.length ? `<span class="wait"><b>${waiting.length}</b>名 まだ</span>` : ''}${refused.length ? `<span class="wait"><b>${refused.length}</b>名 入浴拒否</span>` : ''}</div>
+        ${note}
+        <h2 class="ds-heading">${DS_SERVICE_LABELS[key]}した方（時刻の早い順）</h2>
+        <div class="list ds-rows">${done.map(row).join('') || '<p class="ds-empty">まだ記録はありません。</p>'}</div>
+        ${refused.length ? `<h2 class="ds-heading">入浴しなかった方</h2><div class="list ds-rows">${refused.map((entry) => `<div class="ds-row muted">${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>入浴拒否</small></span></div>`).join('')}</div>` : ''}
+        ${waiting.length ? `<h2 class="ds-heading">予定があって、まだ記録がない方</h2><div class="list ds-rows">${waiting.map((entry) => `<div class="ds-row muted">${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>未記録</small></span></div>`).join('')}</div>` : ''}`;
+    }
+
+    // ---- 実費 ----
+    // 根拠: 指定居宅サービス基準(平成11年厚生省令第37号)第96条第3項・第5項、平成12年老企第54号。
+    // ご本人・ご家族の希望で渡した物だけを記録する(全員に一律に配る物は対象外)。
+
+    function dsFeeRecordsFor(host, userId) {
+      const id = normalizeClientUserId(userId);
+      return (host.feeRecords() || []).filter((record) => normalizeClientUserId(record.userId) === id);
+    }
+
+    function dsFeeTotal(records) {
+      return (records || []).reduce((sum, record) => sum + (Number(record.amount) || 0), 0);
+    }
+
+    // 今日の一覧の行に付ける小さな目印
+    function feeBadgeHtml(host, userId) {
+      const total = dsFeeTotal(dsFeeRecordsFor(host, userId));
+      return total ? `<span class="status-chip fee">実費 ${escapeHtml(dsYen(total))}</span>` : '';
+    }
+
+    function openFeeSheet(host, userId) {
+      const user = host.findUser(userId);
+      if (!user) return;
+      dsFeeUi.host = host;
+      dsFeeUi.userId = normalizeClientUserId(user.userId);
+      dsFeeUi.itemId = '';
+      dsFeeUi.quantity = 1;
+      dsFeeUi.saving = false;
+      dsFeeUi.monthTotal = null;
+      dsFeeUi.confirmCancel = '';
+      const previous = document.getElementById('dsFeeSheet');
+      if (previous) previous.remove();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sheet-backdrop';
+      backdrop.id = 'dsFeeSheet';
+      if (!GinNav.isTop('dsFeeSheet')) GinNav.push('dsFeeSheet', closeFeeSheet);
+      backdrop.innerHTML = `
+        <div class="sheet ds-fee-sheet" role="dialog" aria-modal="true" aria-labelledby="dsFeeTitle">
+          <div class="care-head">
+            <div><h3 id="dsFeeTitle" tabindex="-1">${escapeHtml(user.displayName)} 様の実費</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}</p></div>
+            <button type="button" class="care-close" data-fee-close aria-label="閉じる">×</button>
+          </div>
+          <div id="dsFeeBody"></div>
+        </div>`;
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) closeFeeSheet();
+      });
+      backdrop.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeFeeSheet();
+      });
+      document.body.appendChild(backdrop);
+      backdrop.querySelector('[data-fee-close]').addEventListener('click', closeFeeSheet);
+      renderFeeSheet();
+      backdrop.querySelector('#dsFeeTitle').focus({ preventScroll: true });
+      loadFeeMonthTotal();
+    }
+
+    function closeFeeSheet() {
+      const existing = document.getElementById('dsFeeSheet');
+      if (!existing) return;
+      existing.remove();
+      dsFeeUi.monthSeq++;
+      GinNav.closed('dsFeeSheet');
+    }
+
+    function loadFeeMonthTotal() {
+      const host = dsFeeUi.host;
+      const month = host.businessDate().slice(0, 7);
+      const seq = ++dsFeeUi.monthSeq;
+      host.call('feeRecords', { month, userId: dsFeeUi.userId }).then((result) => {
+        if (seq !== dsFeeUi.monthSeq) return;
+        const records = (result && result.feeRecords) || [];
+        dsFeeUi.monthTotal = { total: dsFeeTotal(records), count: records.length };
+        renderFeeSheet();
+      }).catch(() => {
+        if (seq !== dsFeeUi.monthSeq) return;
+        dsFeeUi.monthTotal = { error: true };
+        renderFeeSheet();
+      });
+    }
+
+    function dsFeeStatus(message, isError) {
+      const status = document.querySelector('#dsFeeSheet .care-status');
+      if (!status) return;
+      status.textContent = message;
+      status.classList.toggle('error', Boolean(isError));
+    }
+
+    function renderFeeSheet() {
+      const host = dsFeeUi.host;
+      const body = document.getElementById('dsFeeBody');
+      if (!host || !body) return;
+      const items = (host.feeItems() || []).filter((item) => item.enabled !== false);
+      const records = dsFeeRecordsFor(host, dsFeeUi.userId);
+      const editable = dsFeeEditable(host);
+      const selected = editable ? items.find((item) => item.feeItemId === dsFeeUi.itemId) || null : null;
+      const month = Number(host.businessDate().slice(5, 7));
+      const monthLine = !dsFeeUi.monthTotal
+        ? '読み込み中…'
+        : (dsFeeUi.monthTotal.error ? '読み込めませんでした' : `${escapeHtml(dsYen(dsFeeUi.monthTotal.total))}（${dsFeeUi.monthTotal.count}件）`);
+      const previousStatus = document.querySelector('#dsFeeSheet .care-status');
+      const statusText = previousStatus ? previousStatus.textContent : '';
+      const statusError = previousStatus ? previousStatus.classList.contains('error') : false;
+      body.innerHTML = `
+        <p class="ds-fee-help">ご本人・ご家族の希望で渡した物だけを記録します。全員に配る物は記録しません。</p>
+        ${!editable ? `<div class="empty-state"><strong>この日の実費は見るだけです</strong>${host.businessDate() > dsTodayJst() ? '先の日の実費は記録できません。' : '過去の日の実費は、主任以上が記録・取消をします。'}</div>`
+          : items.length ? `<p class="care-choice-label">渡した物を選んでください</p>
+        <div class="ds-fee-items" role="group" aria-label="品目">${items.map((item) =>
+          `<button type="button" data-fee-item="${escapeHtml(item.feeItemId)}" aria-pressed="${String(item.feeItemId === dsFeeUi.itemId)}"><strong>${escapeHtml(item.itemName)}</strong><small>${escapeHtml(dsYen(item.unitPrice))}${item.unit ? ` / ${escapeHtml(item.unit)}` : ''}</small></button>`).join('')}</div>`
+          : '<div class="empty-state"><strong>実費の品目が登録されていません</strong>管理者が「管理」→「実費の品目」で品目と単価を登録すると、ここに表示されます。</div>'}
+        ${selected ? `<div class="ds-fee-confirm">
+          <div class="ds-fee-line"><strong>${escapeHtml(selected.itemName)}</strong>
+            <span class="ds-stepper" role="group" aria-label="数量"><button type="button" data-fee-qty="-1" aria-label="1つ減らす">−</button><b aria-live="polite">${dsFeeUi.quantity}</b><button type="button" data-fee-qty="1" aria-label="1つ増やす">＋</button></span>
+            <em>${escapeHtml(selected.unit || '')}</em></div>
+          <p class="ds-fee-amount">${escapeHtml(dsYen(selected.unitPrice))} × ${dsFeeUi.quantity} ＝ <b>${escapeHtml(dsYen(selected.unitPrice * dsFeeUi.quantity))}</b></p>
+          <div class="ds-fee-actions"><button type="button" class="primary" data-fee-add ${dsFeeUi.saving ? 'disabled' : ''}>${dsFeeUi.saving ? '記録中…' : '記録する'}</button><button type="button" data-fee-unselect>やめる</button></div>
+        </div>` : ''}
+        <p class="care-status${statusError ? ' error' : ''}" role="status" aria-live="polite">${escapeHtml(statusText)}</p>
+        <h4 class="ds-fee-heading">この日の記録</h4>
+        <div class="list ds-fee-records">${records.map((record) => `<div class="ds-fee-record">
+          <span><strong>${escapeHtml(record.itemName)} × ${Number(record.quantity) || 0}</strong><small>${escapeHtml(dsTimeText(record.createdAt))}${record.createdBy ? ` ・ ${escapeHtml(String(record.createdBy).replace(/@.*$/, ''))}` : ''}</small></span>
+          <b>${escapeHtml(dsYen(record.amount))}</b>
+          ${!editable ? '' : dsFeeUi.confirmCancel === record.feeId
+            ? `<span class="ds-fee-cancel-confirm">取り消しますか？<button type="button" data-fee-cancel-yes="${escapeHtml(record.feeId)}">取り消す</button><button type="button" data-fee-cancel-no>戻る</button></span>`
+            : `<button type="button" class="ds-fee-cancel" data-fee-cancel="${escapeHtml(record.feeId)}" aria-label="${escapeHtml(record.itemName)}の記録を取り消す">取消</button>`}
+        </div>`).join('') || '<p class="ds-empty">まだ記録はありません。</p>'}</div>
+        <div class="ds-fee-totals">
+          <div><span>この日の合計</span><b>${escapeHtml(dsYen(dsFeeTotal(records)))}</b></div>
+          <div><span>${month}月の合計</span><b>${monthLine}</b></div>
+        </div>
+        <div class="care-actions single"><button type="button" data-fee-done>閉じる</button></div>`;
+      body.querySelectorAll('[data-fee-item]').forEach((button) => button.addEventListener('click', () => {
+        dsFeeUi.itemId = dsFeeUi.itemId === button.dataset.feeItem ? '' : button.dataset.feeItem;
+        dsFeeUi.quantity = 1;
+        dsFeeUi.confirmCancel = '';
+        renderFeeSheet();
+      }));
+      body.querySelectorAll('[data-fee-qty]').forEach((button) => button.addEventListener('click', () => {
+        dsFeeUi.quantity = Math.max(1, Math.min(99, dsFeeUi.quantity + Number(button.dataset.feeQty)));
+        renderFeeSheet();
+      }));
+      const unselect = body.querySelector('[data-fee-unselect]');
+      if (unselect) unselect.addEventListener('click', () => { dsFeeUi.itemId = ''; renderFeeSheet(); });
+      const add = body.querySelector('[data-fee-add]');
+      if (add) add.addEventListener('click', addFeeFromSheet);
+      body.querySelectorAll('[data-fee-cancel]').forEach((button) => button.addEventListener('click', () => {
+        dsFeeUi.confirmCancel = button.dataset.feeCancel;
+        renderFeeSheet();
+      }));
+      body.querySelectorAll('[data-fee-cancel-no]').forEach((button) => button.addEventListener('click', () => {
+        dsFeeUi.confirmCancel = '';
+        renderFeeSheet();
+      }));
+      body.querySelectorAll('[data-fee-cancel-yes]').forEach((button) => button.addEventListener('click', () => cancelFeeFromSheet(button.dataset.feeCancelYes)));
+      body.querySelector('[data-fee-done]').addEventListener('click', closeFeeSheet);
+    }
+
+    async function addFeeFromSheet() {
+      const host = dsFeeUi.host;
+      if (!host || dsFeeUi.saving || !dsFeeUi.itemId) return;
+      const item = (host.feeItems() || []).find((candidate) => candidate.feeItemId === dsFeeUi.itemId);
+      dsFeeUi.saving = true;
+      renderFeeSheet();
+      dsFeeStatus('記録しています…', false);
+      try {
+        const result = await host.call('addFeeRecord', {
+          businessDate: host.businessDate(),
+          userId: dsFeeUi.userId,
+          feeItemId: dsFeeUi.itemId,
+          quantity: dsFeeUi.quantity
+        });
+        host.addFeeRecordLocally(result.feeRecord);
+        dsFeeUi.saving = false;
+        dsFeeUi.itemId = '';
+        renderFeeSheet();
+        dsFeeStatus(`${item ? item.itemName : '実費'}を記録しました。`, false);
+        loadFeeMonthTotal();
+        host.onFeeChanged();
+      } catch (error) {
+        dsFeeUi.saving = false;
+        renderFeeSheet();
+        dsFeeStatus(`記録できませんでした。${friendlyError(error)}`, true);
+      }
+    }
+
+    async function cancelFeeFromSheet(feeId) {
+      const host = dsFeeUi.host;
+      if (!host || dsFeeUi.saving) return;
+      dsFeeUi.saving = true;
+      dsFeeStatus('取り消しています…', false);
+      try {
+        await host.call('cancelFeeRecord', { feeId });
+        host.removeFeeRecordLocally(feeId);
+        dsFeeUi.saving = false;
+        dsFeeUi.confirmCancel = '';
+        renderFeeSheet();
+        dsFeeStatus('取り消しました。', false);
+        loadFeeMonthTotal();
+        host.onFeeChanged();
+      } catch (error) {
+        dsFeeUi.saving = false;
+        renderFeeSheet();
+        dsFeeStatus(`取り消せませんでした。${friendlyError(error)}`, true);
+      }
+    }
+
+    // 「実費」ボタン: その日の合計と、利用者を選んで記録する入口
+    function openFeePicker(host) {
+      const previous = document.getElementById('dsFeePicker');
+      if (previous) previous.remove();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sheet-backdrop';
+      backdrop.id = 'dsFeePicker';
+      const close = () => {
+        const existing = document.getElementById('dsFeePicker');
+        if (!existing) return;
+        existing.remove();
+        GinNav.closed('dsFeePicker');
+      };
+      if (!GinNav.isTop('dsFeePicker')) GinNav.push('dsFeePicker', close);
+      const records = host.feeRecords() || [];
+      backdrop.innerHTML = `
+        <div class="sheet ds-fee-sheet" role="dialog" aria-modal="true" aria-labelledby="dsFeePickerTitle">
+          <div class="care-head">
+            <div><h3 id="dsFeePickerTitle" tabindex="-1">実費の記録</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))} ・ この日の合計 ${escapeHtml(dsYen(dsFeeTotal(records)))}（${records.length}件）</p></div>
+            <button type="button" class="care-close" data-picker-close aria-label="閉じる">×</button>
+          </div>
+          <p class="ds-fee-help">おむつ・マスクなどを渡した方を選んでください。</p>
+          <div class="material-search plan-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="dsFeeSearch" placeholder="名前・ふりがなで絞り込み" aria-label="利用者を検索" autocomplete="off" type="search">
+            <span></span>
+          </div>
+          <div class="list plan-results" id="dsFeeResults"></div>
+        </div>`;
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) close();
+      });
+      document.body.appendChild(backdrop);
+      backdrop.querySelector('[data-picker-close]').addEventListener('click', close);
+      const input = backdrop.querySelector('#dsFeeSearch');
+      const render = () => {
+        const query = normalizeForSearch(input.value);
+        // 先に、その日に予定・来所がある方。名前を入れると全員から探せる。
+        const users = host.users().slice().sort(kanaSort).filter((user) => {
+          if (query) return normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query);
+          const plan = host.plan(user.userId);
+          return Boolean(plan && plan.planned) || Boolean((host.flags(user.userId) || {}).arrival) || dsFeeRecordsFor(host, user.userId).length > 0;
+        });
+        backdrop.querySelector('#dsFeeResults').innerHTML = users.map((user) => {
+          const total = dsFeeTotal(dsFeeRecordsFor(host, user.userId));
+          return `<button type="button" class="row plan-pick-row" data-fee-user="${escapeHtml(user.userId)}">${avatarHtml(user)}<span class="plan-pick-name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span><span class="plan-badge ${total ? 'added' : 'none'}">${total ? escapeHtml(dsYen(total)) : 'なし'}</span></button>`;
+        }).join('') || '<div class="empty-state"><strong>該当する利用者がいません</strong>名前を入力して探してください。</div>';
+        backdrop.querySelectorAll('[data-fee-user]').forEach((button) => button.addEventListener('click', () => {
+          const userId = button.dataset.feeUser;
+          close();
+          openFeeSheet(host, userId);
+        }));
+      };
+      input.addEventListener('input', render);
+      render();
+    }
+    /* @@DS_EXTRA_JS END@@ */
 
     // ===== 日ごとの利用予定(臨時の追加・お休み・振替)。Scanner.html と Index.html で同じ処理 =====
     // host: businessDate() / users() / findUser(id) / plans() / fetchPlans(date) / save(payload) / applySaved(result) / feedback(text)
