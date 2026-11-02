@@ -1402,7 +1402,7 @@
     /* ===== 記録一覧・実費(Scanner.html と Index.html で共通。元は shared/ds-extra.css) ===== */
     .status-chip.fee { background: #fdf2f8; color: #a0306a; }
     .ds-list .nb-toolbar { grid-template-columns: auto minmax(0, 1fr) auto; }
-    .ds-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-width: 860px; margin: 0 auto; padding: 10px 12px; background: #eef1f5; }
+    .ds-tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; max-width: 860px; margin: 0 auto; padding: 10px 12px; background: #eef1f5; }
     .ds-tabs button { min-height: 44px; padding: 6px 4px; font-size: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 999px; }
     .ds-tabs button[aria-selected="true"] { color: #fff; background: var(--c); border-color: var(--c); font-weight: 700; }
     .ds-list-body { max-width: 860px; margin: 0 auto; padding: 4px 12px 40px; }
@@ -1481,7 +1481,7 @@
       .ds-table th, .ds-table td { padding: 7px 3px; }
       .ds-cell b { font-size: 15px; }
       .ds-cell small.ds-how { display: none; }
-      .ds-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 8px; }
+      .ds-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px; }
       .ds-tabs button { font-size: 13px; }
       .ds-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .ds-counts.single { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1656,6 +1656,33 @@
       .today-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
       #modeButtons.mode-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .manual-services { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    /* バイタル(単位つき)。ケア記録・QRの直後・一覧の「バイタル」で同じ形 */
+    .care-bp { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto !important; }
+    .care-bp em { flex: 0 0 auto; color: var(--muted, #5f6368); font-size: 13px; font-style: normal; }
+    .care-last { margin: 4px 0 0; font-size: 12.5px; }
+    .ds-vitals { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5em, 1fr)); gap: 8px; }
+    .ds-vitals label { display: grid; gap: 3px; margin: 0; font-size: 13px; color: #3d4f6b; }
+    .ds-vitals label.bp { grid-column: span 2; }
+    .ds-vitals label small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .ds-vin { display: flex; align-items: center; gap: 4px; min-width: 0; }
+    .ds-vin input { min-width: 0; width: 100%; min-height: 46px; padding: 6px 8px; font-size: 18px; text-align: right; border: 1px solid #d6deea; border-radius: 10px; background: #fff; }
+    .ds-vin input::placeholder { color: #aab4c0; font-size: 14px; }
+    .ds-vin em { flex: 0 0 auto; color: var(--muted, #5a6b83); font-size: 12.5px; font-style: normal; }
+    .ds-vin.changed input { outline: 2px solid #f59e0b; outline-offset: 1px; }
+    .ds-bp { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 4px; }
+    .ds-bp i { color: var(--muted, #5a6b83); font-style: normal; }
+    .ds-vital-row .ds-vitals { padding: 0 10px 10px calc(4.2em + 20px); }
+    .ds-quick-vitals { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #d6deea; }
+    .ds-quick-vitals .ds-quick-label { display: block; margin: 0 0 6px; }
+    .ds-quick-vitals .ds-quick-label small { display: block; color: var(--muted, #5a6b83); font-size: 12px; font-weight: 400; }
+    .ds-quick-vital-save { width: 100%; min-height: 50px; margin-top: 10px; font-size: 16px; font-weight: 700; color: #fff !important; background: #be123c !important; border: 0 !important; border-radius: 12px; }
+    @media (max-width: 480px) {
+      .ds-vital-row .ds-vitals { padding-left: 10px; }
+      .ds-vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media print {
+      #dsRecordList .ds-vitals { display: none !important; }
     }
     /* @@DS_EXTRA_CSS END@@ */
 
@@ -3857,6 +3884,7 @@
       if (options && options.showPhoto) {
         rows.push(`<div class="kv"><span class="k">既往歴</span><span class="v">${escapeHtml(user.medicalHistory || '未登録')}</span></div>`);
         rows.push(`<div class="kv"><span class="k">かかりつけ医</span><span class="v">${escapeHtml(user.primaryDoctor || '未登録')}</span></div>`);
+        if (user.weightRequired === 'あり') rows.push(`<div class="kv"><span class="k">体重測定</span><span class="v">測る${careLastWeightText(user) ? `（${escapeHtml(careLastWeightText(user))}）` : ''}</span></div>`);
       }
       panel.innerHTML = `<h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p><div class="user-info">${rows.join('')}</div>`;
       void panel.offsetWidth;
@@ -4409,7 +4437,7 @@
     const CARE_FIELD_KEYS = [
       'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
       'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote',
-      'arrivalTransport', 'departureTransport'
+      'arrivalTransport', 'departureTransport', 'weight'
     ];
     // 来所・送りの送迎。家族送迎(事業所が送迎しない片道)は送迎減算の確認に使う
     const CARE_TRANSPORT_CHOICES = [['facility', '施設送迎'], ['family', '家族送迎']];
@@ -4421,12 +4449,40 @@
       bpLow: { min: 30, max: 150, label: '血圧(下)' },
       pulse: { min: 30, max: 200, label: '脈拍' },
       spo2: { min: 70, max: 100, label: 'SpO2' },
+      weight: { min: 20, max: 200, label: '体重' },
       mealMain: { min: 0, max: 10, label: '主食' },
       mealSide: { min: 0, max: 10, label: '副食' },
       snackAmount: { min: 0, max: 10, label: 'おやつ' },
       fluidMl: { min: 0, max: 3000, label: '水分量' }
     };
+    // バイタルの項目と単位(画面・連絡帳・一覧で同じ表示にする)
+    const CARE_VITAL_FIELDS = ['temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2', 'weight'];
+    const CARE_VITAL_UNITS = { temperature: '℃', bpHigh: 'mmHg', bpLow: 'mmHg', pulse: '回/分', spo2: '%', weight: 'kg' };
     const careUi = { host: null, userId: '', initial: null, saving: false };
+
+    // 体重の欄を出す方: 利用者の「体重測定」がありの方と、その日すでに体重が入っている方
+    function careWeightNeeded(user, care) {
+      return Boolean((user && user.weightRequired === 'あり') || (care && careHas(care.weight)));
+    }
+
+    // 「前回 52.3kg（10/28）」
+    function careLastWeightText(user) {
+      if (!user || !careHas(user.lastWeight)) return '';
+      const [, month, day] = String(user.lastWeightDate || '').split('-').map(Number);
+      return `前回 ${user.lastWeight}kg${month && day ? `（${month}/${day}）` : ''}`;
+    }
+
+    // 「体温 36.5℃」「血圧 120/70mmHg」などの短い表示
+    function careVitalTexts(care) {
+      const c = care || {};
+      const texts = [];
+      if (careHas(c.temperature)) texts.push(`体温 ${c.temperature}℃`);
+      if (careHas(c.bpHigh) || careHas(c.bpLow)) texts.push(`血圧 ${careHas(c.bpHigh) ? c.bpHigh : '—'}/${careHas(c.bpLow) ? c.bpLow : '—'}mmHg`);
+      if (careHas(c.pulse)) texts.push(`脈拍 ${c.pulse}回/分`);
+      if (careHas(c.spo2)) texts.push(`SpO2 ${c.spo2}%`);
+      if (careHas(c.weight)) texts.push(`体重 ${c.weight}kg`);
+      return texts;
+    }
 
     function careHas(value) {
       return value !== undefined && value !== null && String(value).trim() !== '';
@@ -4436,6 +4492,21 @@
       return String(value == null ? '' : value)
         .replace(/[０-９．：－]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
         .trim();
+    }
+
+    // 数字の欄: 全角・末尾の単位(36.5℃、120mmHg、52kg など)をそろえて数字の文字にする
+    const CARE_UNIT_SUFFIX = /\s*(割|ml|℃|°C|度|%|mmHg|回\/分|回|kg|キロ)$/i;
+    function careNumberText(value) {
+      return careToHalfWidth(String(value == null ? '' : value).normalize('NFKC')).replace(CARE_UNIT_SUFFIX, '').trim();
+    }
+
+    // 2つの数字の欄が同じ値か(「36.50」と「36.5」は同じ)
+    function careSameNumber(a, b) {
+      const x = careNumberText(a);
+      const y = careNumberText(b);
+      if (x === y) return true;
+      if (x === '' || y === '') return false;
+      return Number(x) === Number(y);
     }
 
     // シートが時刻を日時に変換していた場合も「09:30」に戻す
@@ -4474,8 +4545,7 @@
       if (careHas(c.departureTime)) parts.push(['time', `送り ${careTimeText(c.departureTime)}`]);
       if (c.departureTransport === 'family') parts.push(['family', '送りは家族送迎']);
       if (careHas(c.lunchTime)) parts.push(['meal', `昼食 ${careTimeText(c.lunchTime)}`]);
-      if (careHas(c.temperature)) parts.push(['vital', `体温 ${c.temperature}`]);
-      if (careHas(c.bpHigh) || careHas(c.bpLow)) parts.push(['vital', `血圧 ${c.bpHigh || '—'}/${c.bpLow || '—'}`]);
+      careVitalTexts(c).forEach((text) => parts.push(['vital', text]));
       if (careHas(c.mealMain)) parts.push(['meal', `主食 ${c.mealMain}割`]);
       if (careHas(c.mealSide)) parts.push(['meal', `副食 ${c.mealSide}割`]);
       if (careHas(c.snackAmount)) parts.push(['snack', `おやつ ${c.snackAmount}割`]);
@@ -4550,9 +4620,10 @@
           <fieldset class="care-group"><legend>バイタル</legend>
             <div class="care-grid two">
               ${careNumberField('temperature', '体温', '℃', v.temperature, 'decimal', '')}
-              <label class="care-field"><span>血圧</span><span class="care-bp"><input data-care="bpHigh" inputmode="numeric" autocomplete="off" placeholder="上" value="${escapeHtml(v.bpHigh)}" aria-label="血圧の上"><i>/</i><input data-care="bpLow" inputmode="numeric" autocomplete="off" placeholder="下" value="${escapeHtml(v.bpLow)}" aria-label="血圧の下"></span></label>
+              <label class="care-field"><span>血圧</span><span class="care-bp"><input data-care="bpHigh" inputmode="numeric" autocomplete="off" placeholder="上" value="${escapeHtml(v.bpHigh)}" aria-label="血圧の上（mmHg）"><i>/</i><input data-care="bpLow" inputmode="numeric" autocomplete="off" placeholder="下" value="${escapeHtml(v.bpLow)}" aria-label="血圧の下（mmHg）"><em>mmHg</em></span></label>
               ${careNumberField('pulse', '脈拍', '回/分', v.pulse, 'numeric', '')}
               ${careNumberField('spo2', 'SpO2', '%', v.spo2, 'numeric', '')}
+              ${careWeightNeeded(user, host.care(user.userId)) ? `<div>${careNumberField('weight', '体重', 'kg', v.weight, 'decimal', '')}${careLastWeightText(user) ? `<p class="care-hint care-last">${escapeHtml(careLastWeightText(user))}</p>` : ''}</div>` : ''}
             </div>
           </fieldset>
           <fieldset class="care-group"><legend>昼食・おやつ（摂取量）</legend>
@@ -4717,11 +4788,12 @@
       for (const key of Object.keys(CARE_NUMBER_RULES)) {
         if (!(key in changed) || changed[key] === '') continue;
         const rule = CARE_NUMBER_RULES[key];
-        const number = Number(careToHalfWidth(changed[key]));
-        if (!Number.isFinite(number) || number < rule.min || number > rule.max) {
+        const text = careNumberText(changed[key]);
+        const number = Number(text);
+        if (text === '' || !Number.isFinite(number) || number < rule.min || number > rule.max) {
           return { key, message: `${rule.label}は${rule.min}〜${rule.max}の範囲で入力してください。` };
         }
-        changed[key] = careToHalfWidth(changed[key]);
+        changed[key] = text;
       }
       for (const key of CARE_TIME_KEYS) {
         if (key in changed && changed[key] !== '' && !/^\d{1,2}:\d{2}$/.test(careToHalfWidth(changed[key]))) {
@@ -4852,6 +4924,9 @@
       departure: [['departureTransport', '送迎']]
     };
     const DS_TRANSPORT_FIELDS = ['arrivalTransport', 'departureTransport'];
+    // 記録一覧の「バイタル」タブ(来所した方のバイタルをまとめて入力・修正する)
+    const DS_VITAL_TAB = 'vital';
+    const DS_VITAL_COLOR = '#be123c';
     const DS_TRANSPORT_BY_SERVICE = { arrival: 'arrivalTransport', departure: 'departureTransport' };
     const DS_AMOUNTS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
     const DS_FEE_CATEGORY_LABELS = {
@@ -4949,7 +5024,7 @@
     // tab: 'summary'(まとめ) または記録の種類(arrival など)。今日の画面の「来所 ○名」から開くときは種類を渡す
     function openRecordList(host, tab) {
       dsListUi.host = host;
-      dsListUi.tab = DS_SERVICES.includes(tab) ? tab : 'summary';
+      dsListUi.tab = DS_SERVICES.includes(tab) || tab === DS_VITAL_TAB ? tab : 'summary';
       dsListUi.events = null;
       dsListUi.eventsError = false;
       dsListUi.drafts = {};
@@ -4973,8 +5048,8 @@
           <button type="button" class="primary" data-ds-print>印刷</button>
         </div>
         <div class="ds-tabs" role="tablist" aria-label="一覧の種類">
-          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]])).map(([key, label]) =>
-            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${DS_SERVICE_COLORS[key] || '#2f5bd3'}">${label}</button>`).join('')}
+          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]]), [[DS_VITAL_TAB, 'バイタル']]).map(([key, label]) =>
+            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${key === DS_VITAL_TAB ? DS_VITAL_COLOR : (DS_SERVICE_COLORS[key] || '#2f5bd3')}">${label}</button>`).join('')}
         </div>
         <div class="ds-list-body" id="dsListBody"></div>
         <div class="ds-list-footer" id="dsListFooter" aria-live="polite"></div>`;
@@ -5032,6 +5107,14 @@
           renderRecordListFooter();
           return;
         }
+        const go = event.target.closest('[data-ds-tab-go]');
+        if (go) {
+          dsListUi.tab = go.dataset.dsTabGo;
+          renderRecordList();
+          const list = document.getElementById('dsRecordList');
+          if (list) list.scrollTop = 0;
+          return;
+        }
         const fill = event.target.closest('[data-ds-fill]');
         if (fill) {
           dsFillBlanks(fill.dataset.dsFill);
@@ -5053,6 +5136,15 @@
           dsListUi.drafts = {};
           closeRecordList();
         }
+      });
+      // バイタルの数字は打つたびに下書きへ入れる(一覧が書き直されても、下書きと入力中の欄は戻す)
+      overlay.addEventListener('input', (event) => {
+        const input = event.target.closest('input[data-ds-vital]');
+        if (!input) return;
+        dsSetDraft(input.dataset.dsUser, input.dataset.dsVital, input.value.trim());
+        const field = input.closest('.ds-vin');
+        if (field) field.classList.toggle('changed', dsIsDraft(input.dataset.dsUser, input.dataset.dsVital));
+        renderRecordListFooter();
       });
       overlay.addEventListener('change', (event) => {
         const select = event.target.closest('select[data-ds-edit]');
@@ -5156,6 +5248,25 @@
         if (dsListUi.confirmClose) closeRecordList();
         return;
       }
+      // 数字(バイタル)の打ち間違いは送る前に止める(サーバーでも同じ範囲で確かめる)
+      for (const item of items) {
+        for (const field of Object.keys(item)) {
+          const rule = CARE_NUMBER_RULES[field];
+          if (!rule || item[field] === '') continue;
+          const text = careNumberText(item[field]);
+          const number = Number(text);
+          if (text === '' || !Number.isFinite(number) || number < rule.min || number > rule.max) {
+            const name = ((host.findUser(item.userId) || {}).displayName || '');
+            dsListUi.status = `${name}様の${rule.label}は${rule.min}〜${rule.max}の範囲で入力してください。`;
+            dsListUi.statusError = true;
+            dsListUi.confirmClose = false;
+            renderRecordListFooter();
+            const input = document.querySelector(`#dsRecordList input[data-ds-vital="${field}"][data-ds-user="${CSS.escape(String(item.userId))}"]`);
+            if (input) input.focus();
+            return;
+          }
+        }
+      }
       const closeAfter = dsListUi.confirmClose;
       const seq = dsListUi.seq;
       dsListUi.saving = true;
@@ -5234,6 +5345,22 @@
       const host = dsListUi.host;
       const body = document.getElementById('dsListBody');
       if (!host || !body) return;
+      // バイタルを打っている途中に一覧が書き直されても、同じ欄に戻す(スマホのキーボードを閉じない)
+      const active = document.activeElement;
+      const focused = active && body.contains(active) && active.dataset && active.dataset.dsVital
+        ? { field: active.dataset.dsVital, user: active.dataset.dsUser, start: active.selectionStart, end: active.selectionEnd }
+        : null;
+      renderRecordListBody(host, body);
+      if (focused) {
+        const input = body.querySelector(`input[data-ds-vital="${focused.field}"][data-ds-user="${CSS.escape(String(focused.user))}"]`);
+        if (input) {
+          input.focus({ preventScroll: true });
+          try { input.setSelectionRange(focused.start, focused.end); } catch (error) { /* 選べない欄は無視 */ }
+        }
+      }
+    }
+
+    function renderRecordListBody(host, body) {
       document.querySelectorAll('#dsRecordList [data-ds-tab]').forEach((button) => {
         button.setAttribute('aria-selected', String(button.dataset.dsTab === dsListUi.tab));
       });
@@ -5265,6 +5392,10 @@
           <p class="ds-legend">「未」は予定があってまだ記録がない方です。上の「来所」「昼食」などを押すと、記録した方の一覧が開き、食べた量や送迎をまとめて直せます。${canOpen ? '名前を押すと、その方のケア記録を見る・直すことができます。' : ''}</p>`;
         return;
       }
+      if (dsListUi.tab === DS_VITAL_TAB) {
+        renderVitalList(host, body, entries, note, canOpen);
+        return;
+      }
       const key = dsListUi.tab;
       const fields = DS_EDIT_FIELDS[key] || [];
       const active = entries.filter((entry) => !entry.cancelled);
@@ -5287,7 +5418,8 @@
       const isTransport = fields.some(([field]) => DS_TRANSPORT_FIELDS.includes(field));
       const blanks = done.some((entry) => fields.some(([field]) => !dsCurrentValue(entry.userId, field)));
       const tools = fields.length && done.length ? `<div class="ds-edit-tools"><p>${isTransport ? '家族送迎の方は「家族送迎」を押してください。' : '食べた量を選んでください。'}変えたら下の「変更を保存」を押します。</p>${blanks
-        ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を10割にする'}</button>` : ''}</div>` : '';
+        ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を10割にする'}</button>` : ''}${key === 'arrival'
+        ? `<button type="button" data-ds-tab-go="${DS_VITAL_TAB}">バイタルをまとめて入力 ›</button>` : ''}</div>` : '';
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_SERVICE_COLORS[key]}"><span><b>${done.length}</b>名 記録済み</span>${waiting.length ? `<span class="wait"><b>${waiting.length}</b>名 まだ</span>` : ''}${refused.length ? `<span class="wait"><b>${refused.length}</b>名 入浴拒否</span>` : ''}</div>
         ${note}
@@ -5296,6 +5428,45 @@
         <div class="list ds-rows">${done.map(row).join('') || '<p class="ds-empty">まだ記録はありません。</p>'}</div>
         ${refused.length ? `<h2 class="ds-heading">入浴しなかった方</h2><div class="list ds-rows">${refused.map((entry) => mutedRow(entry, '入浴拒否')).join('')}</div>` : ''}
         ${waiting.length ? `<h2 class="ds-heading">まだ${DS_SERVICE_LABELS[key]}の記録がない方（予定・来所あり）</h2><div class="list ds-rows">${waiting.map((entry) => mutedRow(entry, canOpen ? '未記録 ・ 押すとケア記録から手入力できます' : '未記録')).join('')}</div>` : ''}`;
+    }
+
+    // バイタルの入力欄(一覧用)。値は下書きがあれば下書き
+    function dsVitalInput(entry, field, label, mode) {
+      const value = dsCurrentValue(entry.userId, field);
+      const changed = dsIsDraft(entry.userId, field) ? ' changed' : '';
+      return `<span class="ds-vin${changed}"><input data-ds-vital="${field}" data-ds-user="${escapeHtml(entry.userId)}" inputmode="${mode}" autocomplete="off" value="${escapeHtml(value)}" aria-label="${escapeHtml(entry.user.displayName)}様の${label}（${CARE_VITAL_UNITS[field]}）" placeholder="${label}"><em>${CARE_VITAL_UNITS[field]}</em></span>`;
+    }
+
+    // 「バイタル」タブ: 来所した方の体温・血圧・脈拍・SpO2(体重は測る方だけ)を一覧のまま入力して、まとめて保存する
+    function renderVitalList(host, body, entries, note, canOpen) {
+      const active = entries.filter((entry) => !entry.cancelled);
+      const arrived = active.filter((entry) => entry.arrived)
+        .sort((a, b) => (a.services.arrival.time || '99:99').localeCompare(b.services.arrival.time || '99:99'));
+      const waiting = active.filter((entry) => entry.planned && !entry.arrived);
+      const measured = arrived.filter((entry) => ['temperature', 'bpHigh', 'pulse', 'spo2'].some((field) => careHas(entry.care[field]))).length;
+      const nameButton = (entry, inner) => canOpen
+        ? `<button type="button" class="ds-row-open" data-ds-open="${escapeHtml(entry.userId)}" aria-label="${escapeHtml(entry.user.displayName)}様のケア記録を開く">${inner}<span class="ds-chevron" aria-hidden="true">›</span></button>`
+        : `<div class="ds-row-open">${inner}</div>`;
+      const row = (entry) => {
+        const weight = careWeightNeeded(entry.user, entry.care) || dsIsDraft(entry.userId, 'weight');
+        const last = weight ? careLastWeightText(entry.user) : '';
+        const inner = `<span class="ds-time">${escapeHtml(entry.services.arrival.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${escapeHtml(careVitalTexts(entry.care).join(' ・ ') || '未入力')}</small></span>`;
+        return `<div class="ds-row ds-edit-row ds-vital-row" style="--c:${DS_VITAL_COLOR}">${nameButton(entry, inner)}<div class="ds-vitals">
+          <label><span>体温</span>${dsVitalInput(entry, 'temperature', '体温', 'decimal')}</label>
+          <label class="bp"><span>血圧</span><span class="ds-bp">${dsVitalInput(entry, 'bpHigh', '上', 'numeric')}<i>/</i>${dsVitalInput(entry, 'bpLow', '下', 'numeric')}</span></label>
+          <label><span>脈拍</span>${dsVitalInput(entry, 'pulse', '脈拍', 'numeric')}</label>
+          <label><span>SpO2</span>${dsVitalInput(entry, 'spo2', 'SpO2', 'numeric')}</label>
+          ${weight ? `<label class="weight"><span>体重</span>${dsVitalInput(entry, 'weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+        </div></div>`;
+      };
+      const mutedRow = (entry) => `<div class="ds-row muted">${nameButton(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>まだ来所の記録がありません</small></span>`)}</div>`;
+      body.innerHTML = `
+        <div class="ds-counts single" style="--c:${DS_VITAL_COLOR}"><span><b>${measured}</b>名 測定済み</span>${arrived.length - measured ? `<span class="wait"><b>${arrived.length - measured}</b>名 まだ</span>` : ''}</div>
+        ${note}
+        <div class="ds-edit-tools"><p>来所した方のバイタルを入力して、下の「変更を保存」を押します。単位：体温 ℃、血圧 mmHg、脈拍 回/分、SpO2 %、体重 kg（体重は「体重測定」がありの方だけ）。</p></div>
+        <h2 class="ds-heading">来所した方（到着の早い順）</h2>
+        <div class="list ds-rows">${arrived.map(row).join('') || '<p class="ds-empty">まだ来所の記録はありません。</p>'}</div>
+        ${waiting.length ? `<h2 class="ds-heading">まだ来所していない方（予定あり）</h2><div class="list ds-rows">${waiting.map(mutedRow).join('')}</div>` : ''}`;
     }
 
     // ---- QRを読んだ直後の入力(結果の欄でそのまま) ----
@@ -5320,7 +5491,27 @@
         <p class="ds-quick-title">${isMeal ? '食べた量' : '送迎'}<small>押すとすぐ保存します。あとで一覧からも直せます。</small></p>
         ${rows}
         ${service === 'lunch' ? '<button type="button" class="ds-quick-all" data-quick-all>主食・副食とも10割</button>' : ''}
+        ${service === 'arrival' ? dsQuickVitalsHtml(host.findUser(userId), care) : ''}
         <p class="ds-quick-status" role="status" aria-live="polite"></p>
+      </div>`;
+    }
+
+    // 来所のQRの直後に出すバイタルの欄。数字を入れて「バイタルを保存」を押す(測っていなければ空のままでよい)
+    function dsQuickVitalsHtml(user, care) {
+      const value = (field) => careHas(care[field]) ? String(care[field]) : '';
+      const input = (field, label, mode) => `<span class="ds-vin"><input data-quick-vital="${field}" inputmode="${mode}" autocomplete="off" value="${escapeHtml(value(field))}" placeholder="${label}" aria-label="${label}（${CARE_VITAL_UNITS[field]}）"><em>${CARE_VITAL_UNITS[field]}</em></span>`;
+      const weight = careWeightNeeded(user, care);
+      const last = weight ? careLastWeightText(user) : '';
+      return `<div class="ds-quick-vitals">
+        <p class="ds-quick-label">バイタル<small>測ったら入れて「バイタルを保存」。あとで一覧の「バイタル」からも入れられます。</small></p>
+        <div class="ds-vitals">
+          <label><span>体温</span>${input('temperature', '体温', 'decimal')}</label>
+          <label class="bp"><span>血圧</span><span class="ds-bp">${input('bpHigh', '上', 'numeric')}<i>/</i>${input('bpLow', '下', 'numeric')}</span></label>
+          <label><span>脈拍</span>${input('pulse', '脈拍', 'numeric')}</label>
+          <label><span>SpO2</span>${input('spo2', 'SpO2', 'numeric')}</label>
+          ${weight ? `<label class="weight"><span>体重</span>${input('weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+        </div>
+        <button type="button" class="ds-quick-vital-save" data-quick-vital-save>バイタルを保存</button>
       </div>`;
     }
 
@@ -5359,18 +5550,62 @@
               dsRefreshRecordList();
             }
             setStatus(`保存しました（${label}）`, false);
+            return true;
           } catch (error) {
             if (queued) {
               setStatus(`送信待ちの記録に入れました（${label}）。電波が戻ると送ります。`, false);
-              return;
+              return false;
             }
             const care = host.care(userId) || {};
             Object.keys(patch).forEach((field) => press(field, careHas(care[field]) ? care[field] : ''));
             setStatus(`保存できませんでした。${friendlyError(error)}`, true);
+            return false;
           }
         });
+        return dsQuickUi.chain;
       };
+      // バイタル: この欄を出したとき(または前に保存したとき)から変えた欄だけを送る。
+      // 別の端末・一覧で入った値を、ここで空のまま保存して消さないよう、今の記録とは比べない。範囲外(打ち間違い)は送らずに知らせる
+      const saveVitals = () => {
+        const patch = {};
+        const inputs = {};
+        box.querySelectorAll('[data-quick-vital]').forEach((input) => {
+          const field = input.dataset.quickVital;
+          inputs[field] = input;
+          if (!careSameNumber(input.value, input.defaultValue)) patch[field] = input.value.trim();
+        });
+        if (!Object.keys(patch).length) {
+          setStatus('バイタルは変わっていません。', false);
+          return;
+        }
+        const invalid = careValidate(patch);
+        if (invalid) {
+          setStatus(invalid.message, true);
+          const input = box.querySelector(`[data-quick-vital="${invalid.key}"]`);
+          if (input) input.focus();
+          return;
+        }
+        const sent = Object.assign({}, patch);
+        save(patch, 'バイタル').then((ok) => {
+          if (!ok) return;
+          // 保存できた値を「出したときの値」にする(次の保存で同じ値を送り直さない)
+          Object.keys(sent).forEach((field) => {
+            const input = inputs[field];
+            if (input && input.isConnected) input.defaultValue = String(sent[field]);
+          });
+        });
+      };
+      box.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && event.target.closest('[data-quick-vital]')) {
+          event.preventDefault();
+          saveVitals();
+        }
+      });
       box.addEventListener('click', (event) => {
+        if (event.target.closest('[data-quick-vital-save]')) {
+          saveVitals();
+          return;
+        }
         if (event.target.closest('[data-quick-all]')) {
           save({ mealMain: '10', mealSide: '10' }, '主食・副食とも10割');
           return;
@@ -5654,11 +5889,7 @@
 
     function careNotebookRows(care, bathStatus) {
       const c = care || {};
-      const vitals = [];
-      if (careHas(c.temperature)) vitals.push(`体温 ${c.temperature}℃`);
-      if (careHas(c.bpHigh) || careHas(c.bpLow)) vitals.push(`血圧 ${careHas(c.bpHigh) ? c.bpHigh : '—'}/${careHas(c.bpLow) ? c.bpLow : '—'}`);
-      if (careHas(c.pulse)) vitals.push(`脈拍 ${c.pulse}回/分`);
-      if (careHas(c.spo2)) vitals.push(`SpO2 ${c.spo2}%`);
+      const vitals = careVitalTexts(c);
       const meal = [];
       if (careHas(c.mealMain)) meal.push(`主食 ${c.mealMain}割`);
       if (careHas(c.mealSide)) meal.push(`副食 ${c.mealSide}割`);
@@ -6647,7 +6878,8 @@
             ${user.alertCard ? `<div class="care-note">⚠ ${escapeHtml(user.alertCard)}</div>` : ''}
             ${detailSection('医療', [
               detailRow('既往歴', user.medicalHistory || '未登録'),
-              detailRow('かかりつけ医', user.primaryDoctor || '未登録')
+              detailRow('かかりつけ医', user.primaryDoctor || '未登録'),
+              detailRow('体重測定', user.weightRequired === 'あり' ? `測る${careLastWeightText(user) ? `（${careLastWeightText(user)}）` : ''}` : '測らない')
             ])}
             ${detailSection('連絡先', [
               detailRow('緊急連絡先', emergencyName),
