@@ -1684,6 +1684,43 @@
     @media print {
       #dsRecordList .ds-vitals { display: none !important; }
     }
+    /* バイタルの振り返り(1人分・過去2週間/1か月) */
+    #dsVitalHistory { z-index: 95; }
+    .vh-body { max-width: 760px; margin: 0 auto; padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); }
+    .vh-periods { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 320px; margin: 4px auto 10px; }
+    .vh-periods button { min-height: 44px; border: 1px solid #d5dbe4; border-radius: 10px; background: #fff; color: #334155; font: inherit; font-weight: 700; }
+    .vh-periods button[aria-pressed="true"] { border-color: #be123c; background: #be123c; color: #fff; }
+    .vh-range { margin: 0 0 10px; color: #475569; font-size: 14px; text-align: center; }
+    .vh-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .vh-chart { margin: 0; padding: 10px 10px 4px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; min-width: 0; }
+    .vh-chart figcaption { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .vh-chart figcaption small { color: #64748b; }
+    .vh-chart svg { display: block; width: 100%; height: auto; }
+    .vh-grid { stroke: #e2e8f0; stroke-width: 1; }
+    .vh-axis { fill: #64748b; font-size: 11px; }
+    .vh-legend { margin-left: auto; color: #475569; font-size: 12px; }
+    .vh-legend i { display: inline-block; width: 14px; height: 3px; margin: 0 3px 3px 6px; background: var(--c); vertical-align: middle; }
+    .vh-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+    .vh-table th, .vh-table td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; text-align: center; white-space: nowrap; }
+    .vh-table thead th { background: #f8fafc; font-size: 13px; }
+    .vh-table thead small { display: block; color: #64748b; font-weight: 400; font-size: 11px; }
+    .vh-table tbody th { text-align: left; font-weight: 600; }
+    .vh-none { color: #94a3b8; }
+    .ds-vhist-open { min-height: 40px; margin-top: 8px; padding: 0 12px; border: 1px solid #fecdd3; border-radius: 10px; background: #fff1f2; color: #9f1239; font: inherit; font-weight: 700; }
+    .ds-vital-row .ds-vhist-open { grid-column: 1 / -1; justify-self: start; margin-top: 2px; }
+    @media (max-width: 600px) {
+      .vh-charts { grid-template-columns: minmax(0, 1fr); }
+      .vh-table { font-size: 13px; }
+      .vh-table th, .vh-table td { padding: 7px 4px; }
+    }
+    @media print {
+      body.dsvhist-open { background: #fff !important; }
+      body.dsvhist-open > *:not(#dsVitalHistory) { display: none !important; }
+      body.dsvhist-open #dsVitalHistory { display: block !important; position: static; overflow: visible; background: #fff; }
+      body.dsvhist-open #dsRecordList { display: none !important; }
+      #dsVitalHistory .nb-toolbar button, #dsVitalHistory .vh-periods { display: none !important; }
+      .vh-chart { break-inside: avoid; }
+    }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -3455,6 +3492,12 @@
         beep(user.alertLevel === 'critical' ? 'warning' : 'success');
         freezeScanFeedback('info', user.displayName, '情報確認(記録していません)');
         showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, '情報確認です。記録はしていません。', user, { showPhoto: true });
+        // 確認でも、その方の過去2週間のバイタルを開ける
+        const panel = document.getElementById('resultPanel');
+        if (panel) {
+          panel.insertAdjacentHTML('beforeend', '<button type="button" class="ds-vhist-open" data-info-vhist>過去2週間のバイタルを見る</button>');
+          panel.querySelector('[data-info-vhist]').addEventListener('click', () => openVitalHistory(scannerCareHost, user.userId, todayStr()));
+        }
         addRecent({ label: user.displayName, status: '確認', serviceType: 'info' });
         return;
       }
@@ -4682,6 +4725,7 @@
               ${careNumberField('spo2', 'SpO2', '%', v.spo2, 'numeric', '')}
               ${careWeightNeeded(user, host.care(user.userId)) ? `<div>${careNumberField('weight', '体重', 'kg', v.weight, 'decimal', '')}${careLastWeightText(user) ? `<p class="care-hint care-last">${escapeHtml(careLastWeightText(user))}</p>` : ''}</div>` : ''}
             </div>
+            ${host.call ? '<button type="button" class="ds-vhist-open" data-care-vhist>過去2週間の記録を見る</button>' : ''}
           </fieldset>
           <fieldset class="care-group"><legend>昼食・おやつ（摂取量）</legend>
             <div class="care-grid two care-time-row">
@@ -4744,6 +4788,8 @@
         if (event.key === 'Escape') requestCloseCareForm();
       });
       form.querySelector('[data-care-close]').addEventListener('click', requestCloseCareForm);
+      const history = form.querySelector('[data-care-vhist]');
+      if (history) history.addEventListener('click', () => openVitalHistory(careUi.host, careUi.userId, careUi.host.businessDate()));
       form.querySelector('[data-care-next]').addEventListener('click', () => saveCareForm(true));
       form.querySelector('[data-care-keep]').addEventListener('click', () => {
         form.querySelector('.care-confirm').classList.add('hidden');
@@ -5148,6 +5194,11 @@
       overlay.addEventListener('click', (event) => {
         const host = dsListUi.host;
         if (!host) return;
+        const history = event.target.closest('[data-ds-vhist]');
+        if (history) {
+          openVitalHistory(host, history.dataset.dsVhist, host.businessDate());
+          return;
+        }
         const open = event.target.closest('[data-ds-open]');
         if (open) {
           if (host.save && host.bathState) openCareForm(host, open.dataset.dsOpen);
@@ -5514,6 +5565,7 @@
           <label><span>脈拍</span>${dsVitalInput(entry, 'pulse', '脈拍', 'numeric')}</label>
           <label><span>SpO2</span>${dsVitalInput(entry, 'spo2', 'SpO2', 'numeric')}</label>
           ${weight ? `<label class="weight"><span>体重</span>${dsVitalInput(entry, 'weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+          ${host.call ? `<button type="button" class="ds-vhist-open" data-ds-vhist="${escapeHtml(entry.userId)}">過去2週間 ›</button>` : ''}
         </div></div>`;
       };
       const mutedRow = (entry) => `<div class="ds-row muted">${nameButton(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>まだ来所の記録がありません</small></span>`)}</div>`;
@@ -5576,6 +5628,7 @@
           ${weight ? `<label class="weight"><span>体重</span>${input('weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
         </div>
         <button type="button" class="ds-quick-vital-save" data-quick-vital-save>バイタルを保存</button>
+        <button type="button" class="ds-vhist-open" data-quick-vital-history>過去2週間の記録を見る</button>
       </div>`;
     }
 
@@ -5668,6 +5721,10 @@
       box.addEventListener('click', (event) => {
         if (event.target.closest('[data-quick-vital-save]')) {
           saveVitals();
+          return;
+        }
+        if (event.target.closest('[data-quick-vital-history]')) {
+          openVitalHistory(host, userId, businessDate);
           return;
         }
         if (event.target.closest('[data-quick-all]')) {
@@ -6620,6 +6677,197 @@
       banner.innerHTML = '<strong>デモ</strong><span>練習用です。架空の利用者だけが入っていて、本番の記録には残りません。</span>';
       document.body.insertBefore(banner, document.body.firstChild);
       if (!/^【デモ】/.test(document.title)) document.title = `【デモ】${document.title}`;
+    }
+
+    // ---- バイタルの振り返り(1人分・過去2週間。1か月にも切り替え) ----
+    // ケア記録に入っている体温・血圧・脈拍・SpO2・体重を、日付ごとの表と折れ線グラフで見る。値の良し悪しの判定はしない。
+    const dsVhUi = { seq: 0, host: null, userId: '', endDate: '', days: 14, data: null, error: '' };
+    const DS_VH_CHARTS = [
+      { label: '体温', unit: '℃', decimals: 1, lines: [['temperature', '#be123c', '']] },
+      { label: '血圧', unit: 'mmHg', decimals: 0, lines: [['bpHigh', '#be123c', '上'], ['bpLow', '#2563eb', '下']] },
+      { label: '脈拍', unit: '回/分', decimals: 0, lines: [['pulse', '#7c3aed', '']] },
+      { label: 'SpO2', unit: '%', decimals: 0, lines: [['spo2', '#0369a1', '']] },
+      { label: '体重', unit: 'kg', decimals: 1, lines: [['weight', '#0f766e', '']] }
+    ];
+
+    function dsVhDates(startDate, endDate) {
+      const dates = [];
+      const [y, m, d] = String(startDate).split('-').map(Number);
+      for (let i = 0; i < 62; i += 1) {
+        const day = new Date(y, m - 1, d + i);
+        const text = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+        if (text > endDate) break;
+        dates.push(text);
+      }
+      return dates;
+    }
+
+    function dsVhShortDate(dateText) {
+      const [y, m, d] = String(dateText).split('-').map(Number);
+      if (!y || !m || !d) return String(dateText || '');
+      return `${m}/${d}（${'日月火水木金土'.charAt(new Date(y, m - 1, d).getDay())}）`;
+    }
+
+    function dsVhNumber(value) {
+      return value === '' || value == null || !Number.isFinite(Number(value)) ? null : Number(value);
+    }
+
+    // 1つの項目の折れ線グラフ(測った日だけ点を打ち、線でつなぐ)
+    function dsVhChartSvg(chart, dates, byDate) {
+      const values = [];
+      chart.lines.forEach(([field]) => dates.forEach((date) => {
+        const value = dsVhNumber((byDate[date] || {})[field]);
+        if (value !== null) values.push(value);
+      }));
+      if (!values.length) return '';
+      const W = 340;
+      const H = 130;
+      const left = 38;
+      const right = 10;
+      const top = 12;
+      const bottom = 24;
+      let min = Math.min(...values);
+      let max = Math.max(...values);
+      const spread = Math.max(max - min, chart.decimals ? 1 : 10);
+      min -= spread * 0.2;
+      max += spread * 0.2;
+      const x = (index) => left + (W - left - right) * (dates.length === 1 ? 0.5 : index / (dates.length - 1));
+      const y = (value) => top + (H - top - bottom) * (1 - (value - min) / (max - min));
+      const fmt = (value) => value.toFixed(chart.decimals);
+      const grid = [0, 0.5, 1].map((t) => {
+        const value = min + (max - min) * t;
+        return `<line x1="${left}" x2="${W - right}" y1="${y(value).toFixed(1)}" y2="${y(value).toFixed(1)}" class="vh-grid"/><text x="${left - 4}" y="${(y(value) + 4).toFixed(1)}" class="vh-axis" text-anchor="end">${fmt(value)}</text>`;
+      }).join('');
+      const ticks = [0, Math.floor((dates.length - 1) / 2), dates.length - 1].filter((v, i, a) => a.indexOf(v) === i)
+        .map((index) => `<text x="${x(index).toFixed(1)}" y="${H - 6}" class="vh-axis" text-anchor="${index === 0 ? 'start' : (index === dates.length - 1 ? 'end' : 'middle')}">${dsVhShortDate(dates[index]).replace(/（.）/, '')}</text>`).join('');
+      const lines = chart.lines.map(([field, color, name]) => {
+        const points = dates.map((date, index) => {
+          const value = dsVhNumber((byDate[date] || {})[field]);
+          return value === null ? null : [x(index), y(value), value, date];
+        }).filter(Boolean);
+        if (!points.length) return '';
+        const path = points.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`).join(' ');
+        return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>${points.map(([px, py, value, date]) =>
+          `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.2" fill="#fff" stroke="${color}" stroke-width="2" aria-label="${escapeHtml(`${dsVhShortDate(date)} ${name ? `${name} ` : ''}${fmt(value)}${chart.unit}`)}"/>`).join('')}`;
+      }).join('');
+      const legend = chart.lines.length > 1
+        ? `<span class="vh-legend">${chart.lines.map(([, color, name]) => `<i style="--c:${color}"></i>${escapeHtml(name)}`).join(' ')}</span>` : '';
+      return `<figure class="vh-chart"><figcaption><strong>${chart.label}</strong><small>${chart.unit}</small>${legend}</figcaption>
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(`${chart.label}の変化`)}">${grid}${ticks}${lines}</svg></figure>`;
+    }
+
+    function openVitalHistory(host, userId, endDate) {
+      if (!host || !host.call) return;
+      dsVhUi.host = host;
+      dsVhUi.userId = normalizeClientUserId(userId);
+      dsVhUi.endDate = endDate || host.businessDate();
+      dsVhUi.days = 14;
+      const user = host.findUser(dsVhUi.userId) || {};
+      const previous = document.getElementById('dsVitalHistory');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsVitalHistory';
+      overlay.className = 'nb-overlay ds-vhist';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'バイタルの記録');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-vh-close>← 戻る</button>
+          <div class="nb-title"><strong>バイタルの記録</strong><span>${escapeHtml(user.displayName || '')} 様</span></div>
+          <button type="button" class="primary" data-vh-print>印刷</button>
+        </div>
+        <div class="vh-body" id="dsVhBody"></div>`;
+      document.body.appendChild(overlay);
+      document.body.classList.add('dsvhist-open');
+      if (!GinNav.isTop('dsVitalHistory')) GinNav.push('dsVitalHistory', closeVitalHistory);
+      overlay.querySelector('[data-vh-close]').addEventListener('click', closeVitalHistory);
+      overlay.querySelector('[data-vh-print]').addEventListener('click', () => { try { window.print(); } catch (error) {} });
+      overlay.addEventListener('click', (event) => {
+        const period = event.target.closest('[data-vh-days]');
+        if (period && Number(period.dataset.vhDays) !== dsVhUi.days) {
+          dsVhUi.days = Number(period.dataset.vhDays);
+          loadVitalHistory();
+        }
+        if (event.target.closest('[data-vh-retry]')) loadVitalHistory();
+      });
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          closeVitalHistory();
+        }
+      });
+      loadVitalHistory();
+      overlay.querySelector('[data-vh-close]').focus({ preventScroll: true });
+    }
+
+    function closeVitalHistory() {
+      const existing = document.getElementById('dsVitalHistory');
+      if (existing) existing.remove();
+      document.body.classList.remove('dsvhist-open');
+      dsVhUi.seq++;
+      if (existing) GinNav.closed('dsVitalHistory');
+    }
+
+    function loadVitalHistory() {
+      const seq = ++dsVhUi.seq;
+      dsVhUi.data = null;
+      dsVhUi.error = '';
+      renderVitalHistory();
+      dsVhUi.host.call('vitalHistory', { userId: dsVhUi.userId, endDate: dsVhUi.endDate, days: dsVhUi.days }).then((result) => {
+        if (seq !== dsVhUi.seq) return;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        dsVhUi.data = result;
+        renderVitalHistory();
+      }).catch((error) => {
+        if (seq !== dsVhUi.seq) return;
+        dsVhUi.error = typeof friendlyError === 'function' ? friendlyError(error) : String((error && error.message) || error);
+        renderVitalHistory();
+      });
+    }
+
+    function renderVitalHistory() {
+      const body = document.getElementById('dsVhBody');
+      if (!body) return;
+      const periods = `<div class="vh-periods" role="group" aria-label="期間">${[[14, '2週間'], [31, '1か月']].map(([days, label]) =>
+        `<button type="button" data-vh-days="${days}" aria-pressed="${String(dsVhUi.days === days)}">${label}</button>`).join('')}</div>`;
+      if (dsVhUi.error) {
+        body.innerHTML = `${periods}<div class="empty-state"><strong>読み込めませんでした</strong>${escapeHtml(dsVhUi.error)}<br><button type="button" data-vh-retry>もう一度読む</button></div>`;
+        return;
+      }
+      const data = dsVhUi.data;
+      if (!data) {
+        body.innerHTML = `${periods}<p class="ds-note">読み込んでいます…</p>`;
+        return;
+      }
+      const records = (data.records || []).map((record) => Object.assign({}, record, { businessDate: String(record.businessDate) }));
+      const byDate = {};
+      records.forEach((record) => { byDate[record.businessDate] = record; });
+      const dates = dsVhDates(data.startDate, data.endDate);
+      const range = `<p class="vh-range">${escapeHtml(dsVhShortDate(data.startDate))} 〜 ${escapeHtml(dsVhShortDate(data.endDate))}　測った日 <b>${records.length}</b>日</p>`;
+      if (!records.length) {
+        body.innerHTML = `${periods}${range}<div class="empty-state"><strong>この期間のバイタルの記録はありません</strong>スキャンの「バイタル」やケア記録で入れた値が、ここに出ます。</div>`;
+        return;
+      }
+      const charts = DS_VH_CHARTS.map((chart) => dsVhChartSvg(chart, dates, byDate)).filter(Boolean).join('');
+      const hasWeight = records.some((record) => dsVhNumber(record.weight) !== null);
+      const cell = (record, field, decimals) => {
+        const value = dsVhNumber(record[field]);
+        return value === null ? '<td class="vh-none">—</td>' : `<td>${escapeHtml(value.toFixed(decimals))}</td>`;
+      };
+      const rows = records.slice().reverse().map((record) => {
+        const high = dsVhNumber(record.bpHigh);
+        const low = dsVhNumber(record.bpLow);
+        const bp = high === null && low === null ? '<td class="vh-none">—</td>' : `<td>${high === null ? '—' : high}/${low === null ? '—' : low}</td>`;
+        return `<tr><th scope="row">${escapeHtml(dsVhShortDate(record.businessDate))}</th>${cell(record, 'temperature', 1)}${bp}${cell(record, 'pulse', 0)}${cell(record, 'spo2', 0)}${hasWeight ? cell(record, 'weight', 1) : ''}</tr>`;
+      }).join('');
+      body.innerHTML = `${periods}${range}
+        <div class="vh-charts">${charts}</div>
+        <div class="ds-table-wrap"><table class="vh-table">
+          <thead><tr><th scope="col">日付</th><th scope="col">体温<small>℃</small></th><th scope="col">血圧<small>mmHg</small></th><th scope="col">脈拍<small>回/分</small></th><th scope="col">SpO2<small>%</small></th>${hasWeight ? '<th scope="col">体重<small>kg</small></th>' : ''}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <p class="ds-legend">新しい日が上です。スキャンの「バイタル」・記録一覧・ケア記録で入れた値を表示しています（測っていない日は出ません）。</p>`;
     }
     /* @@DS_EXTRA_JS END@@ */
 
