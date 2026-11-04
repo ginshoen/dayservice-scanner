@@ -943,7 +943,7 @@
       .scan-primary { padding: 16px; }
       #scanView .page-heading p { display: none; }
       #scanView .camera-box { aspect-ratio: auto; height: 132px; }
-      #scanView .mode-banner:not([data-mode="info"]) #modeSubtitle { display: none; }
+      #scanView .mode-banner:not([data-mode="info"]):not([data-mode="vital"]) #modeSubtitle { display: none; }
       .camera-placeholder { font-size: 13px; padding: 16px; max-width: 280px; }
       .camera-placeholder::before { width: 34px; height: 34px; margin-bottom: 10px; border-width: 2px; border-radius: 8px; }
       .metric strong { font-size: 24px; }
@@ -1650,11 +1650,11 @@
     button.metric { width: 100%; min-height: 0; margin: 0; font: inherit; font-weight: 400; color: inherit; cursor: pointer; }
     button.metric:active { transform: translateY(1px); }
     button.metric::before { content: '一覧 ›'; position: absolute; right: 6px; bottom: 4px; color: #9aa7b8; font-size: 10px; }
-    /* スキャン: 記録の種類が6つ(来所・入浴・昼食・おやつ・送り・確認) */
-    #modeButtons.mode-buttons { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    /* スキャン: 種類が7つ(来所・バイタル・入浴・昼食・おやつ・送り・確認) */
+    #modeButtons.mode-buttons { grid-template-columns: repeat(7, minmax(0, 1fr)); }
     @media (max-width: 600px) {
       .today-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-      #modeButtons.mode-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #modeButtons.mode-buttons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       .manual-services { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     /* バイタル(単位つき)。ケア記録・QRの直後・一覧の「バイタル」で同じ形 */
@@ -2265,6 +2265,7 @@
       lunch: '<path d="M3 11h18a9 9 0 0 1-18 0zM12 3v4M8 4.5v2.5M16 4.5v2.5"/>',
       snack: '<path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6V9zM17 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.5 1 1.5 1 3M12 3.5c0 1.5 1 1.5 1 3"/>',
       departure: '<path d="M4 16v-4l2.2-5.2A2 2 0 0 1 8 5.5h8a2 2 0 0 1 1.8 1.3L20 12v4M2.5 16h19v2.5h-19zM4 12h16M7 18.5V20M17 18.5V20"/>',
+      vital: '<path d="M12 20s-7-4.3-7-10a4 4 0 0 1 7-2.7A4 4 0 0 1 19 10c0 5.7-7 10-7 10z"/><path d="M4.5 12.5h3.5l1.5-3 2.5 5.5 1.5-2.5H19.5"/>',
       info: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.4"/><path d="M5.8 16.2c.7-1.6 1.8-2.4 3.2-2.4s2.5.8 3.2 2.4M14.5 10h4M14.5 14h4"/>',
       cancelled: '<circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/>'
     };
@@ -2285,9 +2286,16 @@
     }
 
     // 記録モード5種(来所・入浴・昼食・おやつ・送り) + 記録しない情報確認モード
-    const MODE_META = Object.assign({}, SERVICE_META, {
+    // スキャンの種類(ボタンの並び順)。「バイタル」と「確認」は記録(読取履歴)を作らない
+    const MODE_META = {
+      arrival: SERVICE_META.arrival,
+      vital: { label: 'バイタル', short: 'バ', color: '#be123c', colorDark: '#9f1239' },
+      bath: SERVICE_META.bath,
+      lunch: SERVICE_META.lunch,
+      snack: SERVICE_META.snack,
+      departure: SERVICE_META.departure,
       info: { label: '確認', short: '確', color: '#475569', colorDark: '#334155' }
-    });
+    };
 
     const API_URL = 'https://script.google.com/macros/s/AKfycbxGZEPz4zdjbACVanoyevLz6xwN0Ll-GBvHt08Gu5PPcjWHuiuIH2f1YNDQXzVPDd4H5Q/exec';
     const MANAGER_APP_URL = 'https://script.google.com/macros/s/AKfycbxGZEPz4zdjbACVanoyevLz6xwN0Ll-GBvHt08Gu5PPcjWHuiuIH2f1YNDQXzVPDd4H5Q/exec';
@@ -2558,8 +2566,11 @@
     function setMode(mode) {
       app.mode = mode;
       const meta = MODE_META[mode];
-      document.getElementById('modeTitle').textContent = mode === 'info' ? '情報を確認' : `${meta.label}を記録`;
-      document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録は追加せず、利用者の情報を表示します' : '同じQRを続けて読んでも重複記録しません';
+      document.getElementById('modeTitle').textContent = mode === 'info' ? '情報を確認' : (mode === 'vital' ? 'バイタルを入力' : `${meta.label}を記録`);
+      document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録は追加せず、利用者の情報を表示します'
+        : (mode === 'vital' ? 'QRを読むと、その方のバイタルを入力できます' : '同じQRを続けて読んでも重複記録しません');
+      const manualOpen = document.getElementById('openManualRecord');
+      if (manualOpen) manualOpen.textContent = mode === 'vital' ? 'QRが読めないとき：一覧からバイタルを入力' : 'QRが読めないとき：名前から記録';
       document.getElementById('modeBanner').style.setProperty('--mode-color', meta.color);
       document.getElementById('modeBanner').dataset.mode = mode;
       document.querySelectorAll('#modeButtons button').forEach((button) => {
@@ -3448,6 +3459,19 @@
         return;
       }
 
+      // バイタルモード: 記録(読取履歴)は作らず、その方のバイタルを入れる欄を出す
+      if (app.mode === 'vital') {
+        const care = careRecordFor(user.userId) || {};
+        const arrived = isLocallyRecorded(`${todayStr()}:${user.userId}:arrival`) || careHas(care.arrivalTime);
+        beep(user.alertLevel === 'critical' ? 'warning' : 'success');
+        freezeScanFeedback('success', user.displayName, 'バイタルを入力してください');
+        showUserResult(user.alertLevel === 'critical' || !arrived ? 'warning' : 'success', user.displayName,
+          arrived ? '測ったバイタルを入れて「バイタルを保存」を押してください。' : 'まだ来所の記録がありません。バイタルは入れられます（来所は「来所」で読んでください）。', user);
+        showScanQuickInput(user.userId, 'vital');
+        addRecent({ label: user.displayName, status: '入力', serviceType: 'vital' });
+        return;
+      }
+
       const businessDate = todayStr();
       const localKey = `${businessDate}:${user.userId}:${app.mode}`;
       if (isLocallyRecorded(localKey)) {
@@ -3528,6 +3552,11 @@
     const manualUi = { service: 'arrival', time: '', query: '', message: '', error: false, last: null, undoing: false };
 
     function openManualRecord() {
+      // バイタルモードでは、来所した方の一覧(バイタル)からまとめて入れる
+      if (app.mode === 'vital') {
+        openRecordList(scannerCareHost, DS_VITAL_TAB);
+        return;
+      }
       manualUi.service = DS_SERVICES.includes(app.mode) ? app.mode : 'arrival';
       manualUi.time = dsNowTime();
       manualUi.query = '';
@@ -4500,6 +4529,34 @@
       return careToHalfWidth(String(value == null ? '' : value).normalize('NFKC')).replace(CARE_UNIT_SUFFIX, '').trim();
     }
 
+    // 体温・体重は小数点を打たなくてよい: 体温「365」→36.5、体重「523」→52.3
+    // (体重は200kgを超える数字になるときだけ、最後の1けたを小数にする。「52」「105」はそのまま)
+    function careAutoPoint(field, value) {
+      const text = String(value == null ? '' : value);
+      if (!/^\d+$/.test(text)) return text;
+      if (field === 'temperature' && text.length === 3) return `${text.slice(0, 2)}.${text.slice(2)}`;
+      if (field === 'weight' && text.length >= 3 && Number(text) > CARE_NUMBER_RULES.weight.max) return `${text.slice(0, -1)}.${text.slice(-1)}`;
+      return text;
+    }
+
+    // 打っている欄にその場で小数点を入れる(ケア記録・来所直後・一覧のどの欄でも)
+    function careAutoPointInput(event) {
+      const input = event.target;
+      if (!input || input.tagName !== 'INPUT' || event.isComposing) return;
+      const field = input.dataset.care || input.dataset.quickVital || input.dataset.dsVital;
+      if (field !== 'temperature' && field !== 'weight') return;
+      const half = careToHalfWidth(input.value);
+      const next = careAutoPoint(field, half);
+      if (next === half) return;
+      input.value = next;
+      try { input.setSelectionRange(next.length, next.length); } catch (error) { /* 選べない欄は無視 */ }
+    }
+    if (typeof document !== 'undefined') {
+      // 先に直してから、下書き・保存の処理に渡す(capture で一番先に動かす)
+      document.addEventListener('input', careAutoPointInput, true);
+      document.addEventListener('compositionend', careAutoPointInput, true);
+    }
+
     // 2つの数字の欄が同じ値か(「36.50」と「36.5」は同じ)
     function careSameNumber(a, b) {
       const x = careNumberText(a);
@@ -4788,7 +4845,7 @@
       for (const key of Object.keys(CARE_NUMBER_RULES)) {
         if (!(key in changed) || changed[key] === '') continue;
         const rule = CARE_NUMBER_RULES[key];
-        const text = careNumberText(changed[key]);
+        const text = careAutoPoint(key, careNumberText(changed[key]));
         const number = Number(text);
         if (text === '' || !Number.isFinite(number) || number < rule.min || number > rule.max) {
           return { key, message: `${rule.label}は${rule.min}〜${rule.max}の範囲で入力してください。` };
@@ -5253,7 +5310,7 @@
         for (const field of Object.keys(item)) {
           const rule = CARE_NUMBER_RULES[field];
           if (!rule || item[field] === '') continue;
-          const text = careNumberText(item[field]);
+          const text = careAutoPoint(field, careNumberText(item[field]));
           const number = Number(text);
           if (text === '' || !Number.isFinite(number) || number < rule.min || number > rule.max) {
             const name = ((host.findUser(item.userId) || {}).displayName || '');
@@ -5463,7 +5520,7 @@
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_VITAL_COLOR}"><span><b>${measured}</b>名 測定済み</span>${arrived.length - measured ? `<span class="wait"><b>${arrived.length - measured}</b>名 まだ</span>` : ''}</div>
         ${note}
-        <div class="ds-edit-tools"><p>来所した方のバイタルを入力して、下の「変更を保存」を押します。単位：体温 ℃、血圧 mmHg、脈拍 回/分、SpO2 %、体重 kg（体重は「体重測定」がありの方だけ）。</p></div>
+        <div class="ds-edit-tools"><p>来所した方のバイタルを入力して、下の「変更を保存」を押します。単位：体温 ℃、血圧 mmHg、脈拍 回/分、SpO2 %、体重 kg（体重は「体重測定」がありの方だけ）。体温・体重は小数点なしで打てます（365→36.5、523→52.3）。</p></div>
         <h2 class="ds-heading">来所した方（到着の早い順）</h2>
         <div class="list ds-rows">${arrived.map(row).join('') || '<p class="ds-empty">まだ来所の記録はありません。</p>'}</div>
         ${waiting.length ? `<h2 class="ds-heading">まだ来所していない方（予定あり）</h2><div class="list ds-rows">${waiting.map(mutedRow).join('')}</div>` : ''}`;
@@ -5474,8 +5531,16 @@
     const dsQuickUi = { seq: 0, chain: Promise.resolve() };
 
     function dsQuickInputHtml(host, userId, service) {
+      if (!host || !host.save) return '';
+      // スキャンの「バイタル」: QRを読んだ方のバイタルだけを入れる(来所のときは出さない)
+      if (service === DS_VITAL_TAB) {
+        return `<div class="ds-quick ds-quick-vital-only" style="--c:${DS_VITAL_COLOR}">
+        ${dsQuickVitalsHtml(host.findUser(userId), host.care(userId) || {})}
+        <p class="ds-quick-status" role="status" aria-live="polite"></p>
+      </div>`;
+      }
       const fields = DS_EDIT_FIELDS[service];
-      if (!fields || !host || !host.save) return '';
+      if (!fields) return '';
       const care = host.care(userId) || {};
       const value = (field) => careHas(care[field]) ? String(care[field]) : '';
       const rows = fields.map(([field, label]) => {
@@ -5491,19 +5556,18 @@
         <p class="ds-quick-title">${isMeal ? '食べた量' : '送迎'}<small>押すとすぐ保存します。あとで一覧からも直せます。</small></p>
         ${rows}
         ${service === 'lunch' ? '<button type="button" class="ds-quick-all" data-quick-all>主食・副食とも10割</button>' : ''}
-        ${service === 'arrival' ? dsQuickVitalsHtml(host.findUser(userId), care) : ''}
         <p class="ds-quick-status" role="status" aria-live="polite"></p>
       </div>`;
     }
 
-    // 来所のQRの直後に出すバイタルの欄。数字を入れて「バイタルを保存」を押す(測っていなければ空のままでよい)
+    // スキャンの「バイタル」でQRを読んだ直後に出すバイタルの欄。数字を入れて「バイタルを保存」を押す(測っていない項目は空のままでよい)
     function dsQuickVitalsHtml(user, care) {
       const value = (field) => careHas(care[field]) ? String(care[field]) : '';
       const input = (field, label, mode) => `<span class="ds-vin"><input data-quick-vital="${field}" inputmode="${mode}" autocomplete="off" value="${escapeHtml(value(field))}" placeholder="${label}" aria-label="${label}（${CARE_VITAL_UNITS[field]}）"><em>${CARE_VITAL_UNITS[field]}</em></span>`;
       const weight = careWeightNeeded(user, care);
       const last = weight ? careLastWeightText(user) : '';
       return `<div class="ds-quick-vitals">
-        <p class="ds-quick-label">バイタル<small>測ったら入れて「バイタルを保存」。あとで一覧の「バイタル」からも入れられます。</small></p>
+        <p class="ds-quick-label">バイタル<small>測ったら入れて「バイタルを保存」。体温・体重は小数点なしで打てます（365→36.5）。あとで記録一覧の「バイタル」からも直せます。</small></p>
         <div class="ds-vitals">
           <label><span>体温</span>${input('temperature', '体温', 'decimal')}</label>
           <label class="bp"><span>血圧</span><span class="ds-bp">${input('bpHigh', '上', 'numeric')}<i>/</i>${input('bpLow', '下', 'numeric')}</span></label>
