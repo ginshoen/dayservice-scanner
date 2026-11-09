@@ -943,7 +943,7 @@
       .scan-primary { padding: 16px; }
       #scanView .page-heading p { display: none; }
       #scanView .camera-box { aspect-ratio: auto; height: 132px; }
-      #scanView .mode-banner:not([data-mode="info"]) #modeSubtitle { display: none; }
+      #scanView .mode-banner:not([data-mode="info"]):not([data-mode="vital"]) #modeSubtitle { display: none; }
       .camera-placeholder { font-size: 13px; padding: 16px; max-width: 280px; }
       .camera-placeholder::before { width: 34px; height: 34px; margin-bottom: 10px; border-width: 2px; border-radius: 8px; }
       .metric strong { font-size: 24px; }
@@ -1402,11 +1402,11 @@
     /* ===== 記録一覧・実費(Scanner.html と Index.html で共通。元は shared/ds-extra.css) ===== */
     .status-chip.fee { background: #fdf2f8; color: #a0306a; }
     .ds-list .nb-toolbar { grid-template-columns: auto minmax(0, 1fr) auto; }
-    .ds-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; max-width: 860px; margin: 0 auto; padding: 10px 12px; background: #eef1f5; }
+    .ds-tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; max-width: 860px; margin: 0 auto; padding: 10px 12px; background: #eef1f5; }
     .ds-tabs button { min-height: 44px; padding: 6px 4px; font-size: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 999px; }
     .ds-tabs button[aria-selected="true"] { color: #fff; background: var(--c); border-color: var(--c); font-weight: 700; }
     .ds-list-body { max-width: 860px; margin: 0 auto; padding: 4px 12px 40px; }
-    .ds-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
+    .ds-counts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
     .ds-counts.single { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ds-counts span { padding: 10px 8px; border-radius: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); color: #3d4f6b; font-size: 13px; text-align: center; }
     .ds-counts span b { display: block; color: var(--c, #2f5bd3); font-size: 24px; line-height: 1.1; }
@@ -1430,8 +1430,14 @@
     .ds-table tr.is-cancelled td { color: #b42318; background: #fef3f2; }
     .ds-heading { margin: 16px 0 8px; color: #1c2b45; font-size: 15px; }
     .ds-rows { gap: 6px; }
-    .ds-row { display: grid; grid-template-columns: 4.2em auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 8px 10px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-left: 4px solid var(--c, #2f5bd3); border-radius: 12px; }
-    .ds-row.muted { grid-template-columns: auto minmax(0, 1fr); border-left-color: #d0d7e2; background: #fafbfc; }
+    .ds-row { display: block; padding: 0; background: #fff; border: 1px solid var(--line, #e3e9f2); border-left: 4px solid var(--c, #2f5bd3); border-radius: 12px; overflow: hidden; }
+    .ds-row.muted { border-left-color: #d0d7e2; background: #fafbfc; }
+    .ds-row-open { display: grid; grid-template-columns: 4.2em auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; min-height: 56px; margin: 0; padding: 8px 10px; color: inherit; font: inherit; font-weight: 400; text-align: left; background: transparent !important; border: 0 !important; border-radius: 0; box-shadow: none !important; }
+    div.ds-row-open { grid-template-columns: 4.2em auto minmax(0, 1fr); }
+    .ds-row.muted .ds-row-open { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .ds-row.muted div.ds-row-open { grid-template-columns: auto minmax(0, 1fr); }
+    button.ds-row-open:active { background: #f3f6fb !important; }
+    .ds-chevron { color: #9aa7b8; font-size: 22px; line-height: 1; }
     .ds-time { color: var(--c, #2f5bd3); font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .ds-person { display: grid; min-width: 0; }
     .ds-person strong { font-size: 16px; }
@@ -1475,7 +1481,7 @@
       .ds-table th, .ds-table td { padding: 7px 3px; }
       .ds-cell b { font-size: 15px; }
       .ds-cell small.ds-how { display: none; }
-      .ds-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 8px; }
+      .ds-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px; }
       .ds-tabs button { font-size: 13px; }
       .ds-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .ds-counts.single { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1485,7 +1491,8 @@
       body.dslist-open { background: #fff !important; }
       body.dslist-open > *:not(#dsRecordList) { display: none !important; }
       body.dslist-open #dsRecordList { position: static; overflow: visible; background: #fff; }
-      #dsRecordList .nb-toolbar button, #dsRecordList .ds-tabs, #dsRecordList .ds-note, #dsRecordList .ds-legend { display: none !important; }
+      #dsRecordList .nb-toolbar button, #dsRecordList .ds-tabs, #dsRecordList .ds-note, #dsRecordList .ds-legend, #dsRecordList .ds-list-footer, #dsRecordList .ds-edit-tools { display: none !important; }
+      #dsRecordList .ds-name-open { padding: 0; border: 0; background: none; color: inherit; font: inherit; }
       #dsRecordList .nb-toolbar { position: static; display: block; border: 0; text-align: left; }
       #dsRecordList .ds-table-wrap { overflow: visible; border: 0; }
       #dsRecordList .ds-table { min-width: 0; font-size: 12px; }
@@ -1501,7 +1508,7 @@
     /* 名前から記録(QRが読めないとき。現場画面だけ) */
     .manual-open { width: 100%; margin-top: 10px; min-height: 50px; font-size: 16px; background: #fff; border: 1.5px dashed #9fb3d9; color: #1c3f8f; }
     .manual-sheet { max-width: 560px; padding-top: 0; }
-    .manual-services { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 12px 0 0; }
+    .manual-services { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 12px 0 0; }
     .manual-services button { min-height: 48px; font-size: 15px; background: #fff; border: 1px solid var(--line, #e3e9f2); }
     .manual-services button[aria-pressed="true"] { color: #fff; background: var(--c); border-color: var(--c); font-weight: 700; }
     .manual-time { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; margin: 12px 0 4px; }
@@ -1553,6 +1560,178 @@
       body.fee-printing .fee-print-title { display: block; }
       body.fee-printing .fee-user { break-inside: avoid; page-break-inside: avoid; }
     }
+
+    /* ---- 連絡帳を印刷(今日の方 全員 / まとまり / 選んで印刷) ---- */
+    .ds-nb-choices { display: grid; gap: 10px; margin-top: 12px; }
+    .ds-nb-choice { display: grid; gap: 4px; width: 100%; min-height: 72px; padding: 12px 16px; text-align: left; color: #1c2b45; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 16px; }
+    .ds-nb-choice strong { font-size: 18px; }
+    .ds-nb-choice small { color: var(--muted, #5a6b83); font-size: 13px; font-weight: 400; }
+    .ds-nb-choice.main { color: #fff; background: linear-gradient(135deg, #2f5bd3, #4f7cf0); border: 0; box-shadow: 0 6px 14px -6px rgba(47, 91, 211, .6); }
+    .ds-nb-choice.main small { color: rgba(255, 255, 255, .88); }
+    .ds-nb-choice:disabled { opacity: .55; box-shadow: none; }
+    .ds-nb-group { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+    .ds-nb-edit { min-width: 68px; font-size: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 16px; }
+    .ds-nb-bulk { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 12px 0 8px; }
+    .ds-nb-bulk button { min-height: 44px; font-size: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 999px; }
+    .ds-nb-pick { min-height: 56px; }
+    .ds-nb-pick[aria-pressed="true"] { background: #eef3ff !important; border-color: #2f5bd3 !important; }
+    .ds-nb-check { display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid #c3cddb; border-radius: 50%; color: #fff; font-weight: 700; }
+    .ds-nb-pick[aria-pressed="true"] .ds-nb-check { background: #2f5bd3; border-color: #2f5bd3; }
+    .ds-nb-more { width: 100%; min-height: 48px; margin-top: 10px; font-size: 14px; background: #fff; border: 1px dashed #b7c3d4; border-radius: 12px; }
+    .ds-nb-name { display: grid; gap: 6px; margin-top: 12px; }
+    .ds-nb-name input { min-height: 48px; font-size: 17px; }
+    .nb-print-help.alert { display: grid; gap: 10px; }
+    .nb-print-help button { min-height: 50px; font-size: 16px; }
+
+    /* ---- デモの表示 ---- */
+    .ds-demo-banner { display: flex; align-items: center; justify-content: center; gap: 10px; padding: calc(6px + env(safe-area-inset-top)) 12px 6px; color: #3d2800; background: repeating-linear-gradient(-45deg, #ffb020, #ffb020 14px, #ffc54d 14px, #ffc54d 28px); font-size: 13px; text-align: left; }
+    .ds-demo-banner strong { flex: 0 0 auto; padding: 2px 10px; border-radius: 999px; color: #fff; background: #b54708; font-size: 15px; letter-spacing: .1em; }
+    body.ds-demo::before { content: ""; position: fixed; inset: 0; z-index: 9999; border: 5px solid #f59e0b; pointer-events: none; }
+    @media print {
+      .ds-demo-banner { display: none !important; }
+      body.ds-demo::before { display: none; }
+    }
+
+    /* ===== 2026-10-30 おやつ・食べた量・送迎・一覧からのまとめ入力 ===== */
+    .care-tag.snack { background: #fde7f1; color: #a3195b; }
+    .care-tag.family { background: #fff4e5; color: #9a4d00; }
+    .care-transport { margin-top: 4px; }
+    .care-transport .care-choice { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    /* 一覧の上の「空欄の方を10割にする」など */
+    .ds-edit-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; background: #f7f9fd; }
+    .ds-edit-tools p { flex: 1 1 14em; margin: 0; color: #3d4f6b; font-size: 13px; line-height: 1.6; }
+    .ds-edit-tools button { min-height: 44px; padding: 6px 14px; font-size: 14px; background: #fff; border: 1px solid var(--line, #d6deea); }
+    /* 一覧の各行の入力欄(食べた量・送迎) */
+    .ds-edit { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 10px 10px calc(4.2em + 20px); }
+    .ds-edit-field { display: grid; grid-template-columns: auto minmax(5.5em, 1fr); align-items: center; gap: 6px; margin: 0; font-size: 14px; color: #3d4f6b; }
+    .ds-edit-field select { min-height: 46px; padding: 4px 8px; font-size: 17px; border-radius: 10px; }
+    .ds-edit-field.changed select, .ds-seg.changed { outline: 2px solid #f59e0b; outline-offset: 1px; border-radius: 10px; }
+    .ds-seg { display: grid; grid-template-columns: repeat(2, minmax(6.5em, 1fr)); gap: 0; border: 1px solid #d6deea; border-radius: 10px; overflow: hidden; }
+    .ds-seg button { min-height: 46px; padding: 4px 10px; font-size: 15px; border: 0 !important; border-radius: 0 !important; background: #fff !important; color: #3d4f6b !important; box-shadow: none !important; }
+    .ds-seg button + button { border-left: 1px solid #d6deea !important; }
+    .ds-seg button[aria-pressed="true"] { background: var(--c, #2f5bd3) !important; color: #fff !important; font-weight: 700; }
+    .ds-name-open { min-height: 0; padding: 2px 0; color: #185abc; font-size: inherit; font-weight: 600; text-align: left; text-decoration: underline; text-underline-offset: 3px; background: none !important; border: 0 !important; box-shadow: none !important; }
+    /* 保存ボタン(画面の下に固定) */
+    .ds-list-footer { position: sticky; bottom: 0; z-index: 3; display: none; max-width: 860px; margin: 0 auto; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.97); border-top: 1px solid var(--line, #e3e9f2); }
+    .ds-list-footer.active { display: block; }
+    .ds-list-save { width: 100%; min-height: 54px; font-size: 17px; }
+    .ds-list-status { margin: 0 0 6px; color: #1d6b35; font-size: 14px; }
+    .ds-list-status.error { color: #b42318; }
+    .ds-list-confirm p { margin: 0 0 8px; color: #9a4d00; font-weight: 600; }
+    .ds-list-confirm div { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6px; }
+    .ds-list-confirm button { min-height: 50px; padding: 4px 6px; font-size: 14px; }
+    /* 一覧の上に開くケア記録 */
+    body.dslist-open #careSheet { z-index: 90; }
+    /* QRを読んだ直後の入力(結果の欄) */
+    .ds-quick { margin-top: 12px; padding: 12px; border-radius: 14px; background: #fff; border: 1px solid color-mix(in srgb, var(--c, #2f5bd3) 35%, #fff); color: #1c2b45; text-align: left; }
+    .ds-quick-title { margin: 0 0 8px; font-size: 15px; font-weight: 700; color: var(--c, #2f5bd3); }
+    .ds-quick-title small { display: block; margin-top: 2px; color: var(--muted, #5a6b83); font-size: 12px; font-weight: 400; }
+    .ds-quick-row { display: grid; gap: 4px; margin-top: 8px; }
+    .ds-quick-label { font-size: 14px; font-weight: 700; color: #3d4f6b; }
+    .ds-quick-amounts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+    .ds-quick-amounts button, .ds-quick-seg button, .ds-quick-all { min-height: 50px; padding: 4px 2px; font-size: 19px; font-weight: 700; color: #1c2b45 !important; background: #fff !important; border: 1.5px solid #d6deea !important; border-radius: 12px; box-shadow: none !important; }
+    .ds-quick-amounts button small { font-size: 11px; font-weight: 400; }
+    .ds-quick-amounts button[aria-pressed="true"], .ds-quick-seg button[aria-pressed="true"] { color: #fff !important; background: var(--c, #2f5bd3) !important; border-color: var(--c, #2f5bd3) !important; }
+    .ds-quick-seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .ds-quick-seg button { font-size: 17px; }
+    .ds-quick-all { width: 100%; margin-top: 10px; font-size: 16px; }
+    .ds-quick-status { min-height: 1.4em; margin: 8px 0 0; color: #1d6b35; font-size: 13.5px; }
+    .ds-quick-status.error { color: #b42318; }
+    @media (max-width: 480px) {
+      .ds-counts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .ds-edit { padding-left: 10px; }
+      .ds-edit-field { flex: 1 1 8em; }
+      .ds-seg { flex: 1 1 100%; }
+      .ds-list-confirm div { grid-template-columns: 1fr 1fr; }
+      .ds-list-confirm div button:first-child { grid-column: 1 / -1; }
+    }
+    /* 今日の集計(来所・入浴・昼食・おやつ・送り・キャンセル)。押すとその記録の一覧が開く */
+    .today-metrics { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+    button.metric { width: 100%; min-height: 0; margin: 0; font: inherit; font-weight: 400; color: inherit; cursor: pointer; }
+    button.metric:active { transform: translateY(1px); }
+    button.metric::before { content: '一覧 ›'; position: absolute; right: 6px; bottom: 4px; color: #9aa7b8; font-size: 10px; }
+    /* スキャン: 種類が7つ(来所・バイタル・入浴・昼食・おやつ・送り・確認) */
+    #modeButtons.mode-buttons { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+    @media (max-width: 600px) {
+      .today-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+      #modeButtons.mode-buttons { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .manual-services { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    /* バイタル(単位つき)。ケア記録・QRの直後・一覧の「バイタル」で同じ形 */
+    .care-bp { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto !important; }
+    .care-bp em { flex: 0 0 auto; color: var(--muted, #5f6368); font-size: 13px; font-style: normal; }
+    .care-last { margin: 4px 0 0; font-size: 12.5px; }
+    .ds-vitals { display: grid; grid-template-columns: repeat(auto-fill, minmax(9.5em, 1fr)); gap: 8px; }
+    .ds-vitals label { display: grid; gap: 3px; margin: 0; font-size: 13px; color: #3d4f6b; }
+    .ds-vitals label.bp { grid-column: span 2; }
+    .ds-vitals label small { color: var(--muted, #5a6b83); font-size: 12px; }
+    .ds-vin { display: flex; align-items: center; gap: 4px; min-width: 0; }
+    .ds-vin input { min-width: 0; width: 100%; min-height: 46px; padding: 6px 8px; font-size: 18px; text-align: right; border: 1px solid #d6deea; border-radius: 10px; background: #fff; }
+    .ds-vin input::placeholder { color: #aab4c0; font-size: 14px; }
+    .ds-vin em { flex: 0 0 auto; color: var(--muted, #5a6b83); font-size: 12.5px; font-style: normal; }
+    .ds-vin.changed input { outline: 2px solid #f59e0b; outline-offset: 1px; }
+    .ds-bp { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 4px; }
+    .ds-bp i { color: var(--muted, #5a6b83); font-style: normal; }
+    .ds-vital-row .ds-vitals { padding: 0 10px 10px calc(4.2em + 20px); }
+    .ds-quick-vitals { margin-top: 12px; padding-top: 10px; border-top: 1px dashed #d6deea; }
+    .ds-quick-vitals .ds-quick-label { display: block; margin: 0 0 6px; }
+    .ds-quick-vitals .ds-quick-label small { display: block; color: var(--muted, #5a6b83); font-size: 12px; font-weight: 400; }
+    .ds-quick-vital-save { width: 100%; min-height: 50px; margin-top: 10px; font-size: 16px; font-weight: 700; color: #fff !important; background: #be123c !important; border: 0 !important; border-radius: 12px; }
+    @media (max-width: 480px) {
+      .ds-vital-row .ds-vitals { padding-left: 10px; }
+      .ds-vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media print {
+      #dsRecordList .ds-vitals { display: none !important; }
+    }
+    /* バイタルの振り返り(1人分・過去2週間/1か月) */
+    #dsVitalHistory { z-index: 95; }
+    .vh-body { max-width: 760px; margin: 0 auto; padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); }
+    .vh-periods { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 320px; margin: 4px auto 10px; }
+    .vh-periods button { min-height: 44px; border: 1px solid #d5dbe4; border-radius: 10px; background: #fff; color: #334155; font: inherit; font-weight: 700; }
+    .vh-periods button[aria-pressed="true"] { border-color: #be123c; background: #be123c; color: #fff; }
+    .vh-range { margin: 0 0 10px; color: #475569; font-size: 14px; text-align: center; }
+    .vh-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .vh-chart { margin: 0; padding: 10px 10px 4px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; min-width: 0; }
+    .vh-chart figcaption { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .vh-chart figcaption small { color: #64748b; }
+    .vh-chart svg { display: block; width: 100%; height: auto; }
+    .vh-grid { stroke: #e2e8f0; stroke-width: 1; }
+    .vh-axis { fill: #64748b; font-size: 11px; }
+    .vh-legend { margin-left: auto; color: #475569; font-size: 12px; }
+    .vh-legend i { display: inline-block; width: 14px; height: 3px; margin: 0 3px 3px 6px; background: var(--c); vertical-align: middle; }
+    .vh-table { width: 100%; border-collapse: collapse; background: #fff; font-size: 14px; }
+    .vh-table th, .vh-table td { padding: 8px 6px; border-bottom: 1px solid #e2e8f0; text-align: center; white-space: nowrap; }
+    .vh-table thead th { background: #f8fafc; font-size: 13px; }
+    .vh-table thead small { display: block; color: #64748b; font-weight: 400; font-size: 11px; }
+    .vh-table tbody th { text-align: left; font-weight: 600; }
+    .vh-none { color: #94a3b8; }
+    .ds-vhist-open { min-height: 40px; margin-top: 8px; padding: 0 12px; border: 1px solid #fecdd3; border-radius: 10px; background: #fff1f2; color: #9f1239; font: inherit; font-weight: 700; }
+    .ds-vital-row .ds-vhist-open { grid-column: 1 / -1; justify-self: start; margin-top: 2px; }
+    @media (max-width: 600px) {
+      .vh-charts { grid-template-columns: minmax(0, 1fr); }
+      .vh-table { font-size: 13px; }
+      .vh-table th, .vh-table td { padding: 7px 4px; }
+    }
+    @media print {
+      body.dsvhist-open { background: #fff !important; }
+      body.dsvhist-open > *:not(#dsVitalHistory) { display: none !important; }
+      body.dsvhist-open #dsVitalHistory { display: block !important; position: static; overflow: visible; background: #fff; }
+      body.dsvhist-open #dsRecordList { display: none !important; }
+      #dsVitalHistory .nb-toolbar button, #dsVitalHistory .vh-periods { display: none !important; }
+      .vh-chart { break-inside: avoid; }
+    }
+
+    /* 連絡帳の行事のお知らせ(画面だけ。印刷には出さない) */
+    .nb-event-edit { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: #f1f6ff; color: #1f3a5f; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; font-size: 13px; display: grid; gap: 8px; }
+    .nb-event-edit p { margin: 0; }
+    .nb-event-edit button { justify-self: start; min-height: 40px; padding: 6px 14px; border: 1px solid #b7c6e0; border-radius: 999px; background: #fff; color: #1a56b8; font: inherit; font-weight: 600; cursor: pointer; }
+    .nb-event-edit button.primary { background: #1a56b8; border-color: #1a56b8; color: #fff; }
+    .nb-event-label { display: grid; gap: 6px; }
+    .nb-event-label textarea { width: 100%; box-sizing: border-box; min-height: 5em; padding: 8px 10px; border: 1px solid #9fb3d1; border-radius: 8px; font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; resize: vertical; }
+    .nb-event-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .nb-event-msg.error { color: #b3261e; }
+    @media print { .nb-event-edit { display: none !important; } }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2123,6 +2302,7 @@
       arrival: { label: '来所', short: '来', color: '#0f766e', colorDark: '#0b5a54' },
       bath: { label: '入浴', short: '入', color: '#d97706', colorDark: '#b45309' },
       lunch: { label: '昼食', short: '昼', color: '#7c3aed', colorDark: '#6d28d9' },
+      snack: { label: 'おやつ', short: 'お', color: '#db2777', colorDark: '#be185d' },
       departure: { label: '送り', short: '送', color: '#0369a1', colorDark: '#075985' }
     };
 
@@ -2131,7 +2311,9 @@
       arrival: '<path d="M10 17l5-5-5-5M15 12H3M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/>',
       bath: '<path d="M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5v-2zM6 12V6.5a2.5 2.5 0 0 1 5 0M7 19l-1 2M17 19l1 2"/>',
       lunch: '<path d="M3 11h18a9 9 0 0 1-18 0zM12 3v4M8 4.5v2.5M16 4.5v2.5"/>',
+      snack: '<path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6V9zM17 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3.5c0 1.5 1 1.5 1 3M12 3.5c0 1.5 1 1.5 1 3"/>',
       departure: '<path d="M4 16v-4l2.2-5.2A2 2 0 0 1 8 5.5h8a2 2 0 0 1 1.8 1.3L20 12v4M2.5 16h19v2.5h-19zM4 12h16M7 18.5V20M17 18.5V20"/>',
+      vital: '<path d="M12 20s-7-4.3-7-10a4 4 0 0 1 7-2.7A4 4 0 0 1 19 10c0 5.7-7 10-7 10z"/><path d="M4.5 12.5h3.5l1.5-3 2.5 5.5 1.5-2.5H19.5"/>',
       info: '<rect x="3" y="5" width="18" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.4"/><path d="M5.8 16.2c.7-1.6 1.8-2.4 3.2-2.4s2.5.8 3.2 2.4M14.5 10h4M14.5 14h4"/>',
       cancelled: '<circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/>'
     };
@@ -2151,13 +2333,23 @@
       return `<span class="avatar" style="--hue:${avatarHue(user.userId || user.displayName)}" aria-hidden="true">${escapeHtml((user.displayName || '人').charAt(0))}</span>`;
     }
 
-    // 記録モード3種 + 記録しない情報確認モード
-    const MODE_META = Object.assign({}, SERVICE_META, {
+    // 記録モード5種(来所・入浴・昼食・おやつ・送り) + 記録しない情報確認モード
+    // スキャンの種類(ボタンの並び順)。「バイタル」と「確認」は記録(読取履歴)を作らない
+    const MODE_META = {
+      arrival: SERVICE_META.arrival,
+      vital: { label: 'バイタル', short: 'バ', color: '#be123c', colorDark: '#9f1239' },
+      bath: SERVICE_META.bath,
+      lunch: SERVICE_META.lunch,
+      snack: SERVICE_META.snack,
+      departure: SERVICE_META.departure,
       info: { label: '確認', short: '確', color: '#475569', colorDark: '#334155' }
-    });
+    };
 
     const API_URL = 'https://script.google.com/macros/s/AKfycbwGN4qNNqwPj6XwXDqH3zWXFh-DYLdzDxLFOeCBX6sqY-1vUbka8KvTcHA-7rkSv4kj-w/exec';
     const MANAGER_APP_URL = 'https://script.google.com/macros/s/AKfycbwlYMPpDFBto10KXQ99anjiNcFyGu2nSztVdxwni9di-bCj5o4g2csDuyAZODlUJ4kVQA/exec';
+    // デモ版(GitHub公開用/demo/)を作るときだけ true になる(scripts/build-demo-scanner.js)。
+    // 画面の「デモ」表示はこれだけで決める。送信のたびにサーバーへ伝え、本番とデモの取り違えを断ってもらう。
+    const IS_DEMO = false;
     const SETUP_QR_PREFIX = 'DSCFG1:';
     const LOGIN_FREE_ACTIONS = ['ping', 'staffList', 'login'];
     const IDLE_STOP_MS = 30000;
@@ -2196,6 +2388,7 @@
       careRecords: [],
       feeItems: [],
       feeRecords: [],
+      notebookGroups: [],
       todayVisibleIds: [],
       recordsRevision: 0,
       pendingDayChanges: new Map(),
@@ -2236,6 +2429,7 @@
     document.addEventListener('DOMContentLoaded', init);
 
     function init() {
+      applyDemoBanner(IS_DEMO);
       bindNavigation();
       bindActions();
       buildModeButtons();
@@ -2325,8 +2519,18 @@
         renderToday();
       }));
       document.getElementById('refreshToday').addEventListener('click', refreshState);
-      document.getElementById('openNotebook').addEventListener('click', () => openCareNotebook(scannerCareHost, notebookUserIds()));
-      document.getElementById('openRecordList').addEventListener('click', () => openRecordList(scannerDsHost));
+      document.getElementById('openNotebook').addEventListener('click', () => openNotebookMenu(scannerCareHost));
+      document.getElementById('openRecordList').addEventListener('click', () => openRecordList(scannerCareHost));
+      document.getElementById('todaySummary').addEventListener('click', (event) => {
+        const metric = event.target.closest('[data-metric]');
+        if (!metric) return;
+        if (metric.dataset.metric === 'cancelled') {
+          app.todayFilter = 'cancelled';
+          renderToday();
+          return;
+        }
+        openRecordList(scannerCareHost, metric.dataset.metric);
+      });
       document.getElementById('openFeePicker').addEventListener('click', () => openFeePicker(scannerDsHost));
       document.getElementById('openPlanSheet').addEventListener('click', () => openPlanSheet(scannerPlanHost));
       document.getElementById('loginSubmit').addEventListener('click', submitLogin);
@@ -2410,8 +2614,11 @@
     function setMode(mode) {
       app.mode = mode;
       const meta = MODE_META[mode];
-      document.getElementById('modeTitle').textContent = mode === 'info' ? '情報を確認' : `${meta.label}を記録`;
-      document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録は追加せず、利用者の情報を表示します' : '同じQRを続けて読んでも重複記録しません';
+      document.getElementById('modeTitle').textContent = mode === 'info' ? '情報を確認' : (mode === 'vital' ? 'バイタルを入力' : `${meta.label}を記録`);
+      document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録は追加せず、利用者の情報を表示します'
+        : (mode === 'vital' ? 'QRを読むと、その方のバイタルを入力できます' : '同じQRを続けて読んでも重複記録しません');
+      const manualOpen = document.getElementById('openManualRecord');
+      if (manualOpen) manualOpen.textContent = mode === 'vital' ? 'QRが読めないとき：一覧からバイタルを入力' : 'QRが読めないとき：名前から記録';
       document.getElementById('modeBanner').style.setProperty('--mode-color', meta.color);
       document.getElementById('modeBanner').dataset.mode = mode;
       document.querySelectorAll('#modeButtons button').forEach((button) => {
@@ -2556,7 +2763,8 @@
       try {
         response = await fetch(app.config.url, {
           method: 'POST',
-          body: JSON.stringify({ action: action, payload: body })
+          // 本番とデモの取り違え防止: サーバーが自分と違う環境なら何もせずに断る
+          body: JSON.stringify({ action: action, payload: body, env: IS_DEMO ? 'demo' : 'production' })
         });
       } catch (error) {
         throw new Error('通信できません。電波状況を確認して、もう一度お試しください。');
@@ -2826,6 +3034,7 @@
         app.feeRecords = (state.businessDate === todayStr() ? state.feeRecords : [])
           .map((record) => Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
       }
+      if (Array.isArray(state.notebookGroups)) app.notebookGroups = state.notebookGroups;
       app.usersByHash = indexUsersByQrHashes(app.users);
       const suffix = fromCache ? '(前回取得分)' : '';
       setStatusLine(`利用者 ${app.users.length}名 / ${state.businessDate || todayStr()}${suffix}`);
@@ -2841,6 +3050,7 @@
         plans: state.plans || [],
         feeItems: state.feeItems || [],
         feeRecords: state.feeRecords || [],
+        notebookGroups: state.notebookGroups || [],
         businessDate: state.businessDate || todayStr()
       }));
     }
@@ -3293,7 +3503,26 @@
         beep(user.alertLevel === 'critical' ? 'warning' : 'success');
         freezeScanFeedback('info', user.displayName, '情報確認(記録していません)');
         showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, '情報確認です。記録はしていません。', user, { showPhoto: true });
+        // 確認でも、その方の過去2週間のバイタルを開ける
+        const panel = document.getElementById('resultPanel');
+        if (panel) {
+          panel.insertAdjacentHTML('beforeend', '<button type="button" class="ds-vhist-open" data-info-vhist>過去2週間のバイタルを見る</button>');
+          panel.querySelector('[data-info-vhist]').addEventListener('click', () => openVitalHistory(scannerCareHost, user.userId, todayStr()));
+        }
         addRecent({ label: user.displayName, status: '確認', serviceType: 'info' });
+        return;
+      }
+
+      // バイタルモード: 記録(読取履歴)は作らず、その方のバイタルを入れる欄を出す
+      if (app.mode === 'vital') {
+        const care = careRecordFor(user.userId) || {};
+        const arrived = isLocallyRecorded(`${todayStr()}:${user.userId}:arrival`) || careHas(care.arrivalTime);
+        beep(user.alertLevel === 'critical' ? 'warning' : 'success');
+        freezeScanFeedback('success', user.displayName, 'バイタルを入力してください');
+        showUserResult(user.alertLevel === 'critical' || !arrived ? 'warning' : 'success', user.displayName,
+          arrived ? '測ったバイタルを入れて「バイタルを保存」を押してください。' : 'まだ来所の記録がありません。バイタルは入れられます（来所は「来所」で読んでください）。', user);
+        showScanQuickInput(user.userId, 'vital');
+        addRecent({ label: user.displayName, status: '入力', serviceType: 'vital' });
         return;
       }
 
@@ -3303,6 +3532,7 @@
         beep('duplicate');
         freezeScanFeedback('warning', `${user.displayName}`, `${SERVICE_META[app.mode].label}は記録済みです`);
         showUserResult('warning', `${user.displayName} は記録済み`, `${SERVICE_META[app.mode].label}はすでに受付済みです。`, user);
+        showScanQuickInput(user.userId, app.mode);
         addRecent({ label: user.displayName, status: '重複', serviceType: app.mode });
         return;
       }
@@ -3320,15 +3550,43 @@
         localKey,
         localStatus: 'pending'
       };
+      // 来所・送りは施設送迎として記録し、家族送迎のときは結果の欄で押し直す(押す回数を増やさない)
+      if (app.mode === 'arrival' || app.mode === 'departure') {
+        const saved = (careRecordFor(user.userId) || {})[DS_TRANSPORT_BY_SERVICE[app.mode]];
+        event.transport = saved === 'family' ? 'family' : 'facility';
+      }
       app.queue.push(event);
       saveQueue();
       beep(user.alertLevel === 'critical' ? 'warning' : 'success');
       freezeScanFeedback('success', `✓ ${user.displayName}`, `${SERVICE_META[app.mode].label}を受付しました`);
       showUserResult(user.alertLevel === 'critical' ? 'warning' : 'success', user.displayName, `${SERVICE_META[app.mode].label}を受付しました。`, user);
+      showScanQuickInput(user.userId, app.mode);
       addRecent({ label: user.displayName, status: '受付', serviceType: app.mode });
       renderSync();
       renderToday();
       syncQueue();
+    }
+
+    // 昼食・おやつは食べた量、来所・送りは送迎を、結果の欄でそのまま入れられるようにする(shared/ds-extra.js)
+    function showScanQuickInput(userId, service) {
+      const panel = document.getElementById('resultPanel');
+      const html = dsQuickInputHtml(scannerCareHost, userId, service);
+      if (!panel || !html) return;
+      panel.insertAdjacentHTML('beforeend', html);
+      bindDsQuickInput(panel, scannerCareHost, userId, {
+        businessDate: todayStr(),
+        // まだ送っていないQRの記録にも、選んだ送迎を入れておく(電波がないときも残る)
+        onTransport: (field, value) => {
+          const serviceType = field === 'arrivalTransport' ? 'arrival' : 'departure';
+          const event = app.queue.find((item) => item.localStatus !== 'rejected' && item.businessDate === todayStr() &&
+            normalizeClientUserId(item.userId) === normalizeClientUserId(userId) && item.serviceType === serviceType);
+          // 送信中の記録は書き換えても届かないので、ケア記録への保存に任せる
+          if (!event || (app.syncPending || []).includes(event)) return false;
+          event.transport = value;
+          saveQueue();
+          return true;
+        }
+      });
     }
 
     function isLocallyRecorded(localKey) {
@@ -3348,6 +3606,11 @@
     const manualUi = { service: 'arrival', time: '', query: '', message: '', error: false, last: null, undoing: false };
 
     function openManualRecord() {
+      // バイタルモードでは、来所した方の一覧(バイタル)からまとめて入れる
+      if (app.mode === 'vital') {
+        openRecordList(scannerCareHost, DS_VITAL_TAB);
+        return;
+      }
       manualUi.service = DS_SERVICES.includes(app.mode) ? app.mode : 'arrival';
       manualUi.time = dsNowTime();
       manualUi.query = '';
@@ -3547,6 +3810,7 @@
         return;
       }
       app.syncing = true;
+      app.syncPending = pending;
       let sentOk = false;
       try {
         const response = await api('syncEvents', {
@@ -3578,6 +3842,7 @@
         setStatusLine(`同期エラー: ${friendlyError(error)}`);
       } finally {
         app.syncing = false;
+        app.syncPending = [];
         renderSync();
         renderToday();
       }
@@ -3621,7 +3886,7 @@
     function cacheCurrentState() {
       // 保存前の仮表示を、次回起動時の確定データとして残さない。
       if (app.pendingDayChanges.size > 0) return;
-      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, businessDate: todayStr() });
+      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, notebookGroups: app.notebookGroups, businessDate: todayStr() });
     }
 
     function nextEventId() {
@@ -3697,6 +3962,12 @@
       }
       if (user.detailMemo) {
         rows.push(`<div class="kv"><span class="k">メモ</span><span class="v">${escapeHtml(user.detailMemo)}</span></div>`);
+      }
+      // 情報確認では、既往歴とかかりつけ医も出す(記録のたびには出さない)
+      if (options && options.showPhoto) {
+        rows.push(`<div class="kv"><span class="k">既往歴</span><span class="v">${escapeHtml(user.medicalHistory || '未登録')}</span></div>`);
+        rows.push(`<div class="kv"><span class="k">かかりつけ医</span><span class="v">${escapeHtml(user.primaryDoctor || '未登録')}</span></div>`);
+        if (user.weightRequired === 'あり') rows.push(`<div class="kv"><span class="k">体重測定</span><span class="v">測る${careLastWeightText(user) ? `（${escapeHtml(careLastWeightText(user))}）` : ''}</span></div>`);
       }
       panel.innerHTML = `<h2>${escapeHtml(title)}</h2><p>${escapeHtml(message)}</p><div class="user-info">${rows.join('')}</div>`;
       void panel.offsetWidth;
@@ -3868,7 +4139,7 @@
       document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
       document.getElementById('clearTodaySearch').classList.toggle('hidden', !rawQuery);
       document.querySelectorAll('[data-today-filter]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.todayFilter === app.todayFilter)));
-      const counts = { arrival: 0, bath: 0, lunch: 0, departure: 0, cancelled: 0 };
+      const counts = { arrival: 0, bath: 0, lunch: 0, snack: 0, departure: 0, cancelled: 0 };
       const entries = app.users.slice().sort(kanaSort).map((user) => {
         const record = recordFor(user.userId);
         const cancelled = Boolean(record && record.attendanceStatus === 'cancelled');
@@ -3879,9 +4150,10 @@
         return { user, record, cancelled, flags, plan, planned: Boolean(plan && plan.planned) };
       });
       renderPlanBar(entries);
+      // 押すと、その記録をした方の一覧(名前・時刻・食べた量・送迎)が開く。キャンセルは下の一覧をキャンセルで絞り込む
       document.getElementById('todaySummary').innerHTML = [
-        ['arrival', '来所'], ['bath', '入浴'], ['lunch', '昼食'], ['departure', '送り'], ['cancelled', 'キャンセル']
-      ].map(([key, label]) => `<div class="metric" data-metric="${key}" style="--c:${key === 'cancelled' ? '#c2410c' : SERVICE_META[key].color}"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${counts[key]}<small>名</small></strong><span>${label}</span></div>`).join('');
+        ['arrival', '来所'], ['bath', '入浴'], ['lunch', '昼食'], ['snack', 'おやつ'], ['departure', '送り'], ['cancelled', 'キャンセル']
+      ].map(([key, label]) => `<button type="button" class="metric" data-metric="${key}" style="--c:${key === 'cancelled' ? '#c2410c' : SERVICE_META[key].color}" aria-label="${label} ${counts[key]}名。押すと一覧を表示"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${counts[key]}<small>名</small></strong><span>${label}</span></button>`).join('');
       const filtered = entries.filter(({user, cancelled, flags, planned}) => {
         if (query && !normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query)) return false;
         // 今日の予定: 予定のある人に加え、予定外で来所した人・キャンセルした人も表示する
@@ -3935,8 +4207,11 @@
       const businessDate = todayStr();
       app.queue.forEach((event) => {
         const field = DS_TIME_FIELDS[event.serviceType] || '';
-        if (!field || careHas(care[field]) || event.localStatus === 'rejected') return;
+        if (!field || event.localStatus === 'rejected') return;
         if (event.businessDate !== businessDate || normalizeClientUserId(event.userId) !== normalizedUserId) return;
+        const transportField = DS_TRANSPORT_BY_SERVICE[event.serviceType];
+        if (event.transport && transportField && !careHas(care[transportField])) care[transportField] = event.transport;
+        if (careHas(care[field])) return;
         const at = new Date(event.occurredAtClient);
         if (!Number.isNaN(at.getTime())) care[field] = `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`;
       });
@@ -4010,6 +4285,12 @@
         app.feeRecords = app.feeRecords.filter((record) => record.feeId !== feeId);
       },
       canEditPast: () => false,
+      notebookCandidates: () => notebookUserIds(),
+      notebookGroups: () => app.notebookGroups,
+      setNotebookGroups: (groups) => {
+        app.notebookGroups = Array.isArray(groups) ? groups : [];
+        cacheCurrentState();
+      },
       onFeeChanged: () => {
         cacheCurrentState();
         renderToday();
@@ -4232,13 +4513,18 @@
       app.records.push(record);
     }
 
+    /* @@DS_EXTRA_JS BEGIN@@ shared/ds-extra.js の写し。直すときは shared 側を直して node デイサービスアプリ/scripts/sync-shared.js */
     // ===== ケア記録の入力と連絡帳(Scanner.html と Index.html で同じ処理) =====
     // 画面ごとの違い(通信方法・一覧の再描画)は host オブジェクトで受け取る。
     const CARE_FACILITY_NAME = 'デイサービス 壱番館';
     const CARE_FIELD_KEYS = [
-      'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
-      'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote'
+      'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
+      'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote',
+      'arrivalTransport', 'departureTransport', 'weight', 'mealAmount'
     ];
+    // 来所・送りの送迎。家族送迎(事業所が送迎しない片道)は送迎減算の確認に使う
+    const CARE_TRANSPORT_CHOICES = [['facility', '施設送迎'], ['family', '家族送迎']];
+    const CARE_TRANSPORT_LABELS = { facility: '施設送迎', family: '家族送迎' };
     // サーバー(Code.gs の CARE_NUMBER_RULES)と同じ範囲。打ち間違い(365など)を保存前に止める。
     const CARE_NUMBER_RULES = {
       temperature: { min: 34, max: 42, label: '体温' },
@@ -4246,12 +4532,41 @@
       bpLow: { min: 30, max: 150, label: '血圧(下)' },
       pulse: { min: 30, max: 200, label: '脈拍' },
       spo2: { min: 70, max: 100, label: 'SpO2' },
+      weight: { min: 20, max: 200, label: '体重' },
       mealMain: { min: 0, max: 10, label: '主食' },
       mealSide: { min: 0, max: 10, label: '副食' },
+      mealAmount: { min: 0, max: 10, label: '食事量' },
       snackAmount: { min: 0, max: 10, label: 'おやつ' },
       fluidMl: { min: 0, max: 3000, label: '水分量' }
     };
+    // バイタルの項目と単位(画面・連絡帳・一覧で同じ表示にする)
+    const CARE_VITAL_FIELDS = ['temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2', 'weight'];
+    const CARE_VITAL_UNITS = { temperature: '℃', bpHigh: 'mmHg', bpLow: 'mmHg', pulse: '回/分', spo2: '%', weight: 'kg' };
     const careUi = { host: null, userId: '', initial: null, saving: false };
+
+    // 体重の欄を出す方: 利用者の「体重測定」がありの方と、その日すでに体重が入っている方
+    function careWeightNeeded(user, care) {
+      return Boolean((user && user.weightRequired === 'あり') || (care && careHas(care.weight)));
+    }
+
+    // 「前回 52.3kg（10/28）」
+    function careLastWeightText(user) {
+      if (!user || !careHas(user.lastWeight)) return '';
+      const [, month, day] = String(user.lastWeightDate || '').split('-').map(Number);
+      return `前回 ${user.lastWeight}kg${month && day ? `（${month}/${day}）` : ''}`;
+    }
+
+    // 「体温 36.5℃」「血圧 120/70mmHg」などの短い表示
+    function careVitalTexts(care) {
+      const c = care || {};
+      const texts = [];
+      if (careHas(c.temperature)) texts.push(`体温 ${c.temperature}℃`);
+      if (careHas(c.bpHigh) || careHas(c.bpLow)) texts.push(`血圧 ${careHas(c.bpHigh) ? c.bpHigh : '—'}/${careHas(c.bpLow) ? c.bpLow : '—'}mmHg`);
+      if (careHas(c.pulse)) texts.push(`脈拍 ${c.pulse}回/分`);
+      if (careHas(c.spo2)) texts.push(`SpO2 ${c.spo2}%`);
+      if (careHas(c.weight)) texts.push(`体重 ${c.weight}kg`);
+      return texts;
+    }
 
     function careHas(value) {
       return value !== undefined && value !== null && String(value).trim() !== '';
@@ -4261,6 +4576,69 @@
       return String(value == null ? '' : value)
         .replace(/[０-９．：－]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
         .trim();
+    }
+
+    // 数字の欄: 全角・末尾の単位(36.5℃、120mmHg、52kg など)をそろえて数字の文字にする
+    const CARE_UNIT_SUFFIX = /\s*(割|ml|℃|°C|度|%|mmHg|回\/分|回|kg|キロ)$/i;
+    function careNumberText(value) {
+      return careToHalfWidth(String(value == null ? '' : value).normalize('NFKC')).replace(CARE_UNIT_SUFFIX, '').trim();
+    }
+
+    // 体温・体重は小数点を打たなくてよい: 体温「365」→36.5、体重「523」→52.3
+    // (体重は200kgを超える数字になるときだけ、最後の1けたを小数にする。「52」「105」はそのまま)
+    function careAutoPoint(field, value) {
+      const text = String(value == null ? '' : value);
+      if (!/^\d+$/.test(text)) return text;
+      if (field === 'temperature' && text.length === 3) return `${text.slice(0, 2)}.${text.slice(2)}`;
+      if (field === 'weight' && text.length >= 3 && Number(text) > CARE_NUMBER_RULES.weight.max) return `${text.slice(0, -1)}.${text.slice(-1)}`;
+      return text;
+    }
+
+    // 打っている欄にその場で小数点を入れる(ケア記録・来所直後・一覧のどの欄でも)
+    function careAutoPointInput(event) {
+      const input = event.target;
+      if (!input || input.tagName !== 'INPUT' || event.isComposing) return;
+      const field = input.dataset.care || input.dataset.quickVital || input.dataset.dsVital;
+      if (field !== 'temperature' && field !== 'weight') return;
+      const half = careToHalfWidth(input.value);
+      const next = careAutoPoint(field, half);
+      if (next === half) return;
+      input.value = next;
+      try { input.setSelectionRange(next.length, next.length); } catch (error) { /* 選べない欄は無視 */ }
+    }
+    if (typeof document !== 'undefined') {
+      // 先に直してから、下書き・保存の処理に渡す(capture で一番先に動かす)
+      document.addEventListener('input', careAutoPointInput, true);
+      document.addEventListener('compositionend', careAutoPointInput, true);
+    }
+
+    // 2つの数字の欄が同じ値か(「36.50」と「36.5」は同じ)
+    function careSameNumber(a, b) {
+      const x = careNumberText(a);
+      const y = careNumberText(b);
+      if (x === y) return true;
+      if (x === '' || y === '') return false;
+      return Number(x) === Number(y);
+    }
+
+    // 食べた量の表示。10割は「全量」
+    function careAmountText(value) {
+      return String(value) === '10' ? '全量' : `${value}割`;
+    }
+
+    // 昼食の食事量(2026-11-09 から主食・副食を分けず1つ)。以前の記録の主食・副食はそのまま表示する
+    function careMealTexts(care, short) {
+      const c = care || {};
+      if (careHas(c.mealAmount)) return [`${short ? '' : '食事量 '}${careAmountText(c.mealAmount)}`];
+      const texts = [];
+      if (careHas(c.mealMain)) texts.push(`主食${short ? '' : ' '}${careAmountText(c.mealMain)}`);
+      if (careHas(c.mealSide)) texts.push(`副食${short ? '' : ' '}${careAmountText(c.mealSide)}`);
+      return texts;
+    }
+
+    function careHasLegacyMeal(care) {
+      const c = care || {};
+      return !careHas(c.mealAmount) && (careHas(c.mealMain) || careHas(c.mealSide));
     }
 
     // シートが時刻を日時に変換していた場合も「09:30」に戻す
@@ -4278,7 +4656,7 @@
     }
 
     // 時刻の欄。QRを読むと自動で入り、QRが読めなかったときは時刻を入れて保存すると記録になる
-    const CARE_TIME_KEYS = ['arrivalTime', 'departureTime', 'bathTime', 'lunchTime'];
+    const CARE_TIME_KEYS = ['arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime'];
 
     function careValuesFrom(care, bathStatus) {
       const values = {};
@@ -4295,12 +4673,13 @@
       const c = care || {};
       const parts = [];
       if (careHas(c.arrivalTime)) parts.push(['time', `到着 ${careTimeText(c.arrivalTime)}`]);
+      if (c.arrivalTransport === 'family') parts.push(['family', '来所は家族送迎']);
       if (careHas(c.departureTime)) parts.push(['time', `送り ${careTimeText(c.departureTime)}`]);
+      if (c.departureTransport === 'family') parts.push(['family', '送りは家族送迎']);
       if (careHas(c.lunchTime)) parts.push(['meal', `昼食 ${careTimeText(c.lunchTime)}`]);
-      if (careHas(c.temperature)) parts.push(['vital', `体温 ${c.temperature}`]);
-      if (careHas(c.bpHigh) || careHas(c.bpLow)) parts.push(['vital', `血圧 ${c.bpHigh || '—'}/${c.bpLow || '—'}`]);
-      if (careHas(c.mealMain)) parts.push(['meal', `主食 ${c.mealMain}割`]);
-      if (careHas(c.mealSide)) parts.push(['meal', `副食 ${c.mealSide}割`]);
+      careVitalTexts(c).forEach((text) => parts.push(['vital', text]));
+      careMealTexts(c).forEach((text) => parts.push(['meal', text]));
+      if (careHas(c.snackAmount)) parts.push(['snack', `おやつ ${careAmountText(c.snackAmount)}`]);
       if (careHas(c.fluidMl)) parts.push(['fluid', `水分 ${c.fluidMl}ml`]);
       if (bathStatus === 'done') parts.push(['bath', (c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : '入浴')) + (careHas(c.bathTime) ? ` ${careTimeText(c.bathTime)}` : '')]);
       if (c.recreation === 'joined') parts.push(['rec', 'レク参加']);
@@ -4329,7 +4708,7 @@
 
     function careSelectField(key, label, value) {
       const options = ['<option value="">—</option>'].concat([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map((amount) =>
-        `<option value="${amount}" ${String(value) === String(amount) ? 'selected' : ''}>${amount}割</option>`));
+        `<option value="${amount}" ${String(value) === String(amount) ? 'selected' : ''}>${careAmountText(amount)}</option>`));
       return `<label class="care-field"><span>${label}</span><select data-care="${key}" aria-label="${label}（割）">${options.join('')}</select></label>`;
     }
 
@@ -4364,24 +4743,31 @@
               ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
               ${careTimeField('departureTime', '送り出発', v.departureTime)}
             </div>
+            <div class="care-grid two care-transport">
+              <div>${careChoice('arrivalTransport', '来所の送迎', CARE_TRANSPORT_CHOICES, v.arrivalTransport)}</div>
+              <div>${careChoice('departureTransport', '送りの送迎', CARE_TRANSPORT_CHOICES, v.departureTransport)}</div>
+            </div>
           </fieldset>
           <fieldset class="care-group"><legend>バイタル</legend>
             <div class="care-grid two">
               ${careNumberField('temperature', '体温', '℃', v.temperature, 'decimal', '')}
-              <label class="care-field"><span>血圧</span><span class="care-bp"><input data-care="bpHigh" inputmode="numeric" autocomplete="off" placeholder="上" value="${escapeHtml(v.bpHigh)}" aria-label="血圧の上"><i>/</i><input data-care="bpLow" inputmode="numeric" autocomplete="off" placeholder="下" value="${escapeHtml(v.bpLow)}" aria-label="血圧の下"></span></label>
+              <label class="care-field"><span>血圧</span><span class="care-bp"><input data-care="bpHigh" inputmode="numeric" autocomplete="off" placeholder="上" value="${escapeHtml(v.bpHigh)}" aria-label="血圧の上（mmHg）"><i>/</i><input data-care="bpLow" inputmode="numeric" autocomplete="off" placeholder="下" value="${escapeHtml(v.bpLow)}" aria-label="血圧の下（mmHg）"><em>mmHg</em></span></label>
               ${careNumberField('pulse', '脈拍', '回/分', v.pulse, 'numeric', '')}
               ${careNumberField('spo2', 'SpO2', '%', v.spo2, 'numeric', '')}
+              ${careWeightNeeded(user, host.care(user.userId)) ? `<div>${careNumberField('weight', '体重', 'kg', v.weight, 'decimal', '')}${careLastWeightText(user) ? `<p class="care-hint care-last">${escapeHtml(careLastWeightText(user))}</p>` : ''}</div>` : ''}
             </div>
+            ${host.call ? '<button type="button" class="ds-vhist-open" data-care-vhist>過去2週間の記録を見る</button>' : ''}
           </fieldset>
           <fieldset class="care-group"><legend>昼食・おやつ（摂取量）</legend>
             <div class="care-grid two care-time-row">
               ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime)}
+              ${careTimeField('snackTime', 'おやつの時刻', v.snackTime)}
             </div>
-            <div class="care-grid three">
-              ${careSelectField('mealMain', '主食', v.mealMain)}
-              ${careSelectField('mealSide', '副食', v.mealSide)}
+            <div class="care-grid two">
+              ${careSelectField('mealAmount', '食事量', v.mealAmount)}
               ${careSelectField('snackAmount', 'おやつ', v.snackAmount)}
             </div>
+            ${careHasLegacyMeal(host.care(user.userId)) ? `<p class="care-hint">以前の入力：${escapeHtml(careMealTexts(host.care(user.userId)).join('・'))}</p>` : ''}
           </fieldset>
           <fieldset class="care-group"><legend>水分</legend>
             <div class="care-fluid">
@@ -4433,6 +4819,8 @@
         if (event.key === 'Escape') requestCloseCareForm();
       });
       form.querySelector('[data-care-close]').addEventListener('click', requestCloseCareForm);
+      const history = form.querySelector('[data-care-vhist]');
+      if (history) history.addEventListener('click', () => openVitalHistory(careUi.host, careUi.userId, careUi.host.businessDate()));
       form.querySelector('[data-care-next]').addEventListener('click', () => saveCareForm(true));
       form.querySelector('[data-care-keep]').addEventListener('click', () => {
         form.querySelector('.care-confirm').classList.add('hidden');
@@ -4534,11 +4922,12 @@
       for (const key of Object.keys(CARE_NUMBER_RULES)) {
         if (!(key in changed) || changed[key] === '') continue;
         const rule = CARE_NUMBER_RULES[key];
-        const number = Number(careToHalfWidth(changed[key]));
-        if (!Number.isFinite(number) || number < rule.min || number > rule.max) {
+        const text = careAutoPoint(key, careNumberText(changed[key]));
+        const number = Number(text);
+        if (text === '' || !Number.isFinite(number) || number < rule.min || number > rule.max) {
           return { key, message: `${rule.label}は${rule.min}〜${rule.max}の範囲で入力してください。` };
         }
-        changed[key] = careToHalfWidth(changed[key]);
+        changed[key] = text;
       }
       for (const key of CARE_TIME_KEYS) {
         if (key in changed && changed[key] !== '' && !/^\d{1,2}:\d{2}$/.test(careToHalfWidth(changed[key]))) {
@@ -4590,6 +4979,7 @@
       try {
         const result = await host.save(Object.assign({ businessDate: host.businessDate(), userId }, changed));
         host.applySaved(userId, result || {});
+        dsRefreshRecordList();
         const name = (host.findUser(userId) || {}).displayName || '';
         setCareSaving(false);
         if (goNext) {
@@ -4651,119 +5041,28 @@
       closeCareForm(true);
     }
 
-    // ---- 連絡帳 ----
-
-    function careNotebookRows(care, bathStatus) {
-      const c = care || {};
-      const vitals = [];
-      if (careHas(c.temperature)) vitals.push(`体温 ${c.temperature}℃`);
-      if (careHas(c.bpHigh) || careHas(c.bpLow)) vitals.push(`血圧 ${careHas(c.bpHigh) ? c.bpHigh : '—'}/${careHas(c.bpLow) ? c.bpLow : '—'}`);
-      if (careHas(c.pulse)) vitals.push(`脈拍 ${c.pulse}回/分`);
-      if (careHas(c.spo2)) vitals.push(`SpO2 ${c.spo2}%`);
-      const meal = [];
-      if (careHas(c.mealMain)) meal.push(`主食 ${c.mealMain}割`);
-      if (careHas(c.mealSide)) meal.push(`副食 ${c.mealSide}割`);
-      const bath = bathStatus === 'done' ? '入浴されました' : (bathStatus === 'refused' ? '本日は入浴されませんでした' : '');
-      const recreation = c.recreation === 'joined' ? '参加されました' : (c.recreation === 'absent' ? '本日は参加されませんでした' : '');
-      return [
-        { label: 'バイタル', value: vitals.join('　') },
-        { label: '昼食', value: meal.join('　') },
-        { label: 'おやつ', value: careHas(c.snackAmount) ? `${c.snackAmount}割` : '' },
-        { label: '水分', value: careHas(c.fluidMl) ? `${c.fluidMl} ml` : '' },
-        { label: '入浴', value: bath },
-        { label: 'レクリエーション', value: recreation },
-        { label: '連絡事項', value: careHas(c.notebookNote) ? String(c.notebookNote) : '', note: true }
-      ];
-    }
-
-    function careNotebookCardHtml(entry, dateText) {
-      const rows = careNotebookRows(entry.care, entry.bathStatus);
-      const missing = rows.filter((row) => !row.note && !row.value).map((row) => row.label);
-      return `<article class="nb-card">
-        <header><h2>連絡帳</h2><span>${escapeHtml(careDateLabel(dateText))}</span></header>
-        <p class="nb-name">${escapeHtml(entry.user.displayName)} 様</p>
-        <table class="nb-table"><tbody>${rows.map((row) => `<tr class="${row.note ? 'nb-note' : ''}"><th scope="row">${row.label}</th><td>${row.value ? escapeHtml(row.value) : (row.note ? '' : '<span class="nb-empty">—</span>')}</td></tr>`).join('')}</tbody></table>
-        <footer>${escapeHtml(CARE_FACILITY_NAME)}</footer>
-        ${missing.length ? `<p class="nb-missing">未記録: ${escapeHtml(missing.join('・'))}（この表示は印刷されません）</p>` : ''}
-      </article>`;
-    }
-
-    function openCareNotebook(host, userIds) {
-      const dateText = host.businessDate();
-      const entries = (userIds || []).map((userId) => ({
-        user: host.findUser(userId),
-        care: host.care(userId),
-        bathStatus: host.bathState(userId)
-      })).filter((entry) => entry.user);
-      const missingCount = entries.filter((entry) =>
-        careNotebookRows(entry.care, entry.bathStatus).some((row) => !row.note && !row.value)).length;
-      const previousNotebook = document.getElementById('careNotebook');
-      if (previousNotebook) previousNotebook.remove();
-      const overlay = document.createElement('div');
-      overlay.id = 'careNotebook';
-      overlay.className = 'nb-overlay';
-      overlay.setAttribute('role', 'dialog');
-      overlay.setAttribute('aria-modal', 'true');
-      overlay.setAttribute('aria-label', '連絡帳');
-      overlay.innerHTML = `
-        <div class="nb-toolbar">
-          <button type="button" data-nb-close>← 戻る</button>
-          <div class="nb-title"><strong>連絡帳</strong><span>${escapeHtml(careDateLabel(dateText))} ・ ${entries.length}名</span></div>
-          <button type="button" class="primary" data-nb-print ${entries.length ? '' : 'disabled'}>印刷</button>
-        </div>
-        <p class="nb-hint">A4用紙1枚に2名分を印刷します。${missingCount ? `未記録の項目がある方が${missingCount}名います。` : ''}</p>
-        <p class="nb-hint nb-print-help" id="nbPrintHelp">印刷画面が開かないときは、ブラウザの<strong>共有ボタン（□に↑）</strong>から「<strong>プリント</strong>」を選んでください。連絡帳だけが印刷されます。</p>
-        <div class="nb-pages">${entries.map((entry) => careNotebookCardHtml(entry, dateText)).join('') ||
-          '<div class="empty-state"><strong>連絡帳を作成できる方がいません</strong>来所を記録した方、またはケア記録を入力した方が表示されます。</div>'}</div>`;
-      document.body.appendChild(overlay);
-      document.body.classList.add('notebook-open');
-      if (!GinNav.isTop('careNotebook')) GinNav.push('careNotebook', closeCareNotebook);
-      overlay.querySelector('[data-nb-close]').addEventListener('click', closeCareNotebook);
-      overlay.querySelector('[data-nb-print]').addEventListener('click', printCareNotebook);
-      overlay.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') closeCareNotebook();
-      });
-      overlay.querySelector('[data-nb-close]').focus({ preventScroll: true });
-    }
-
-    // iPhoneのChromeやホーム画面に追加したアプリでは、window.print() で印刷画面が開かないことがある。
-    // 印刷画面が開いたか(beforeprint)を確かめ、開かなければ共有ボタンからの印刷を目立たせて案内する。
-    function printCareNotebook() {
-      const help = document.getElementById('nbPrintHelp');
-      let opened = false;
-      const markOpened = () => { opened = true; };
-      window.addEventListener('beforeprint', markOpened, { once: true });
-      try {
-        window.print();
-      } catch (error) {
-        opened = false;
-      }
-      setTimeout(() => {
-        window.removeEventListener('beforeprint', markOpened);
-        if (!opened && help) {
-          help.classList.add('alert');
-          help.scrollIntoView({ block: 'nearest' });
-        }
-      }, 1500);
-    }
-
-    function closeCareNotebook() {
-      const existing = document.getElementById('careNotebook');
-      if (existing) existing.remove();
-      document.body.classList.remove('notebook-open');
-      if (existing) GinNav.closed('careNotebook');
-    }
-
-    /* @@DS_EXTRA_JS BEGIN@@ shared/ds-extra.js の写し。直すときは shared 側を直して node デイサービスアプリ/scripts/sync-shared.js */
     // ===== 記録一覧・実費(Scanner.html と Index.html で共通) =====
     // 直すときはこのファイルを直して node デイサービスアプリ/scripts/sync-shared.js で両方へ書き写す。
     // 画面ごとの違いは host で受け取る:
     //   businessDate() / users() / findUser(id) / flags(id) / record(id) / care(id) / plan(id)
     //   feeItems() / feeRecords() / call(name, payload) / onFeeChanged() / canEditPast()
-    const DS_SERVICES = ['arrival', 'bath', 'lunch', 'departure'];
-    const DS_SERVICE_LABELS = { arrival: '来所', bath: '入浴', lunch: '昼食', departure: '送り' };
-    const DS_TIME_FIELDS = { arrival: 'arrivalTime', bath: 'bathTime', lunch: 'lunchTime', departure: 'departureTime' };
-    const DS_SERVICE_COLORS = { arrival: '#0f766e', bath: '#d97706', lunch: '#7c3aed', departure: '#0369a1' };
+    const DS_SERVICES = ['arrival', 'bath', 'lunch', 'snack', 'departure'];
+    const DS_SERVICE_LABELS = { arrival: '来所', bath: '入浴', lunch: '昼食', snack: 'おやつ', departure: '送り' };
+    const DS_TIME_FIELDS = { arrival: 'arrivalTime', bath: 'bathTime', lunch: 'lunchTime', snack: 'snackTime', departure: 'departureTime' };
+    const DS_SERVICE_COLORS = { arrival: '#0f766e', bath: '#d97706', lunch: '#7c3aed', snack: '#db2777', departure: '#0369a1' };
+    // QRの直後・一覧でまとめて直せる項目(サーバーの CARE_BULK_FIELDS と同じ)。日次実績(請求の元)には触れない
+    const DS_EDIT_FIELDS = {
+      arrival: [['arrivalTransport', '送迎']],
+      lunch: [['mealAmount', '食事量']],
+      snack: [['snackAmount', 'おやつ']],
+      departure: [['departureTransport', '送迎']]
+    };
+    const DS_TRANSPORT_FIELDS = ['arrivalTransport', 'departureTransport'];
+    // 記録一覧の「バイタル」タブ(来所した方のバイタルをまとめて入力・修正する)
+    const DS_VITAL_TAB = 'vital';
+    const DS_VITAL_COLOR = '#be123c';
+    const DS_TRANSPORT_BY_SERVICE = { arrival: 'arrivalTransport', departure: 'departureTransport' };
+    const DS_AMOUNTS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
     const DS_FEE_CATEGORY_LABELS = {
       diaper: 'おむつ代',
       daily: '日常生活費（身の回り品）',
@@ -4771,7 +5070,8 @@
       meal: '食費',
       other: 'その他'
     };
-    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0 };
+    // drafts: 一覧で変えて、まだ保存していない値 { 利用者ID: { 項目: 値 } }
+    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, filled: {}, saving: false, status: '', statusError: false, confirmClose: false };
     const dsFeeUi = { host: null, userId: '', itemId: '', quantity: 1, saving: false, monthTotal: null, monthSeq: 0, confirmCancel: '' };
 
     function dsYen(value) {
@@ -4801,6 +5101,8 @@
     }
 
     // ---- 記録一覧 ----
+    // 今日の画面の「来所 ○名」などを押すと、その記録の一覧が開く。名前を押すとケア記録を見る・直す。
+    // 昼食・おやつの量と、来所・送りの送迎は、一覧のままでまとめて直して保存できる。
 
     // 1人分の「何を・何時に・どうやって・誰が」。時刻はケア記録(手で直した時刻)を優先する。
     function dsEntryFor(host, user, events) {
@@ -4823,16 +5125,18 @@
       });
       services.bath.refused = record.bathStatus === 'refused';
       services.bath.detail = care.bathType === 'special' ? '特浴' : (care.bathType === 'general' ? '一般浴' : '');
-      const meal = [];
-      if (careHas(care.mealMain)) meal.push(`主食${care.mealMain}割`);
-      if (careHas(care.mealSide)) meal.push(`副食${care.mealSide}割`);
-      services.lunch.detail = meal.join(' ');
+      services.lunch.detail = careMealTexts(care, true).join(' ');
+      services.snack.detail = careHas(care.snackAmount) ? careAmountText(care.snackAmount) : '';
+      services.arrival.detail = CARE_TRANSPORT_LABELS[care.arrivalTransport] || '';
+      services.departure.detail = CARE_TRANSPORT_LABELS[care.departureTransport] || '';
       return {
         user,
         userId,
+        care,
         cancelled,
         cancelReason: record.cancelReason || '',
         planned: Boolean(plan && plan.planned),
+        arrived: Boolean(flags.arrival),
         halfDay: record.usageActual === 'half_am',
         services
       };
@@ -4844,10 +5148,22 @@
         .filter((entry) => entry.planned || entry.cancelled || DS_SERVICES.some((key) => entry.services[key].done));
     }
 
-    function openRecordList(host) {
+    function dsDraftCount() {
+      return Object.keys(dsListUi.drafts).filter((userId) => Object.keys(dsListUi.drafts[userId]).length).length;
+    }
+
+    // tab: 'summary'(まとめ) または記録の種類(arrival など)。今日の画面の「来所 ○名」から開くときは種類を渡す
+    function openRecordList(host, tab) {
       dsListUi.host = host;
+      dsListUi.tab = DS_SERVICES.includes(tab) || tab === DS_VITAL_TAB ? tab : 'summary';
       dsListUi.events = null;
       dsListUi.eventsError = false;
+      dsListUi.drafts = {};
+      dsListUi.filled = {};
+      dsListUi.saving = false;
+      dsListUi.status = '';
+      dsListUi.statusError = false;
+      dsListUi.confirmClose = false;
       const seq = ++dsListUi.seq;
       const previous = document.getElementById('dsRecordList');
       if (previous) previous.remove();
@@ -4864,14 +5180,15 @@
           <button type="button" class="primary" data-ds-print>印刷</button>
         </div>
         <div class="ds-tabs" role="tablist" aria-label="一覧の種類">
-          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]])).map(([key, label]) =>
-            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${DS_SERVICE_COLORS[key] || '#2f5bd3'}">${label}</button>`).join('')}
+          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]]), [[DS_VITAL_TAB, 'バイタル']]).map(([key, label]) =>
+            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${key === DS_VITAL_TAB ? DS_VITAL_COLOR : (DS_SERVICE_COLORS[key] || '#2f5bd3')}">${label}</button>`).join('')}
         </div>
-        <div class="ds-list-body" id="dsListBody"></div>`;
+        <div class="ds-list-body" id="dsListBody"></div>
+        <div class="ds-list-footer" id="dsListFooter" aria-live="polite"></div>`;
       document.body.appendChild(overlay);
       document.body.classList.add('dslist-open');
-      if (!GinNav.isTop('dsRecordList')) GinNav.push('dsRecordList', closeRecordList);
-      overlay.querySelector('[data-ds-close]').addEventListener('click', closeRecordList);
+      if (!GinNav.isTop('dsRecordList')) GinNav.push('dsRecordList', recordListBack);
+      overlay.querySelector('[data-ds-close]').addEventListener('click', requestCloseRecordList);
       overlay.querySelector('[data-ds-print]').addEventListener('click', () => {
         dsListUi.tab = 'summary';
         renderRecordList();
@@ -4880,10 +5197,13 @@
       overlay.querySelectorAll('[data-ds-tab]').forEach((button) => button.addEventListener('click', () => {
         dsListUi.tab = button.dataset.dsTab;
         renderRecordList();
+        const body = document.getElementById('dsListBody');
+        if (body) overlay.scrollTop = 0;
       }));
       overlay.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') closeRecordList();
+        if (event.key === 'Escape' && !document.getElementById('careSheet')) requestCloseRecordList();
       });
+      bindRecordListBody(overlay);
       renderRecordList();
       overlay.querySelector('[data-ds-close]').focus({ preventScroll: true });
       // 記録の方法(QR/手入力)と記録した職員は読取履歴から後で足す。届くまでは時刻だけで表示する。
@@ -4898,12 +5218,268 @@
       });
     }
 
+    // 一覧の中の操作(名前を押す・量や送迎を変える・まとめて入れる・保存)は、書き直しても効くよう親でまとめて受ける
+    function bindRecordListBody(overlay) {
+      overlay.addEventListener('click', (event) => {
+        const host = dsListUi.host;
+        if (!host) return;
+        const history = event.target.closest('[data-ds-vhist]');
+        if (history) {
+          openVitalHistory(host, history.dataset.dsVhist, host.businessDate());
+          return;
+        }
+        const open = event.target.closest('[data-ds-open]');
+        if (open) {
+          if (host.save && host.bathState) openCareForm(host, open.dataset.dsOpen);
+          return;
+        }
+        const seg = event.target.closest('[data-ds-seg-value]');
+        if (seg) {
+          const group = seg.closest('[data-ds-edit]');
+          dsSetDraft(group.dataset.dsUser, group.dataset.dsEdit, seg.dataset.dsSegValue);
+          group.querySelectorAll('[data-ds-seg-value]').forEach((button) => {
+            button.setAttribute('aria-pressed', String(button.dataset.dsSegValue === seg.dataset.dsSegValue));
+          });
+          group.classList.toggle('changed', dsIsDraft(group.dataset.dsUser, group.dataset.dsEdit));
+          renderRecordListFooter();
+          return;
+        }
+        const go = event.target.closest('[data-ds-tab-go]');
+        if (go) {
+          dsListUi.tab = go.dataset.dsTabGo;
+          renderRecordList();
+          const list = document.getElementById('dsRecordList');
+          if (list) list.scrollTop = 0;
+          return;
+        }
+        const fill = event.target.closest('[data-ds-fill]');
+        if (fill) {
+          dsFillBlanks(fill.dataset.dsFill);
+          renderRecordList();
+          return;
+        }
+        if (event.target.closest('[data-ds-save]')) {
+          saveRecordListDrafts();
+          return;
+        }
+        if (event.target.closest('[data-ds-keep]')) {
+          dsListUi.confirmClose = false;
+          renderRecordListFooter();
+          return;
+        }
+        if (event.target.closest('[data-ds-discard]')) {
+          // 保存の途中で閉じると、保存した値が画面に入らないので待つ
+          if (dsListUi.saving) return;
+          dsListUi.drafts = {};
+          dsListUi.filled = {};
+          closeRecordList();
+        }
+      });
+      // バイタルの数字は打つたびに下書きへ入れる(一覧が書き直されても、下書きと入力中の欄は戻す)
+      overlay.addEventListener('input', (event) => {
+        const input = event.target.closest('input[data-ds-vital]');
+        if (!input) return;
+        dsSetDraft(input.dataset.dsUser, input.dataset.dsVital, input.value.trim());
+        const field = input.closest('.ds-vin');
+        if (field) field.classList.toggle('changed', dsIsDraft(input.dataset.dsUser, input.dataset.dsVital));
+        renderRecordListFooter();
+      });
+      overlay.addEventListener('change', (event) => {
+        const select = event.target.closest('select[data-ds-edit]');
+        if (!select) return;
+        dsSetDraft(select.dataset.dsUser, select.dataset.dsEdit, select.value);
+        select.closest('.ds-edit-field').classList.toggle('changed', dsIsDraft(select.dataset.dsUser, select.dataset.dsEdit));
+        renderRecordListFooter();
+      });
+    }
+
+    function dsSavedValue(userId, field) {
+      const care = (dsListUi.host && dsListUi.host.care(userId)) || {};
+      return careHas(care[field]) ? String(care[field]) : '';
+    }
+
+    function dsIsDraft(userId, field) {
+      return Boolean(dsListUi.drafts[userId] && field in dsListUi.drafts[userId]);
+    }
+
+    function dsCurrentValue(userId, field) {
+      return dsIsDraft(userId, field) ? dsListUi.drafts[userId][field] : dsSavedValue(userId, field);
+    }
+
+    // fromFill: 「空欄の方を…にする」で入れた値(保存のときにサーバーでもまだ空か確かめる)
+    function dsSetDraft(userId, field, value, fromFill) {
+      const filled = dsListUi.filled[userId] || (dsListUi.filled[userId] = {});
+      if (fromFill) filled[field] = true;
+      else delete filled[field];
+      const drafts = dsListUi.drafts[userId] || {};
+      if (String(value) === dsSavedValue(userId, field)) delete drafts[field];
+      else drafts[field] = String(value);
+      if (Object.keys(drafts).length) dsListUi.drafts[userId] = drafts;
+      else delete dsListUi.drafts[userId];
+      dsListUi.status = '';
+      dsListUi.confirmClose = false;
+    }
+
+    // 空欄の方だけに入れる(入力済みの値は変えない)。value は '10'(割) または 'facility'(施設送迎)
+    // まだ入っていない欄か(以前の主食・副食の入力がある日は、食事量が空でも入力済みとみなす)
+    function dsFieldBlank(entry, field) {
+      if (dsCurrentValue(entry.userId, field)) return false;
+      return !(field === 'mealAmount' && careHasLegacyMeal(entry.care));
+    }
+
+    function dsFillBlanks(value) {
+      const host = dsListUi.host;
+      const key = dsListUi.tab;
+      const fields = (DS_EDIT_FIELDS[key] || []).map(([field]) => field);
+      dsListEntries(host).filter((entry) => !entry.cancelled && entry.services[key] && entry.services[key].done).forEach((entry) => {
+        fields.forEach((field) => {
+          if (dsFieldBlank(entry, field)) dsSetDraft(entry.userId, field, value, true);
+        });
+      });
+    }
+
+    function dsEditControl(entry, field, label) {
+      const value = dsCurrentValue(entry.userId, field);
+      const changed = dsIsDraft(entry.userId, field) ? ' changed' : '';
+      const userId = escapeHtml(entry.userId);
+      if (DS_TRANSPORT_FIELDS.includes(field)) {
+        return `<div class="ds-seg${changed}" role="group" aria-label="${escapeHtml(entry.user.displayName)}様の${label}" data-ds-edit="${field}" data-ds-user="${userId}">${CARE_TRANSPORT_CHOICES.map(([choice, text]) =>
+          `<button type="button" data-ds-seg-value="${choice}" aria-pressed="${String(value === choice)}">${text}</button>`).join('')}</div>`;
+      }
+      const options = ['<option value="">—</option>'].concat(DS_AMOUNTS.map((amount) =>
+        `<option value="${amount}" ${value === String(amount) ? 'selected' : ''}>${careAmountText(amount)}</option>`));
+      return `<label class="ds-edit-field${changed}"><span>${label}</span><select data-ds-edit="${field}" data-ds-user="${userId}" aria-label="${escapeHtml(entry.user.displayName)}様の${label}（割）">${options.join('')}</select></label>`;
+    }
+
+    function requestCloseRecordList() {
+      if (dsListUi.saving) return;
+      if (dsDraftCount()) {
+        dsListUi.confirmClose = true;
+        renderRecordListFooter();
+        return;
+      }
+      closeRecordList();
+    }
+
+    // スマホ・ブラウザの「戻る」。保存していない変更があれば閉じずに確認を出す
+    function recordListBack() {
+      if (!document.getElementById('dsRecordList')) return;
+      if (dsListUi.saving || dsDraftCount()) {
+        GinNav.push('dsRecordList', recordListBack);
+        requestCloseRecordList();
+        return;
+      }
+      closeRecordList();
+    }
+
     function closeRecordList() {
       const existing = document.getElementById('dsRecordList');
       if (existing) existing.remove();
       document.body.classList.remove('dslist-open');
       dsListUi.seq++;
+      dsListUi.drafts = {};
+      dsListUi.filled = {};
+      dsListUi.confirmClose = false;
       if (existing) GinNav.closed('dsRecordList');
+    }
+
+    // ケア記録やQRの直後の入力を保存したら、開いている一覧も新しい値で書き直す(一覧で変えた値はそのまま)
+    function dsRefreshRecordList() {
+      if (document.getElementById('dsRecordList')) renderRecordList();
+    }
+
+    async function saveRecordListDrafts() {
+      const host = dsListUi.host;
+      if (!host || dsListUi.saving) return;
+      const items = Object.keys(dsListUi.drafts).map((userId) => {
+        const item = Object.assign({ userId }, dsListUi.drafts[userId]);
+        const filled = Object.keys(dsListUi.filled[userId] || {}).filter((field) => field in item);
+        if (filled.length) item.onlyIfBlank = filled;
+        return item;
+      }).filter((item) => Object.keys(item).filter((key) => key !== 'onlyIfBlank').length > 1);
+      if (!items.length) {
+        if (dsListUi.confirmClose) closeRecordList();
+        return;
+      }
+      // 数字(バイタル)の打ち間違いは送る前に止める(サーバーでも同じ範囲で確かめる)
+      for (const item of items) {
+        for (const field of Object.keys(item)) {
+          const rule = CARE_NUMBER_RULES[field];
+          if (!rule || item[field] === '') continue;
+          const text = careAutoPoint(field, careNumberText(item[field]));
+          const number = Number(text);
+          if (text === '' || !Number.isFinite(number) || number < rule.min || number > rule.max) {
+            const name = ((host.findUser(item.userId) || {}).displayName || '');
+            dsListUi.status = `${name}様の${rule.label}は${rule.min}〜${rule.max}の範囲で入力してください。`;
+            dsListUi.statusError = true;
+            dsListUi.confirmClose = false;
+            renderRecordListFooter();
+            const input = document.querySelector(`#dsRecordList input[data-ds-vital="${field}"][data-ds-user="${CSS.escape(String(item.userId))}"]`);
+            if (input) input.focus();
+            return;
+          }
+        }
+      }
+      const closeAfter = dsListUi.confirmClose;
+      const seq = dsListUi.seq;
+      dsListUi.saving = true;
+      dsListUi.status = '保存しています…';
+      dsListUi.statusError = false;
+      renderRecordListFooter();
+      try {
+        const result = await host.call('saveCareRecordsBulk', { businessDate: host.businessDate(), items });
+        if (seq !== dsListUi.seq) return;
+        ((result && result.careRecords) || []).forEach((care) => {
+          if (host.applySaved) host.applySaved(normalizeClientUserId(care.userId), { careRecord: care });
+        });
+        // 保存している間に変えた値は残す(送った値と同じものだけ下書きから外す)
+        items.forEach((item) => {
+          const drafts = dsListUi.drafts[item.userId];
+          if (!drafts) return;
+          Object.keys(item).forEach((field) => {
+            if (field !== 'userId' && field !== 'onlyIfBlank' && drafts[field] === item[field]) {
+              delete drafts[field];
+              if (dsListUi.filled[item.userId]) delete dsListUi.filled[item.userId][field];
+            }
+          });
+          if (!Object.keys(drafts).length) delete dsListUi.drafts[item.userId];
+        });
+        dsListUi.saving = false;
+        dsListUi.status = `${items.length}名分を保存しました。`;
+        if (closeAfter && dsDraftCount()) {
+          dsListUi.status += 'まだ保存していない変更があります。';
+          dsListUi.confirmClose = true;
+          renderRecordList();
+          return;
+        }
+        if (closeAfter) {
+          closeRecordList();
+          if (host.feedback) host.feedback(dsListUi.status);
+          return;
+        }
+        renderRecordList();
+      } catch (error) {
+        if (seq !== dsListUi.seq) return;
+        dsListUi.saving = false;
+        dsListUi.status = `保存できませんでした。${friendlyError(error)}`;
+        dsListUi.statusError = true;
+        renderRecordListFooter();
+      }
+    }
+
+    function renderRecordListFooter() {
+      const footer = document.getElementById('dsListFooter');
+      if (!footer) return;
+      const count = dsDraftCount();
+      const status = dsListUi.status ? `<p class="ds-list-status${dsListUi.statusError ? ' error' : ''}" role="status">${escapeHtml(dsListUi.status)}</p>` : '';
+      if (dsListUi.confirmClose && count) {
+        footer.innerHTML = `${status}<div class="ds-list-confirm" role="alert"><p>保存していない変更が${count}名分あります。</p><div><button type="button" class="primary" data-ds-save ${dsListUi.saving ? 'disabled' : ''}>保存して戻る</button><button type="button" data-ds-discard ${dsListUi.saving ? 'disabled' : ''}>保存せずに戻る</button><button type="button" data-ds-keep>一覧に戻る</button></div></div>`;
+      } else if (count) {
+        footer.innerHTML = `${status}<button type="button" class="primary ds-list-save" data-ds-save ${dsListUi.saving ? 'disabled' : ''}>${dsListUi.saving ? '保存中…' : `変更を保存（${count}名）`}</button>`;
+      } else {
+        footer.innerHTML = status;
+      }
+      footer.classList.toggle('active', Boolean(count || dsListUi.status));
     }
 
     function dsHowText(service) {
@@ -4915,7 +5491,7 @@
       const service = entry.services[key];
       if (entry.cancelled) return '';
       if (key === 'bath' && service.refused) return '<td class="ds-cell refused">入浴拒否</td>';
-      if (!service.done) return `<td class="ds-cell ${entry.planned ? 'missing' : 'empty'}">${entry.planned ? '未' : '—'}</td>`;
+      if (!service.done) return `<td class="ds-cell ${entry.planned ? 'missing' : 'empty'}">${entry.planned && key !== 'snack' ? '未' : '—'}</td>`;
       const detail = service.detail ? `<small>${escapeHtml(service.detail)}</small>` : '';
       const how = dsHowText(service) ? `<small class="ds-how">${escapeHtml(dsHowText(service))}</small>` : '';
       return `<td class="ds-cell done"><b>${escapeHtml(service.time || '記録済')}</b>${detail}${how}</td>`;
@@ -4925,10 +5501,31 @@
       const host = dsListUi.host;
       const body = document.getElementById('dsListBody');
       if (!host || !body) return;
+      // バイタルを打っている途中に一覧が書き直されても、同じ欄に戻す(スマホのキーボードを閉じない)
+      const active = document.activeElement;
+      const focused = active && body.contains(active) && active.dataset && active.dataset.dsVital
+        ? { field: active.dataset.dsVital, user: active.dataset.dsUser, start: active.selectionStart, end: active.selectionEnd }
+        : null;
+      renderRecordListBody(host, body);
+      if (focused) {
+        const input = body.querySelector(`input[data-ds-vital="${focused.field}"][data-ds-user="${CSS.escape(String(focused.user))}"]`);
+        if (input) {
+          input.focus({ preventScroll: true });
+          try { input.setSelectionRange(focused.start, focused.end); } catch (error) { /* 選べない欄は無視 */ }
+        }
+      }
+    }
+
+    function renderRecordListBody(host, body) {
       document.querySelectorAll('#dsRecordList [data-ds-tab]').forEach((button) => {
         button.setAttribute('aria-selected', String(button.dataset.dsTab === dsListUi.tab));
       });
+      renderRecordListFooter();
       const entries = dsListEntries(host);
+      const canOpen = Boolean(host.save && host.bathState);
+      const nameHtml = (entry) => canOpen
+        ? `<button type="button" class="ds-name-open" data-ds-open="${escapeHtml(entry.userId)}">${escapeHtml(entry.user.displayName)}</button>`
+        : escapeHtml(entry.user.displayName);
       const note = dsListUi.eventsError
         ? '<p class="ds-note">記録した職員の表示を読み込めませんでした（時刻は表示しています）。</p>'
         : (dsListUi.events ? '' : '<p class="ds-note">記録した職員を読み込んでいます…</p>');
@@ -4944,31 +5541,249 @@
           <div class="ds-table-wrap"><table class="ds-table">
             <colgroup><col class="name">${DS_SERVICES.map(() => '<col>').join('')}</colgroup>
             <thead><tr><th scope="col">利用者</th>${DS_SERVICES.map((key) => `<th scope="col" style="--c:${DS_SERVICE_COLORS[key]}">${DS_SERVICE_LABELS[key]}</th>`).join('')}</tr></thead>
-            <tbody>${entries.map((entry) => `<tr class="${entry.cancelled ? 'is-cancelled' : ''}"><th scope="row">${escapeHtml(entry.user.displayName)}${entry.halfDay ? '<small>午前のみ</small>' : ''}</th>${entry.cancelled
-              ? `<td colspan="4" class="ds-cell refused">当日キャンセル${entry.cancelReason ? `（${escapeHtml(entry.cancelReason)}）` : ''}</td>`
+            <tbody>${entries.map((entry) => `<tr class="${entry.cancelled ? 'is-cancelled' : ''}"><th scope="row">${nameHtml(entry)}${entry.halfDay ? '<small>午前のみ</small>' : ''}</th>${entry.cancelled
+              ? `<td colspan="${DS_SERVICES.length}" class="ds-cell refused">当日キャンセル${entry.cancelReason ? `（${escapeHtml(entry.cancelReason)}）` : ''}</td>`
               : DS_SERVICES.map((key) => dsSummaryCell(entry, key)).join('')}</tr>`).join('')}</tbody>
           </table></div>
-          <p class="ds-legend">「未」は予定があってまだ記録がない方です。記録の方法（QR・手入力）と記録した職員は、上の「来所」などを押すと見られます。時刻を直すときは、今日の一覧で利用者を押してケア記録の時刻を直してください。</p>`;
+          <p class="ds-legend">「未」は予定があってまだ記録がない方です。上の「来所」「昼食」などを押すと、記録した方の一覧が開き、食べた量や送迎をまとめて直せます。${canOpen ? '名前を押すと、その方のケア記録を見る・直すことができます。' : ''}</p>`;
+        return;
+      }
+      if (dsListUi.tab === DS_VITAL_TAB) {
+        renderVitalList(host, body, entries, note, canOpen);
         return;
       }
       const key = dsListUi.tab;
+      const fields = DS_EDIT_FIELDS[key] || [];
       const active = entries.filter((entry) => !entry.cancelled);
       const done = active.filter((entry) => entry.services[key].done)
         .sort((a, b) => (a.services[key].time || '99:99').localeCompare(b.services[key].time || '99:99'));
       const refused = key === 'bath' ? active.filter((entry) => entry.services.bath.refused) : [];
-      const waiting = active.filter((entry) => entry.planned && !entry.services[key].done && !(key === 'bath' && entry.services.bath.refused));
+      // まだの方: 予定がある方、または来所した方(おやつ・昼食は予定がなくても食べることがある)
+      const waiting = active.filter((entry) => (entry.planned || entry.arrived) && !entry.services[key].done && !(key === 'bath' && entry.services.bath.refused));
+      const open = (entry, inner) => canOpen
+        ? `<button type="button" class="ds-row-open" data-ds-open="${escapeHtml(entry.userId)}" aria-label="${escapeHtml(entry.user.displayName)}様のケア記録を開く">${inner}<span class="ds-chevron" aria-hidden="true">›</span></button>`
+        : `<div class="ds-row-open">${inner}</div>`;
       const row = (entry) => {
         const service = entry.services[key];
         const how = dsHowText(service);
-        return `<div class="ds-row" style="--c:${DS_SERVICE_COLORS[key]}"><span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${[service.detail, how].filter(Boolean).map(escapeHtml).join(' ・ ')}</small></span></div>`;
+        // 食事量が1項目になる前の記録(主食・副食)は、空欄に見えないよう以前の入力を添える
+        const legacy = key === 'lunch' && careHasLegacyMeal(entry.care) ? `以前の入力：${careMealTexts(entry.care, true).join(' ')}` : '';
+        const small = (fields.length ? [legacy, how] : [service.detail, how]).filter(Boolean).map(escapeHtml).join(' ・ ');
+        const inner = `<span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${small}</small></span>`;
+        return `<div class="ds-row${fields.length ? ' ds-edit-row' : ''}" style="--c:${DS_SERVICE_COLORS[key]}">${open(entry, inner)}${fields.length ? `<div class="ds-edit">${fields.map(([field, label]) => dsEditControl(entry, field, label)).join('')}</div>` : ''}</div>`;
       };
+      const mutedRow = (entry, text) => `<div class="ds-row muted">${open(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${text}</small></span>`)}</div>`;
+      const isTransport = fields.some(([field]) => DS_TRANSPORT_FIELDS.includes(field));
+      const blanks = done.some((entry) => fields.some(([field]) => dsFieldBlank(entry, field)));
+      const tools = fields.length && done.length ? `<div class="ds-edit-tools"><p>${isTransport ? '家族送迎の方は「家族送迎」を押してください。' : '食べた量を選んでください。'}変えたら下の「変更を保存」を押します。</p>${blanks
+        ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を全量にする'}</button>` : ''}${key === 'arrival'
+        ? `<button type="button" data-ds-tab-go="${DS_VITAL_TAB}">バイタルをまとめて入力 ›</button>` : ''}</div>` : '';
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_SERVICE_COLORS[key]}"><span><b>${done.length}</b>名 記録済み</span>${waiting.length ? `<span class="wait"><b>${waiting.length}</b>名 まだ</span>` : ''}${refused.length ? `<span class="wait"><b>${refused.length}</b>名 入浴拒否</span>` : ''}</div>
         ${note}
-        <h2 class="ds-heading">${DS_SERVICE_LABELS[key]}した方（時刻の早い順）</h2>
+        ${tools}
+        <h2 class="ds-heading">${DS_SERVICE_LABELS[key]}を記録した方（時刻の早い順）</h2>
         <div class="list ds-rows">${done.map(row).join('') || '<p class="ds-empty">まだ記録はありません。</p>'}</div>
-        ${refused.length ? `<h2 class="ds-heading">入浴しなかった方</h2><div class="list ds-rows">${refused.map((entry) => `<div class="ds-row muted">${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>入浴拒否</small></span></div>`).join('')}</div>` : ''}
-        ${waiting.length ? `<h2 class="ds-heading">予定があって、まだ記録がない方</h2><div class="list ds-rows">${waiting.map((entry) => `<div class="ds-row muted">${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>未記録</small></span></div>`).join('')}</div>` : ''}`;
+        ${refused.length ? `<h2 class="ds-heading">入浴しなかった方</h2><div class="list ds-rows">${refused.map((entry) => mutedRow(entry, '入浴拒否')).join('')}</div>` : ''}
+        ${waiting.length ? `<h2 class="ds-heading">まだ${DS_SERVICE_LABELS[key]}の記録がない方（予定・来所あり）</h2><div class="list ds-rows">${waiting.map((entry) => mutedRow(entry, canOpen ? '未記録 ・ 押すとケア記録から手入力できます' : '未記録')).join('')}</div>` : ''}`;
+    }
+
+    // バイタルの入力欄(一覧用)。値は下書きがあれば下書き
+    function dsVitalInput(entry, field, label, mode) {
+      const value = dsCurrentValue(entry.userId, field);
+      const changed = dsIsDraft(entry.userId, field) ? ' changed' : '';
+      return `<span class="ds-vin${changed}"><input data-ds-vital="${field}" data-ds-user="${escapeHtml(entry.userId)}" inputmode="${mode}" autocomplete="off" value="${escapeHtml(value)}" aria-label="${escapeHtml(entry.user.displayName)}様の${label}（${CARE_VITAL_UNITS[field]}）" placeholder="${label}"><em>${CARE_VITAL_UNITS[field]}</em></span>`;
+    }
+
+    // 「バイタル」タブ: 来所した方の体温・血圧・脈拍・SpO2(体重は測る方だけ)を一覧のまま入力して、まとめて保存する
+    function renderVitalList(host, body, entries, note, canOpen) {
+      const active = entries.filter((entry) => !entry.cancelled);
+      const arrived = active.filter((entry) => entry.arrived)
+        .sort((a, b) => (a.services.arrival.time || '99:99').localeCompare(b.services.arrival.time || '99:99'));
+      const waiting = active.filter((entry) => entry.planned && !entry.arrived);
+      const measured = arrived.filter((entry) => ['temperature', 'bpHigh', 'pulse', 'spo2'].some((field) => careHas(entry.care[field]))).length;
+      const nameButton = (entry, inner) => canOpen
+        ? `<button type="button" class="ds-row-open" data-ds-open="${escapeHtml(entry.userId)}" aria-label="${escapeHtml(entry.user.displayName)}様のケア記録を開く">${inner}<span class="ds-chevron" aria-hidden="true">›</span></button>`
+        : `<div class="ds-row-open">${inner}</div>`;
+      const row = (entry) => {
+        const weight = careWeightNeeded(entry.user, entry.care) || dsIsDraft(entry.userId, 'weight');
+        const last = weight ? careLastWeightText(entry.user) : '';
+        const inner = `<span class="ds-time">${escapeHtml(entry.services.arrival.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${escapeHtml(careVitalTexts(entry.care).join(' ・ ') || '未入力')}</small></span>`;
+        return `<div class="ds-row ds-edit-row ds-vital-row" style="--c:${DS_VITAL_COLOR}">${nameButton(entry, inner)}<div class="ds-vitals">
+          <label><span>体温</span>${dsVitalInput(entry, 'temperature', '体温', 'decimal')}</label>
+          <label class="bp"><span>血圧</span><span class="ds-bp">${dsVitalInput(entry, 'bpHigh', '上', 'numeric')}<i>/</i>${dsVitalInput(entry, 'bpLow', '下', 'numeric')}</span></label>
+          <label><span>脈拍</span>${dsVitalInput(entry, 'pulse', '脈拍', 'numeric')}</label>
+          <label><span>SpO2</span>${dsVitalInput(entry, 'spo2', 'SpO2', 'numeric')}</label>
+          ${weight ? `<label class="weight"><span>体重</span>${dsVitalInput(entry, 'weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+          ${host.call ? `<button type="button" class="ds-vhist-open" data-ds-vhist="${escapeHtml(entry.userId)}">過去2週間 ›</button>` : ''}
+        </div></div>`;
+      };
+      const mutedRow = (entry) => `<div class="ds-row muted">${nameButton(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>まだ来所の記録がありません</small></span>`)}</div>`;
+      body.innerHTML = `
+        <div class="ds-counts single" style="--c:${DS_VITAL_COLOR}"><span><b>${measured}</b>名 測定済み</span>${arrived.length - measured ? `<span class="wait"><b>${arrived.length - measured}</b>名 まだ</span>` : ''}</div>
+        ${note}
+        <div class="ds-edit-tools"><p>来所した方のバイタルを入力して、下の「変更を保存」を押します。単位：体温 ℃、血圧 mmHg、脈拍 回/分、SpO2 %、体重 kg（体重は「体重測定」がありの方だけ）。体温・体重は小数点なしで打てます（365→36.5、523→52.3）。</p></div>
+        <h2 class="ds-heading">来所した方（到着の早い順）</h2>
+        <div class="list ds-rows">${arrived.map(row).join('') || '<p class="ds-empty">まだ来所の記録はありません。</p>'}</div>
+        ${waiting.length ? `<h2 class="ds-heading">まだ来所していない方（予定あり）</h2><div class="list ds-rows">${waiting.map(mutedRow).join('')}</div>` : ''}`;
+    }
+
+    // ---- QRを読んだ直後の入力(結果の欄でそのまま) ----
+    // 昼食・おやつ: 食べた量(割)。来所・送り: 施設送迎/家族送迎。押すとすぐ保存し、あとで一覧からも直せる。
+    const dsQuickUi = { seq: 0, chain: Promise.resolve() };
+
+    function dsQuickInputHtml(host, userId, service) {
+      if (!host || !host.save) return '';
+      // スキャンの「バイタル」: QRを読んだ方のバイタルだけを入れる(来所のときは出さない)
+      if (service === DS_VITAL_TAB) {
+        return `<div class="ds-quick ds-quick-vital-only" style="--c:${DS_VITAL_COLOR}">
+        ${dsQuickVitalsHtml(host.findUser(userId), host.care(userId) || {})}
+        <p class="ds-quick-status" role="status" aria-live="polite"></p>
+      </div>`;
+      }
+      const fields = DS_EDIT_FIELDS[service];
+      if (!fields) return '';
+      const care = host.care(userId) || {};
+      const value = (field) => careHas(care[field]) ? String(care[field]) : '';
+      const rows = fields.map(([field, label]) => {
+        if (DS_TRANSPORT_FIELDS.includes(field)) {
+          return `<div class="ds-quick-seg" role="group" aria-label="${label}">${CARE_TRANSPORT_CHOICES.map(([choice, text]) =>
+            `<button type="button" data-quick-field="${field}" data-quick-value="${choice}" aria-pressed="${String(value(field) === choice)}">${text}</button>`).join('')}</div>`;
+        }
+        return `<div class="ds-quick-row"><span class="ds-quick-label">${label}</span><div class="ds-quick-amounts" role="group" aria-label="${label}（割）">${DS_AMOUNTS.map((amount) =>
+          `<button type="button" data-quick-field="${field}" data-quick-value="${amount}" aria-pressed="${String(value(field) === String(amount))}">${amount === 10 ? '全量' : `${amount}<small>割</small>`}</button>`).join('')}</div></div>`;
+      }).join('');
+      const isMeal = service === 'lunch' || service === 'snack';
+      const legacy = service === 'lunch' && careHasLegacyMeal(care) ? `<p class="care-hint">以前の入力：${escapeHtml(careMealTexts(care, true).join(' '))}</p>` : '';
+      return `<div class="ds-quick" style="--c:${DS_SERVICE_COLORS[service]}">
+        <p class="ds-quick-title">${isMeal ? '食べた量' : '送迎'}<small>押すとすぐ保存します。あとで一覧からも直せます。</small></p>
+        ${legacy}${rows}
+        <p class="ds-quick-status" role="status" aria-live="polite"></p>
+      </div>`;
+    }
+
+    // スキャンの「バイタル」でQRを読んだ直後に出すバイタルの欄。数字を入れて「バイタルを保存」を押す(測っていない項目は空のままでよい)
+    function dsQuickVitalsHtml(user, care) {
+      const value = (field) => careHas(care[field]) ? String(care[field]) : '';
+      const input = (field, label, mode) => `<span class="ds-vin"><input data-quick-vital="${field}" inputmode="${mode}" autocomplete="off" value="${escapeHtml(value(field))}" placeholder="${label}" aria-label="${label}（${CARE_VITAL_UNITS[field]}）"><em>${CARE_VITAL_UNITS[field]}</em></span>`;
+      const weight = careWeightNeeded(user, care);
+      const last = weight ? careLastWeightText(user) : '';
+      return `<div class="ds-quick-vitals">
+        <p class="ds-quick-label">バイタル<small>測ったら入れて「バイタルを保存」。体温・体重は小数点なしで打てます（365→36.5）。あとで記録一覧の「バイタル」からも直せます。</small></p>
+        <div class="ds-vitals">
+          <label><span>体温</span>${input('temperature', '体温', 'decimal')}</label>
+          <label class="bp"><span>血圧</span><span class="ds-bp">${input('bpHigh', '上', 'numeric')}<i>/</i>${input('bpLow', '下', 'numeric')}</span></label>
+          <label><span>脈拍</span>${input('pulse', '脈拍', 'numeric')}</label>
+          <label><span>SpO2</span>${input('spo2', 'SpO2', 'numeric')}</label>
+          ${weight ? `<label class="weight"><span>体重</span>${input('weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+        </div>
+        <button type="button" class="ds-quick-vital-save" data-quick-vital-save>バイタルを保存</button>
+        <button type="button" class="ds-vhist-open" data-quick-vital-history>過去2週間の記録を見る</button>
+      </div>`;
+    }
+
+    // options.onTransport(field, value): 送信待ちの記録に送迎を入れる(入れられたら true)。電波がなくても選んだ送迎を残すため
+    // options.businessDate: QRを読んだ日。あとで日付を切り替えても、読んだ日の記録に入れる
+    function bindDsQuickInput(container, host, userId, options) {
+      const box = container && container.querySelector('.ds-quick');
+      if (!box) return;
+      const seq = ++dsQuickUi.seq;
+      const businessDate = (options && options.businessDate) || host.businessDate();
+      const labels = {};
+      Object.keys(DS_EDIT_FIELDS).forEach((key) => DS_EDIT_FIELDS[key].forEach(([field, label]) => { labels[field] = label; }));
+      const setStatus = (text, isError) => {
+        if (seq !== dsQuickUi.seq) return;
+        const status = box.querySelector('.ds-quick-status');
+        if (!status) return;
+        status.textContent = text;
+        status.classList.toggle('error', Boolean(isError));
+      };
+      const press = (field, value) => box.querySelectorAll(`[data-quick-field="${field}"]`).forEach((button) => {
+        button.setAttribute('aria-pressed', String(button.dataset.quickValue === String(value)));
+      });
+      const save = (patch, label) => {
+        Object.keys(patch).forEach((field) => press(field, patch[field]));
+        let queued = false;
+        Object.keys(patch).filter((field) => DS_TRANSPORT_FIELDS.includes(field)).forEach((field) => {
+          if (options && options.onTransport && options.onTransport(field, patch[field])) queued = true;
+        });
+        setStatus('保存しています…', false);
+        // 続けて押したときに、古い保存の結果で新しい表示を戻さないよう、1件ずつ順に送る
+        dsQuickUi.chain = dsQuickUi.chain.catch(() => {}).then(async () => {
+          try {
+            const result = await host.save(Object.assign({ businessDate, userId }, patch));
+            if (businessDate === host.businessDate()) {
+              host.applySaved(userId, result || {});
+              dsRefreshRecordList();
+            }
+            setStatus(`保存しました（${label}）`, false);
+            return true;
+          } catch (error) {
+            if (queued) {
+              setStatus(`送信待ちの記録に入れました（${label}）。電波が戻ると送ります。`, false);
+              return false;
+            }
+            const care = host.care(userId) || {};
+            Object.keys(patch).forEach((field) => press(field, careHas(care[field]) ? care[field] : ''));
+            setStatus(`保存できませんでした。${friendlyError(error)}`, true);
+            return false;
+          }
+        });
+        return dsQuickUi.chain;
+      };
+      // バイタル: この欄を出したとき(または前に保存したとき)から変えた欄だけを送る。
+      // 別の端末・一覧で入った値を、ここで空のまま保存して消さないよう、今の記録とは比べない。範囲外(打ち間違い)は送らずに知らせる
+      const saveVitals = () => {
+        const patch = {};
+        const inputs = {};
+        box.querySelectorAll('[data-quick-vital]').forEach((input) => {
+          const field = input.dataset.quickVital;
+          inputs[field] = input;
+          if (!careSameNumber(input.value, input.defaultValue)) patch[field] = input.value.trim();
+        });
+        if (!Object.keys(patch).length) {
+          setStatus('バイタルは変わっていません。', false);
+          return;
+        }
+        const invalid = careValidate(patch);
+        if (invalid) {
+          setStatus(invalid.message, true);
+          const input = box.querySelector(`[data-quick-vital="${invalid.key}"]`);
+          if (input) input.focus();
+          return;
+        }
+        const sent = Object.assign({}, patch);
+        save(patch, 'バイタル').then((ok) => {
+          if (!ok) return;
+          // 保存できた値を「出したときの値」にする(次の保存で同じ値を送り直さない)
+          Object.keys(sent).forEach((field) => {
+            const input = inputs[field];
+            if (input && input.isConnected) input.defaultValue = String(sent[field]);
+          });
+        });
+      };
+      box.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && event.target.closest('[data-quick-vital]')) {
+          event.preventDefault();
+          saveVitals();
+        }
+      });
+      box.addEventListener('click', (event) => {
+        if (event.target.closest('[data-quick-vital-save]')) {
+          saveVitals();
+          return;
+        }
+        if (event.target.closest('[data-quick-vital-history]')) {
+          openVitalHistory(host, userId, businessDate);
+          return;
+        }
+        const button = event.target.closest('[data-quick-field]');
+        if (!button) return;
+        const field = button.dataset.quickField;
+        const value = button.dataset.quickValue;
+        const label = DS_TRANSPORT_FIELDS.includes(field) ? CARE_TRANSPORT_LABELS[value] : `${labels[field]} ${careAmountText(value)}`;
+        save({ [field]: value }, label);
+      });
     }
 
     // ---- 実費 ----
@@ -5231,6 +6046,1079 @@
       };
       input.addEventListener('input', render);
       render();
+    }
+
+    // ===== 連絡帳の行事のお知らせ(壱番館 行事予定表から自動で作る一文) =====
+    // サーバー(notebookEvents)が行事予定表の「その日から2週間分の行事」を返す。一文はここで作る。
+    // 職員が直した文(ケア記録の notebookEventNote、印 notebookEventEdited=yes)は、そのまま出して自動では一切変えない。
+    const dsEventCache = {};
+
+    function dsLoadNotebookEvents(host, dateText) {
+      if (!host || !host.call) return Promise.resolve({ ok: false, events: {} });
+      const cached = dsEventCache[dateText];
+      if (cached && cached.result && Date.now() - cached.at < 10 * 60 * 1000) return Promise.resolve(cached.result);
+      if (cached && cached.promise) return cached.promise;
+      const promise = Promise.resolve()
+        .then(() => host.call('notebookEvents', { businessDate: dateText }))
+        .then((result) => {
+          const value = result && result.ok ? result : { ok: false, events: {}, error: (result && result.error) || '' };
+          dsEventCache[dateText] = { at: Date.now(), result: value };
+          return value;
+        })
+        .catch(() => {
+          delete dsEventCache[dateText];
+          return { ok: false, events: {}, error: '行事予定表を読めませんでした。' };
+        });
+      dsEventCache[dateText] = { promise };
+      return promise;
+    }
+
+    function dsCachedNotebookEvents(dateText) {
+      const cached = dsEventCache[dateText];
+      return cached && cached.result ? cached.result : null;
+    }
+
+    function dsUserWeekdays(user) {
+      let text = user && user.serviceWeekdays ? String(user.serviceWeekdays) : '';
+      if (!text && user && user.defaultServicePattern) {
+        try {
+          const pattern = typeof user.defaultServicePattern === 'string' ? JSON.parse(user.defaultServicePattern) : user.defaultServicePattern;
+          text = String((pattern && pattern.weekdays) || '');
+        } catch (error) {
+          text = '';
+        }
+      }
+      return text;
+    }
+
+    function dsAddDays(dateText, days) {
+      const [year, month, day] = String(dateText).split('-').map(Number);
+      const date = new Date(year, month - 1, day + days);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function dsEventQuote(items) {
+      return items.map((item) => `「${item.title}」`).join('と');
+    }
+
+    function dsEventPeriod(item) {
+      return Number(String(item.start).split(':')[0]) < 12 ? '午前' : '午後';
+    }
+
+    // その日の行事と、次回ご利用予定日の行事から一文を作る。行事がなければ空。
+    // その日の行事は、来所より前に終わったもの・お帰りの後に始まるものを除く(記録の時刻がわかるときだけ)。
+    function dsEventSentence(user, care, dateText, events) {
+      const all = events || {};
+      const c = care || {};
+      const arrival = careTimeText(c.arrivalTime);
+      const departure = careTimeText(c.departureTime);
+      const fits = (item) => {
+        if (!item.start) return true;
+        if (departure && item.start >= departure) return false;
+        if (arrival && item.end && item.end <= arrival) return false;
+        return true;
+      };
+      const today = (all[dateText] || []).filter(fits);
+      const span = today.filter((item) => item.span > 1);
+      const allDay = today.filter((item) => item.span <= 1 && !item.start);
+      const timed = today.filter((item) => item.span <= 1 && item.start);
+      const parts = [];
+      if (span.length) parts.push(`今週は${dsEventQuote(span)}です。`);
+      if (allDay.length) parts.push(`本日は${dsEventQuote(allDay)}でした。`);
+      if (timed.length) parts.push(`${allDay.length ? 'また、' : '本日は'}${dsEventPeriod(timed[0])}に${dsEventQuote(timed)}がありました。`);
+      // 次回ご利用予定日(利用曜日から2週間以内で最初の日)
+      const weekdays = dsUserWeekdays(user);
+      const spanTitles = new Set((all[dateText] || []).filter((item) => item.span > 1).map((item) => item.title));
+      for (let i = 1; weekdays && i <= 14; i++) {
+        const date = dsAddDays(dateText, i);
+        const [year, month, day] = date.split('-').map(Number);
+        const weekday = '日月火水木金土'.charAt(new Date(year, month - 1, day).getDay());
+        if (!weekdays.includes(weekday)) continue;
+        const next = (all[date] || []).filter((item) => !spanTitles.has(item.title));
+        if (next.length) {
+          const sameMonth = date.slice(0, 7) === String(dateText).slice(0, 7);
+          const label = `${sameMonth ? '' : `${month}月`}${day}日（${weekday}）`;
+          const nextAllDay = next.filter((item) => !item.start);
+          const nextTimed = next.filter((item) => item.start);
+          let text = `次回ご利用予定の${label}は`;
+          if (nextAllDay.length && nextTimed.length) {
+            text += `${dsEventQuote(nextAllDay)}で、${dsEventPeriod(nextTimed[0])}には${dsEventQuote(nextTimed)}があります。`;
+          } else if (nextAllDay.length) {
+            text += `${dsEventQuote(nextAllDay)}です。`;
+          } else {
+            text += `${dsEventPeriod(nextTimed[0])}に${dsEventQuote(nextTimed)}があります。`;
+          }
+          const notes = next.reduce((list, item) => list.concat(item.notes || []), []);
+          parts.push(`${text}${notes.join('')}どうぞお楽しみに。`);
+        }
+        break;
+      }
+      return parts.join('');
+    }
+
+    function dsEventEdited(care) {
+      return Boolean(care) && String(care.notebookEventEdited || '') === 'yes';
+    }
+
+    // 連絡帳に出す行事のお知らせ。職員が直した文があればその文だけ(空にした場合も空のまま)
+    function dsNotebookEventText(entry, dateText, eventsResult) {
+      if (dsEventEdited(entry.care)) return String(entry.care.notebookEventNote == null ? '' : entry.care.notebookEventNote);
+      if (!eventsResult || !eventsResult.ok) return '';
+      return dsEventSentence(entry.user, entry.care, dateText, eventsResult.events);
+    }
+
+    // ===== 連絡帳(Scanner.html と Index.html で共通) =====
+    // 「連絡帳」→ 今日の方 全員 / いつもの方(名前を付けたまとまり) / 選んで印刷 の3通り。どれも1回押せば印刷画面まで進む。
+    // host で受け取るもの(記録一覧・実費と同じ host に加えて):
+    //   bathState(id) / notebookCandidates() … その日の連絡帳の対象(来所を記録した方・ケア記録がある方。キャンセルは除く)
+    //   notebookGroups() / setNotebookGroups(groups)
+
+    // eventText: 行事のお知らせ(連絡事項の後ろに続けて出す)
+    function careNotebookRows(care, bathStatus, eventText) {
+      const c = care || {};
+      const vitals = careVitalTexts(c);
+      const meal = careMealTexts(c);
+      const bath = bathStatus === 'done' ? '入浴されました' : (bathStatus === 'refused' ? '本日は入浴されませんでした' : '');
+      const recreation = c.recreation === 'joined' ? '参加されました' : (c.recreation === 'absent' ? '本日は参加されませんでした' : '');
+      return [
+        { label: 'バイタル', value: vitals.join('　') },
+        { label: '昼食', value: meal.join('　') },
+        { label: 'おやつ', value: careHas(c.snackAmount) ? careAmountText(c.snackAmount) : '' },
+        { label: '水分', value: careHas(c.fluidMl) ? `${c.fluidMl} ml` : '' },
+        { label: '入浴', value: bath },
+        { label: 'レクリエーション', value: recreation },
+        { label: '連絡事項', value: [careHas(c.notebookNote) ? String(c.notebookNote) : '', eventText || ''].filter(Boolean).join('\n'), note: true }
+      ];
+    }
+
+    function careNotebookCardHtml(entry, dateText) {
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
+      const missing = rows.filter((row) => !row.note && !row.value).map((row) => row.label);
+      return `<article class="nb-card">
+        <header><h2>連絡帳</h2><span>${escapeHtml(careDateLabel(dateText))}</span></header>
+        <p class="nb-name">${escapeHtml(entry.user.displayName)} 様</p>
+        <table class="nb-table"><tbody>${rows.map((row) => `<tr class="${row.note ? 'nb-note' : ''}"><th scope="row">${row.label}</th><td>${row.value ? escapeHtml(row.value) : (row.note ? '' : '<span class="nb-empty">—</span>')}</td></tr>`).join('')}</tbody></table>
+        <footer>${escapeHtml(CARE_FACILITY_NAME)}</footer>
+        ${missing.length ? `<p class="nb-missing">未記録: ${escapeHtml(missing.join('・'))}（この表示は印刷されません）</p>` : ''}
+        ${entry.canEditEvent ? `<div class="nb-event-edit" data-nb-event-user="${escapeHtml(entry.user.userId)}"><p>${escapeHtml(dsNotebookEventState(entry))}</p><button type="button" data-nb-event-edit>行事のお知らせを直す</button></div>` : ''}
+      </article>`;
+    }
+
+    function dsNotebookEventState(entry) {
+      if (dsEventEdited(entry.care)) return '行事のお知らせ：職員が直した文です。自動では変わりません。';
+      if (entry.eventState === 'loading') return '行事のお知らせ：行事予定表を読んでいます…';
+      if (entry.eventState === 'error') return '行事のお知らせ：行事予定表を読めませんでした。必要なら「直す」から書いてください。';
+      return entry.eventText ? '行事のお知らせ：行事予定表から自動で入れています（連絡事項の後ろ）。' : '行事のお知らせ：この日の行事は予定表にありません。';
+    }
+
+    function dsNotebookEntries(host, userIds) {
+      return (userIds || []).map((userId) => ({
+        user: host.findUser(userId),
+        care: host.care(userId),
+        bathStatus: host.bathState(userId)
+      })).filter((entry) => entry.user);
+    }
+
+    // options.title: 一覧の見出し(例「今日の方 全員」) / options.autoPrint: 開いてすぐ印刷する
+    function openCareNotebook(host, userIds, options) {
+      const opts = options || {};
+      const dateText = host.businessDate();
+      const entries = dsNotebookEntries(host, userIds);
+      const canLoad = Boolean(host.call);
+      const applyEvents = (result, state) => entries.forEach((entry) => {
+        entry.canEditEvent = Boolean(host.save);
+        entry.eventState = state;
+        entry.eventText = dsNotebookEventText(entry, dateText, result);
+      });
+      const cachedEvents = dsCachedNotebookEvents(dateText);
+      const loading = canLoad && !cachedEvents;
+      applyEvents(cachedEvents, loading ? 'loading' : (cachedEvents && !cachedEvents.ok ? 'error' : 'ready'));
+      const missingCount = entries.filter((entry) =>
+        careNotebookRows(entry.care, entry.bathStatus).some((row) => !row.note && !row.value)).length;
+      const previousNotebook = document.getElementById('careNotebook');
+      if (previousNotebook) previousNotebook.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'careNotebook';
+      overlay.className = 'nb-overlay';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '連絡帳');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-nb-close>← 戻る</button>
+          <div class="nb-title"><strong>連絡帳${opts.title ? `（${escapeHtml(opts.title)}）` : ''}</strong><span>${escapeHtml(careDateLabel(dateText))} ・ ${entries.length}名</span></div>
+          <button type="button" class="primary" data-nb-print ${entries.length && !loading ? '' : 'disabled'}>${loading && entries.length ? '準備中…' : '印刷'}</button>
+        </div>
+        <p class="nb-hint">A4用紙1枚に2名分を印刷します。${missingCount ? `未記録の項目がある方が${missingCount}名います。` : ''}</p>
+        <div class="nb-print-help hidden" id="nbPrintHelp" role="status"></div>
+        <div class="nb-pages">${entries.map((entry) => careNotebookCardHtml(entry, dateText)).join('') ||
+          '<div class="empty-state"><strong>連絡帳を作成できる方がいません</strong>来所を記録した方、またはケア記録を入力した方が表示されます。</div>'}</div>`;
+      document.body.appendChild(overlay);
+      document.body.classList.add('notebook-open');
+      if (!GinNav.isTop('careNotebook')) GinNav.push('careNotebook', closeCareNotebook);
+      overlay.querySelector('[data-nb-close]').addEventListener('click', closeCareNotebook);
+      overlay.querySelector('[data-nb-print]').addEventListener('click', () => dsPrintNotebook(entries, dateText));
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeCareNotebook();
+      });
+      overlay.querySelector('[data-nb-close]').focus({ preventScroll: true });
+      overlay.addEventListener('click', (event) => dsNotebookEventClick(event, host, entries, dateText));
+      if (!loading) {
+        if (opts.autoPrint && entries.length) dsPrintNotebook(entries, dateText);
+        return;
+      }
+      // 行事予定表を読み終わってから印刷できるようにする(読めなくても印刷はできる)
+      dsLoadNotebookEvents(host, dateText).then((result) => {
+        if (document.getElementById('careNotebook') !== overlay) return;
+        applyEvents(result, result.ok ? 'ready' : 'error');
+        dsRenderNotebookPages(overlay, entries, dateText);
+        const print = overlay.querySelector('[data-nb-print]');
+        print.textContent = '印刷';
+        print.disabled = !entries.length;
+        if (opts.autoPrint && entries.length) dsPrintNotebook(entries, dateText);
+      });
+    }
+
+    function dsRenderNotebookPages(overlay, entries, dateText) {
+      const pages = overlay.querySelector('.nb-pages');
+      if (pages && entries.length) pages.innerHTML = entries.map((entry) => careNotebookCardHtml(entry, dateText)).join('');
+    }
+
+    // 連絡帳の画面で、行事のお知らせをその場で直す。保存した文は職員の文として残り、自動では変わらない
+    function dsNotebookEventClick(event, host, entries, dateText) {
+      const box = event.target.closest('.nb-event-edit');
+      if (!box) return;
+      const entry = entries.find((item) => item.user.userId === box.dataset.nbEventUser);
+      if (!entry) return;
+      const overlay = document.getElementById('careNotebook');
+      const rerender = () => { if (overlay) dsRenderNotebookPages(overlay, entries, dateText); };
+      const save = (patch) => {
+        const message = box.querySelector('.nb-event-msg');
+        box.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+        if (message) { message.textContent = '保存しています…'; message.classList.remove('error'); }
+        return Promise.resolve()
+          .then(() => host.save(Object.assign({ businessDate: dateText, userId: entry.user.userId }, patch)))
+          .then((result) => {
+            host.applySaved(entry.user.userId, result || {});
+            entry.care = host.care(entry.user.userId);
+            entry.eventText = dsNotebookEventText(entry, dateText, dsCachedNotebookEvents(dateText));
+            rerender();
+          })
+          .catch((error) => {
+            box.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+            if (message) { message.textContent = `保存できませんでした。${friendlyError(error)}`; message.classList.add('error'); }
+          });
+      };
+      if (event.target.closest('[data-nb-event-edit]')) {
+        box.innerHTML = `<label class="nb-event-label"><span>行事のお知らせ（連絡事項の後ろに入ります。保存すると、この文がそのまま連絡帳に出ます）</span>
+          <textarea data-nb-event-text rows="3" maxlength="500">${escapeHtml(entry.eventText || '')}</textarea></label>
+          <div class="nb-event-actions"><button type="button" class="primary" data-nb-event-save>保存</button><button type="button" data-nb-event-cancel>やめる</button>${dsEventEdited(entry.care) ? '<button type="button" data-nb-event-auto>自動の文に戻す</button>' : ''}</div>
+          <p class="nb-event-msg" role="status" aria-live="polite"></p>`;
+        box.querySelector('textarea').focus();
+        return;
+      }
+      if (event.target.closest('[data-nb-event-cancel]')) {
+        rerender();
+        return;
+      }
+      if (event.target.closest('[data-nb-event-save]')) {
+        const value = box.querySelector('[data-nb-event-text]').value;
+        if (!dsEventEdited(entry.care) && value === (entry.eventText || '')) {
+          rerender();
+          return;
+        }
+        save({ notebookEventNote: value, notebookEventEdited: 'yes' });
+        return;
+      }
+      if (event.target.closest('[data-nb-event-auto]')) {
+        save({ notebookEventNote: '', notebookEventEdited: '' });
+      }
+    }
+
+    function closeCareNotebook() {
+      const existing = document.getElementById('careNotebook');
+      if (existing) existing.remove();
+      document.body.classList.remove('notebook-open');
+      if (existing) GinNav.closed('careNotebook');
+    }
+
+    // ---- 印刷 ----
+    // iPad・iPhone をホーム画面から開いたアプリでは window.print() が何もしない。
+    // そのときは連絡帳をPDFにして共有メニューを出す(「プリント」を押せば印刷できる)。
+    // それ以外(Safari・Chrome・パソコン)は印刷画面を開き、開かなかったときだけPDFの案内を出す。
+
+    function dsIsAppleTouch() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function dsIsStandalone() {
+      return window.navigator.standalone === true || Boolean(window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    }
+
+    function dsPrintNotebook(entries, dateText) {
+      if (!entries.length) return;
+      if (dsIsAppleTouch() && dsIsStandalone()) {
+        dsShareNotebookPdf(entries, dateText);
+        return;
+      }
+      let opened = false;
+      const markOpened = () => { opened = true; };
+      window.addEventListener('beforeprint', markOpened, { once: true });
+      try {
+        window.print();
+      } catch (error) {
+        opened = false;
+      }
+      setTimeout(() => {
+        window.removeEventListener('beforeprint', markOpened);
+        if (!opened) dsShowPdfHelp(entries, dateText, '印刷画面が開きませんでした。');
+      }, 1500);
+    }
+
+    function dsShowPdfHelp(entries, dateText, lead) {
+      const help = document.getElementById('nbPrintHelp');
+      if (!help) return;
+      help.classList.remove('hidden');
+      help.classList.add('alert');
+      help.innerHTML = `<span>${escapeHtml(lead)}下のボタンで連絡帳をPDFにして、出てきたメニューの「<strong>プリント</strong>」を押してください。</span><button type="button" class="primary" data-nb-pdf>PDFにして印刷</button>`;
+      help.querySelector('[data-nb-pdf]').addEventListener('click', () => dsShareNotebookPdf(entries, dateText));
+      help.scrollIntoView({ block: 'nearest' });
+    }
+
+    let dsNotebookPdfCache = null;
+
+    function dsShareNotebookPdf(entries, dateText) {
+      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus, entry.eventText || ''])]);
+      let bytes;
+      try {
+        bytes = dsNotebookPdfCache && dsNotebookPdfCache.key === key ? dsNotebookPdfCache.bytes : dsNotebookPdf(entries, dateText);
+      } catch (error) {
+        dsShowNotebookMessage(`PDFを作れませんでした。${friendlyError(error)}`);
+        return;
+      }
+      const failures = dsNotebookPdfCache && dsNotebookPdfCache.key === key ? dsNotebookPdfCache.failures : 0;
+      dsNotebookPdfCache = { key, bytes, failures };
+      const fileName = `連絡帳_${dateText}.pdf`;
+      let file = null;
+      try {
+        file = new File([bytes], fileName, { type: 'application/pdf' });
+      } catch (error) {
+        file = null;
+      }
+      // 共有メニューは押した直後でないと開けない。PDFは同じ押下の中で作り終えてから呼ぶ。
+      // 2回続けて共有できなかったときは、共有をあきらめてPDFを開く(共有が使えない画面で同じ案内をくり返さない)
+      if (file && failures < 2 && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: fileName }).catch((error) => {
+          if (error && error.name === 'AbortError') return;
+          dsNotebookPdfCache.failures = failures + 1;
+          // 作るのに時間がかかって「押した直後」でなくなったときは、もう一度押してもらう(2回目はすぐ開く)
+          dsShowPdfHelp(entries, dateText, 'PDFができました。');
+        });
+        return;
+      }
+      const blob = file || new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const opened = window.open(url, '_blank');
+      if (!opened) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 120000);
+    }
+
+    function dsShowNotebookMessage(text) {
+      const help = document.getElementById('nbPrintHelp');
+      if (!help) return;
+      help.classList.remove('hidden');
+      help.classList.add('alert');
+      help.textContent = text;
+    }
+
+    // ---- 連絡帳のPDF(A4・1枚に2名。外部の部品を使わず、画面の文字で描いた画像をPDFに入れる) ----
+
+    const DS_PDF_PAGE = { width: 1240, height: 1754, margin: 59 }; // A4 を 150dpi で描く(余白10mm)
+    const DS_PDF_SERIF = '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif';
+
+    function dsNotebookPdf(entries, dateText) {
+      const images = [];
+      // 大きな画像を何枚も持つと古いiPadで描けなくなるので、1枚の canvas を使い回す
+      const canvas = document.createElement('canvas');
+      canvas.width = DS_PDF_PAGE.width;
+      canvas.height = DS_PDF_PAGE.height;
+      const ctx = canvas.getContext('2d');
+      for (let index = 0; index < entries.length; index += 2) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const cardHeight = 780;
+        dsDrawNotebookCard(ctx, entries[index], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin, DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2, cardHeight);
+        if (entries[index + 1]) {
+          dsDrawNotebookCard(ctx, entries[index + 1], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin + cardHeight + 35, DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2, cardHeight);
+        }
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const binary = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        images.push({ bytes, width: DS_PDF_PAGE.width, height: DS_PDF_PAGE.height });
+      }
+      canvas.width = 0;
+      canvas.height = 0;
+      return dsBuildPdf(images);
+    }
+
+    function dsWrapText(ctx, text, width) {
+      const lines = [];
+      String(text || '').split('\n').forEach((paragraph) => {
+        let line = '';
+        for (const char of paragraph) {
+          if (line && ctx.measureText(line + char).width > width) {
+            lines.push(line);
+            line = char;
+          } else {
+            line += char;
+          }
+        }
+        lines.push(line);
+      });
+      return lines;
+    }
+
+    function dsDrawNotebookCard(ctx, entry, dateText, x, y, width, height) {
+      const ink = '#1f2933';
+      const pad = 36;
+      ctx.strokeStyle = '#9aa5b1';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, width, height);
+      const left = x + pad;
+      const right = x + width - pad;
+      let top = y + pad;
+      ctx.fillStyle = ink;
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = `600 36px ${DS_PDF_SERIF}`;
+      ctx.textAlign = 'left';
+      ctx.fillText('連 絡 帳', left, top + 32);
+      ctx.font = `400 24px ${DS_PDF_SERIF}`;
+      ctx.textAlign = 'right';
+      ctx.fillText(careDateLabel(dateText), right, top + 32);
+      top += 44;
+      ctx.fillRect(left, top, right - left, 3);
+      top += 22;
+      ctx.textAlign = 'left';
+      ctx.font = `700 33px ${DS_PDF_SERIF}`;
+      ctx.fillText(`${entry.user.displayName} 様`, left, top + 32);
+      top += 52;
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
+      const labelWidth = 230;
+      const rowHeight = 62;
+      const lineHeight = 36;
+      const footerSpace = 50;
+      ctx.font = `400 23px ${DS_PDF_SERIF}`;
+      const valueWidth = right - left - labelWidth - 32;
+      rows.forEach((row) => {
+        const value = row.value || (row.note ? '' : '—');
+        let lines = dsWrapText(ctx, value, valueWidth);
+        let cellHeight = rowHeight;
+        if (row.note) {
+          const room = y + height - pad - footerSpace - top;
+          const maxLines = Math.max(1, Math.floor((room - 24) / lineHeight));
+          if (lines.length > maxLines) {
+            lines = lines.slice(0, maxLines);
+            lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
+          }
+          cellHeight = Math.max(rowHeight, Math.min(room, Math.max(126, lines.length * lineHeight + 24)));
+        } else if (lines.length > 1) {
+          cellHeight = lines.length * lineHeight + 24;
+        }
+        ctx.fillStyle = '#f3f5f8';
+        ctx.fillRect(left, top, labelWidth, cellHeight);
+        ctx.strokeStyle = '#8996a5';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(left, top, labelWidth, cellHeight);
+        ctx.strokeRect(left + labelWidth, top, right - left - labelWidth, cellHeight);
+        ctx.fillStyle = ink;
+        ctx.font = `600 23px ${DS_PDF_SERIF}`;
+        ctx.fillText(row.label, left + 16, top + 39);
+        ctx.font = `400 23px ${DS_PDF_SERIF}`;
+        ctx.fillStyle = row.value ? ink : '#9aa5b1';
+        lines.forEach((line, lineIndex) => {
+          ctx.fillText(line, left + labelWidth + 16, top + 39 + lineIndex * lineHeight);
+        });
+        top += cellHeight;
+      });
+      ctx.fillStyle = ink;
+      ctx.font = `400 22px ${DS_PDF_SERIF}`;
+      ctx.textAlign = 'right';
+      ctx.fillText(CARE_FACILITY_NAME, right, y + height - pad);
+      ctx.textAlign = 'left';
+    }
+
+    // JPEG の画像を1ページに1枚ずつ入れた、最小限のPDFを作る(A4縦 595.28×841.89pt)
+    function dsBuildPdf(images) {
+      const encoder = new TextEncoder();
+      const chunks = [];
+      const offsets = [];
+      let length = 0;
+      const push = (data) => {
+        const bytes = typeof data === 'string' ? encoder.encode(data) : data;
+        chunks.push(bytes);
+        length += bytes.length;
+      };
+      const object = (number, write) => {
+        offsets[number] = length;
+        push(`${number} 0 obj\n`);
+        write();
+        push('\nendobj\n');
+      };
+      push('%PDF-1.4\n');
+      push(new Uint8Array([37, 226, 227, 207, 211, 10]));
+      object(1, () => push('<< /Type /Catalog /Pages 2 0 R >>'));
+      object(2, () => push(`<< /Type /Pages /Kids [${images.map((_, i) => `${3 + i * 3} 0 R`).join(' ')}] /Count ${images.length} >>`));
+      images.forEach((image, i) => {
+        const page = 3 + i * 3;
+        const content = 'q 595.28 0 0 841.89 0 0 cm /Im0 Do Q';
+        object(page, () => push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /XObject << /Im0 ${page + 2} 0 R >> >> /Contents ${page + 1} 0 R >>`));
+        object(page + 1, () => push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`));
+        object(page + 2, () => {
+          push(`<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${image.bytes.length} >>\nstream\n`);
+          push(image.bytes);
+          push('\nendstream');
+        });
+      });
+      const count = 3 + images.length * 3;
+      const xrefAt = length;
+      let xref = `xref\n0 ${count}\n0000000000 65535 f \n`;
+      for (let number = 1; number < count; number++) xref += `${String(offsets[number]).padStart(10, '0')} 00000 n \n`;
+      push(`${xref}trailer\n<< /Size ${count} /Root 1 0 R >>\nstartxref\n${xrefAt}\n%%EOF\n`);
+      const out = new Uint8Array(length);
+      let position = 0;
+      chunks.forEach((chunk) => {
+        out.set(chunk, position);
+        position += chunk.length;
+      });
+      return out;
+    }
+
+    // ---- 「連絡帳」ボタン: 3通りの選び方 ----
+
+    const dsNotebookUi = { host: null, mode: 'pick', groupId: '', selected: new Set(), showAll: false, saving: false, message: '', error: false };
+
+    function dsActiveNotebookGroups(host) {
+      return (host.notebookGroups() || []).filter((group) => group && group.groupId && group.enabled !== false);
+    }
+
+    // まとまりのうち、その日の連絡帳の対象(来所した方など)だけを並べる
+    function dsGroupIdsForToday(host, group) {
+      const today = new Set(host.notebookCandidates().map(normalizeClientUserId));
+      return (group.memberIds || []).map(normalizeClientUserId).filter((id) => today.has(id) && host.findUser(id));
+    }
+
+    function openNotebookMenu(host) {
+      dsNotebookUi.host = host;
+      const previous = document.getElementById('dsNotebookMenu');
+      if (previous) previous.remove();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sheet-backdrop';
+      backdrop.id = 'dsNotebookMenu';
+      if (!GinNav.isTop('dsNotebookMenu')) GinNav.push('dsNotebookMenu', closeNotebookMenu);
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) closeNotebookMenu();
+      });
+      document.body.appendChild(backdrop);
+      renderNotebookMenu();
+    }
+
+    function closeNotebookMenu() {
+      const existing = document.getElementById('dsNotebookMenu');
+      if (!existing) return;
+      existing.remove();
+      GinNav.closed('dsNotebookMenu');
+    }
+
+    function renderNotebookMenu() {
+      const host = dsNotebookUi.host;
+      const backdrop = document.getElementById('dsNotebookMenu');
+      if (!host || !backdrop) return;
+      const todayIds = host.notebookCandidates();
+      const groups = dsActiveNotebookGroups(host);
+      backdrop.innerHTML = `
+        <div class="sheet ds-fee-sheet ds-nb-menu" role="dialog" aria-modal="true" aria-labelledby="dsNotebookMenuTitle">
+          <div class="care-head">
+            <div><h3 id="dsNotebookMenuTitle" tabindex="-1">連絡帳を印刷</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))} ・ 押すとすぐ印刷画面が開きます</p></div>
+            <button type="button" class="care-close" data-nbm-close aria-label="閉じる">×</button>
+          </div>
+          <div class="ds-nb-choices">
+            <button type="button" class="ds-nb-choice main" data-nbm-today ${todayIds.length ? '' : 'disabled'}>
+              <strong>今日の方 全員</strong><small>${todayIds.length ? `${todayIds.length}名を印刷` : '来所を記録した方がまだいません'}</small>
+            </button>
+            ${groups.map((group) => {
+              const count = dsGroupIdsForToday(host, group).length;
+              return `<div class="ds-nb-group">
+                <button type="button" class="ds-nb-choice" data-nbm-group="${escapeHtml(group.groupId)}" ${count ? '' : 'disabled'}>
+                  <strong>${escapeHtml(group.groupName)}</strong><small>${count ? `今日来た${count}名を印刷` : '今日来た方はいません'}（登録${(group.memberIds || []).length}名）</small>
+                </button>
+                <button type="button" class="ds-nb-edit" data-nbm-edit="${escapeHtml(group.groupId)}" aria-label="${escapeHtml(group.groupName)}を変更">変更</button>
+              </div>`;
+            }).join('')}
+            <button type="button" class="ds-nb-choice" data-nbm-pick><strong>選んで印刷</strong><small>名前を押して選びます</small></button>
+          </div>
+          <p class="ds-fee-help">いつも同じ方をまとめて印刷するときは「選んで印刷」で選んだあと「まとまりとして保存」を押すと、ここにボタンができます。今日お休みの方は印刷しません。</p>
+          <div class="care-actions single"><button type="button" data-nbm-new>まとまりを新しく作る</button></div>
+        </div>`;
+      backdrop.querySelector('[data-nbm-close]').addEventListener('click', closeNotebookMenu);
+      backdrop.querySelector('[data-nbm-today]').addEventListener('click', () => {
+        closeNotebookMenu();
+        openCareNotebook(host, todayIds, { title: '今日の方 全員', autoPrint: true });
+      });
+      backdrop.querySelectorAll('[data-nbm-group]').forEach((button) => button.addEventListener('click', () => {
+        const group = groups.find((item) => item.groupId === button.dataset.nbmGroup);
+        if (!group) return;
+        closeNotebookMenu();
+        openCareNotebook(host, dsGroupIdsForToday(host, group), { title: group.groupName, autoPrint: true });
+      }));
+      backdrop.querySelectorAll('[data-nbm-edit]').forEach((button) => button.addEventListener('click', () => {
+        const group = groups.find((item) => item.groupId === button.dataset.nbmEdit);
+        if (group) openNotebookPicker('group', group);
+      }));
+      backdrop.querySelector('[data-nbm-pick]').addEventListener('click', () => openNotebookPicker('pick', null));
+      backdrop.querySelector('[data-nbm-new]').addEventListener('click', () => openNotebookPicker('group', null));
+    }
+
+    // mode 'pick' … 選んでそのまま印刷 / 'group' … まとまりを作る・直す
+    function openNotebookPicker(mode, group) {
+      const host = dsNotebookUi.host;
+      const backdrop = document.getElementById('dsNotebookMenu');
+      if (!host || !backdrop) return;
+      dsNotebookUi.mode = mode;
+      dsNotebookUi.groupId = group ? group.groupId : '';
+      dsNotebookUi.groupName = group ? group.groupName : '';
+      dsNotebookUi.selected = new Set(group ? (group.memberIds || []).map(normalizeClientUserId) : []);
+      dsNotebookUi.showAll = mode === 'group';
+      dsNotebookUi.query = '';
+      dsNotebookUi.message = '';
+      dsNotebookUi.error = false;
+      dsNotebookUi.confirmDelete = false;
+      dsNotebookUi.saving = false;
+      // 前の画面で始めた保存の結果が、あとから開いた画面に出ないようにする
+      dsNotebookUi.pickerId = (dsNotebookUi.pickerId || 0) + 1;
+      renderNotebookPicker();
+    }
+
+    // 画面全体は開いたとき(と、選ぶ→まとまりに切り替えたとき)だけ作る。
+    // 名前を押したとき・検索したときは一覧と下のボタンだけを書き換える(日本語入力が途切れず、一覧も上に戻らない)。
+    function renderNotebookPicker() {
+      const host = dsNotebookUi.host;
+      const backdrop = document.getElementById('dsNotebookMenu');
+      if (!host || !backdrop) return;
+      const ui = dsNotebookUi;
+      const isGroup = ui.mode === 'group';
+      backdrop.innerHTML = `
+        <div class="sheet ds-fee-sheet ds-nb-menu" role="dialog" aria-modal="true" aria-labelledby="dsNotebookPickTitle">
+          <div class="care-head">
+            <div><h3 id="dsNotebookPickTitle" tabindex="-1">${isGroup ? (ui.groupId ? 'まとまりを変更' : 'まとまりを作る') : '選んで印刷'}</h3><p class="sub">${isGroup ? '印刷する方を選んで、名前を付けて保存します' : `${escapeHtml(careDateLabel(host.businessDate()))} ・ 名前を押して選びます`}</p></div>
+            <button type="button" class="care-close" data-nbp-back aria-label="戻る">×</button>
+          </div>
+          ${isGroup ? `<label class="care-field ds-nb-name"><span>まとまりの名前</span><input id="dsNbGroupName" maxlength="20" placeholder="例: 火曜の送迎A" value="${escapeHtml(ui.groupName || '')}" autocomplete="off"></label>` : ''}
+          <div class="ds-nb-bulk">
+            <button type="button" data-nbp-all>今日の方を全員選ぶ</button>
+            <button type="button" data-nbp-none>選ぶのをやめる</button>
+          </div>
+          <div class="material-search plan-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="dsNbSearch" placeholder="名前・ふりがなで絞り込み" aria-label="利用者を検索" autocomplete="off" type="search" value="${escapeHtml(ui.query || '')}">
+            <span></span>
+          </div>
+          <div id="dsNbLists"></div>
+          <p class="care-status" id="dsNbStatus" role="status" aria-live="polite"></p>
+          <div class="care-actions ds-nb-actions" id="dsNbFooter"></div>
+          ${isGroup ? '' : '<div class="care-links"><button type="button" data-nbp-as-group>選んだ方をまとまりとして保存</button></div>'}
+        </div>`;
+      backdrop.querySelector('[data-nbp-back]').addEventListener('click', renderNotebookMenu);
+      backdrop.querySelector('[data-nbp-all]').addEventListener('click', () => {
+        host.notebookCandidates().map(normalizeClientUserId).forEach((id) => ui.selected.add(id));
+        renderNotebookPickerLists();
+      });
+      backdrop.querySelector('[data-nbp-none]').addEventListener('click', () => {
+        ui.selected.clear();
+        renderNotebookPickerLists();
+      });
+      const search = backdrop.querySelector('#dsNbSearch');
+      const applySearch = () => {
+        ui.query = search.value;
+        renderNotebookPickerLists();
+      };
+      search.addEventListener('input', (event) => {
+        if (event.isComposing) return; // 変換中は待つ(確定したら compositionend で絞り込む)
+        applySearch();
+      });
+      search.addEventListener('compositionend', applySearch);
+      const lists = backdrop.querySelector('#dsNbLists');
+      lists.addEventListener('click', (event) => {
+        const more = event.target.closest('[data-nbp-more]');
+        if (more) {
+          ui.showAll = true;
+          renderNotebookPickerLists();
+          return;
+        }
+        const button = event.target.closest('[data-nbp-user]');
+        if (!button) return;
+        const id = button.dataset.nbpUser;
+        if (ui.selected.has(id)) ui.selected.delete(id); else ui.selected.add(id);
+        const on = ui.selected.has(id);
+        button.setAttribute('aria-pressed', String(on));
+        button.querySelector('.ds-nb-check').textContent = on ? '✓' : '';
+        renderNotebookPickerFooter();
+      });
+      const asGroup = backdrop.querySelector('[data-nbp-as-group]');
+      if (asGroup) asGroup.addEventListener('click', () => {
+        if (!ui.selected.size) return;
+        ui.mode = 'group';
+        ui.groupId = '';
+        ui.groupName = '';
+        ui.message = '';
+        renderNotebookPicker();
+        const input = document.getElementById('dsNbGroupName');
+        if (input) input.focus();
+      });
+      renderNotebookPickerLists();
+    }
+
+    function renderNotebookPickerLists() {
+      const host = dsNotebookUi.host;
+      const lists = document.getElementById('dsNbLists');
+      if (!host || !lists) return;
+      const ui = dsNotebookUi;
+      const todaySet = new Set(host.notebookCandidates().map(normalizeClientUserId));
+      const query = normalizeForSearch(ui.query || '');
+      const users = host.users().slice().sort(kanaSort);
+      const matches = (user) => !query || normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query);
+      const todayUsers = users.filter((user) => todaySet.has(normalizeClientUserId(user.userId)) && matches(user));
+      const otherUsers = users.filter((user) => !todaySet.has(normalizeClientUserId(user.userId)) && matches(user));
+      const row = (user) => {
+        const id = normalizeClientUserId(user.userId);
+        const on = ui.selected.has(id);
+        return `<button type="button" class="row plan-pick-row ds-nb-pick" data-nbp-user="${escapeHtml(id)}" aria-pressed="${String(on)}">${avatarHtml(user)}<span class="plan-pick-name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span><span class="ds-nb-check" aria-hidden="true">${on ? '✓' : ''}</span></button>`;
+      };
+      lists.innerHTML = `
+        <h4 class="ds-fee-heading">今日の方（${todayUsers.length}名）</h4>
+        <div class="list plan-results">${todayUsers.map(row).join('') || '<p class="ds-empty">今日来所を記録した方はいません。</p>'}</div>
+        ${ui.showAll || query
+          ? `<h4 class="ds-fee-heading">ほかの方（${otherUsers.length}名）</h4><div class="list plan-results">${otherUsers.map(row).join('') || '<p class="ds-empty">該当する方はいません。</p>'}</div>`
+          : `<button type="button" class="ds-nb-more" data-nbp-more>ほかの方も表示（${otherUsers.length}名）</button>`}`;
+      const all = document.querySelector('#dsNotebookMenu [data-nbp-all]');
+      if (all) all.disabled = !todaySet.size;
+      renderNotebookPickerFooter();
+    }
+
+    function renderNotebookPickerFooter() {
+      const host = dsNotebookUi.host;
+      const footer = document.getElementById('dsNbFooter');
+      if (!host || !footer) return;
+      const ui = dsNotebookUi;
+      const isGroup = ui.mode === 'group';
+      const count = ui.selected.size;
+      footer.classList.toggle('single', !(isGroup && ui.groupId));
+      footer.innerHTML = isGroup
+        ? `${ui.groupId ? `<button type="button" data-nbp-delete ${ui.saving ? 'disabled' : ''}>${ui.confirmDelete ? 'もう一度押すと削除' : 'このまとまりを削除'}</button>` : ''}<button type="button" class="primary" data-nbp-save ${count && !ui.saving ? '' : 'disabled'}>${ui.saving ? '保存中…' : `保存（${count}名）`}</button>`
+        : `<button type="button" class="primary" data-nbp-print ${count ? '' : 'disabled'}>印刷（${count}名）</button>`;
+      const none = document.querySelector('#dsNotebookMenu [data-nbp-none]');
+      if (none) none.disabled = !count;
+      const asGroup = document.querySelector('#dsNotebookMenu [data-nbp-as-group]');
+      if (asGroup) asGroup.disabled = !count;
+      const status = document.getElementById('dsNbStatus');
+      if (status) {
+        status.textContent = ui.message || '';
+        status.classList.toggle('error', Boolean(ui.error));
+      }
+      const print = footer.querySelector('[data-nbp-print]');
+      if (print) print.addEventListener('click', () => {
+        const ids = dsSelectedInOrder(host);
+        closeNotebookMenu();
+        openCareNotebook(host, ids, { title: `選んだ${ids.length}名`, autoPrint: true });
+      });
+      const save = footer.querySelector('[data-nbp-save]');
+      if (save) save.addEventListener('click', saveNotebookGroupFromPicker);
+      const remove = footer.querySelector('[data-nbp-delete]');
+      if (remove) remove.addEventListener('click', deleteNotebookGroupFromPicker);
+    }
+
+    function dsKeepNotebookInputs() {
+      const name = document.getElementById('dsNbGroupName');
+      if (name) dsNotebookUi.groupName = name.value;
+    }
+
+    // 選んだ順ではなく、ふりがな順(一覧と同じ並び)で印刷する
+    function dsSelectedInOrder(host) {
+      return host.users().slice().sort(kanaSort)
+        .map((user) => normalizeClientUserId(user.userId))
+        .filter((id) => dsNotebookUi.selected.has(id));
+    }
+
+    async function saveNotebookGroupFromPicker() {
+      const host = dsNotebookUi.host;
+      dsKeepNotebookInputs();
+      const ui = dsNotebookUi;
+      if (!String(ui.groupName || '').trim()) {
+        ui.message = 'まとまりの名前を入れてください（例: 火曜の送迎A）。';
+        ui.error = true;
+        renderNotebookPickerFooter();
+        return;
+      }
+      ui.saving = true;
+      ui.message = '';
+      ui.error = false;
+      renderNotebookPickerFooter();
+      const pickerId = ui.pickerId;
+      try {
+        const result = await host.call('saveNotebookGroup', { groupId: ui.groupId, groupName: ui.groupName.trim(), memberIds: dsSelectedInOrder(host) });
+        host.setNotebookGroups(result.notebookGroups || []);
+        if (pickerId !== ui.pickerId) return;
+        ui.saving = false;
+        renderNotebookMenu();
+      } catch (error) {
+        if (pickerId !== ui.pickerId) return;
+        ui.saving = false;
+        ui.message = `保存できませんでした。${friendlyError(error)}`;
+        ui.error = true;
+        renderNotebookPickerFooter();
+      }
+    }
+
+    async function deleteNotebookGroupFromPicker() {
+      const host = dsNotebookUi.host;
+      const ui = dsNotebookUi;
+      if (!ui.confirmDelete) {
+        ui.confirmDelete = true;
+        ui.message = 'もう一度押すと、このまとまりを削除します。利用者の記録は消えません。';
+        ui.error = false;
+        renderNotebookPickerFooter();
+        return;
+      }
+      ui.confirmDelete = false;
+      ui.saving = true;
+      renderNotebookPickerFooter();
+      const pickerId = ui.pickerId;
+      try {
+        const result = await host.call('deleteNotebookGroup', { groupId: ui.groupId });
+        host.setNotebookGroups(result.notebookGroups || []);
+        if (pickerId !== ui.pickerId) return;
+        ui.saving = false;
+        renderNotebookMenu();
+      } catch (error) {
+        if (pickerId !== ui.pickerId) return;
+        ui.saving = false;
+        ui.message = `削除できませんでした。${friendlyError(error)}`;
+        ui.error = true;
+        renderNotebookPickerFooter();
+      }
+    }
+
+    // ---- デモの表示 ----
+    // デモのスプレッドシートにつながっているときは、画面の上に「デモ」と大きく出して本番と見分ける。
+    function applyDemoBanner(isDemo) {
+      if (!isDemo || document.getElementById('dsDemoBanner')) return;
+      document.body.classList.add('ds-demo');
+      const banner = document.createElement('div');
+      banner.id = 'dsDemoBanner';
+      banner.className = 'ds-demo-banner';
+      banner.setAttribute('role', 'note');
+      banner.innerHTML = '<strong>デモ</strong><span>練習用です。架空の利用者だけが入っていて、本番の記録には残りません。</span>';
+      document.body.insertBefore(banner, document.body.firstChild);
+      if (!/^【デモ】/.test(document.title)) document.title = `【デモ】${document.title}`;
+    }
+
+    // ---- バイタルの振り返り(1人分・過去2週間。1か月にも切り替え) ----
+    // ケア記録に入っている体温・血圧・脈拍・SpO2・体重を、日付ごとの表と折れ線グラフで見る。値の良し悪しの判定はしない。
+    const dsVhUi = { seq: 0, host: null, userId: '', endDate: '', days: 14, data: null, error: '' };
+    const DS_VH_CHARTS = [
+      { label: '体温', unit: '℃', decimals: 1, lines: [['temperature', '#be123c', '']] },
+      { label: '血圧', unit: 'mmHg', decimals: 0, lines: [['bpHigh', '#be123c', '上'], ['bpLow', '#2563eb', '下']] },
+      { label: '脈拍', unit: '回/分', decimals: 0, lines: [['pulse', '#7c3aed', '']] },
+      { label: 'SpO2', unit: '%', decimals: 0, lines: [['spo2', '#0369a1', '']] },
+      { label: '体重', unit: 'kg', decimals: 1, lines: [['weight', '#0f766e', '']] }
+    ];
+
+    function dsVhDates(startDate, endDate) {
+      const dates = [];
+      const [y, m, d] = String(startDate).split('-').map(Number);
+      for (let i = 0; i < 62; i += 1) {
+        const day = new Date(y, m - 1, d + i);
+        const text = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`;
+        if (text > endDate) break;
+        dates.push(text);
+      }
+      return dates;
+    }
+
+    function dsVhShortDate(dateText) {
+      const [y, m, d] = String(dateText).split('-').map(Number);
+      if (!y || !m || !d) return String(dateText || '');
+      return `${m}/${d}（${'日月火水木金土'.charAt(new Date(y, m - 1, d).getDay())}）`;
+    }
+
+    function dsVhNumber(value) {
+      return value === '' || value == null || !Number.isFinite(Number(value)) ? null : Number(value);
+    }
+
+    // 1つの項目の折れ線グラフ(測った日だけ点を打ち、線でつなぐ)
+    function dsVhChartSvg(chart, dates, byDate) {
+      const values = [];
+      chart.lines.forEach(([field]) => dates.forEach((date) => {
+        const value = dsVhNumber((byDate[date] || {})[field]);
+        if (value !== null) values.push(value);
+      }));
+      if (!values.length) return '';
+      const W = 340;
+      const H = 130;
+      const left = 38;
+      const right = 10;
+      const top = 12;
+      const bottom = 24;
+      let min = Math.min(...values);
+      let max = Math.max(...values);
+      const spread = Math.max(max - min, chart.decimals ? 1 : 10);
+      min -= spread * 0.2;
+      max += spread * 0.2;
+      const x = (index) => left + (W - left - right) * (dates.length === 1 ? 0.5 : index / (dates.length - 1));
+      const y = (value) => top + (H - top - bottom) * (1 - (value - min) / (max - min));
+      const fmt = (value) => value.toFixed(chart.decimals);
+      const grid = [0, 0.5, 1].map((t) => {
+        const value = min + (max - min) * t;
+        return `<line x1="${left}" x2="${W - right}" y1="${y(value).toFixed(1)}" y2="${y(value).toFixed(1)}" class="vh-grid"/><text x="${left - 4}" y="${(y(value) + 4).toFixed(1)}" class="vh-axis" text-anchor="end">${fmt(value)}</text>`;
+      }).join('');
+      const ticks = [0, Math.floor((dates.length - 1) / 2), dates.length - 1].filter((v, i, a) => a.indexOf(v) === i)
+        .map((index) => `<text x="${x(index).toFixed(1)}" y="${H - 6}" class="vh-axis" text-anchor="${index === 0 ? 'start' : (index === dates.length - 1 ? 'end' : 'middle')}">${dsVhShortDate(dates[index]).replace(/（.）/, '')}</text>`).join('');
+      const lines = chart.lines.map(([field, color, name]) => {
+        const points = dates.map((date, index) => {
+          const value = dsVhNumber((byDate[date] || {})[field]);
+          return value === null ? null : [x(index), y(value), value, date];
+        }).filter(Boolean);
+        if (!points.length) return '';
+        const path = points.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(1)} ${py.toFixed(1)}`).join(' ');
+        return `<path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>${points.map(([px, py, value, date]) =>
+          `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.2" fill="#fff" stroke="${color}" stroke-width="2" aria-label="${escapeHtml(`${dsVhShortDate(date)} ${name ? `${name} ` : ''}${fmt(value)}${chart.unit}`)}"/>`).join('')}`;
+      }).join('');
+      const legend = chart.lines.length > 1
+        ? `<span class="vh-legend">${chart.lines.map(([, color, name]) => `<i style="--c:${color}"></i>${escapeHtml(name)}`).join(' ')}</span>` : '';
+      return `<figure class="vh-chart"><figcaption><strong>${chart.label}</strong><small>${chart.unit}</small>${legend}</figcaption>
+        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${escapeHtml(`${chart.label}の変化`)}">${grid}${ticks}${lines}</svg></figure>`;
+    }
+
+    function openVitalHistory(host, userId, endDate) {
+      if (!host || !host.call) return;
+      dsVhUi.host = host;
+      dsVhUi.userId = normalizeClientUserId(userId);
+      dsVhUi.endDate = endDate || host.businessDate();
+      dsVhUi.days = 14;
+      const user = host.findUser(dsVhUi.userId) || {};
+      const previous = document.getElementById('dsVitalHistory');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsVitalHistory';
+      overlay.className = 'nb-overlay ds-vhist';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', 'バイタルの記録');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-vh-close>← 戻る</button>
+          <div class="nb-title"><strong>バイタルの記録</strong><span>${escapeHtml(user.displayName || '')} 様</span></div>
+          <button type="button" class="primary" data-vh-print>印刷</button>
+        </div>
+        <div class="vh-body" id="dsVhBody"></div>`;
+      document.body.appendChild(overlay);
+      document.body.classList.add('dsvhist-open');
+      if (!GinNav.isTop('dsVitalHistory')) GinNav.push('dsVitalHistory', closeVitalHistory);
+      overlay.querySelector('[data-vh-close]').addEventListener('click', closeVitalHistory);
+      overlay.querySelector('[data-vh-print]').addEventListener('click', () => { try { window.print(); } catch (error) {} });
+      overlay.addEventListener('click', (event) => {
+        const period = event.target.closest('[data-vh-days]');
+        if (period && Number(period.dataset.vhDays) !== dsVhUi.days) {
+          dsVhUi.days = Number(period.dataset.vhDays);
+          loadVitalHistory();
+        }
+        if (event.target.closest('[data-vh-retry]')) loadVitalHistory();
+      });
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          closeVitalHistory();
+        }
+      });
+      loadVitalHistory();
+      overlay.querySelector('[data-vh-close]').focus({ preventScroll: true });
+    }
+
+    function closeVitalHistory() {
+      const existing = document.getElementById('dsVitalHistory');
+      if (existing) existing.remove();
+      document.body.classList.remove('dsvhist-open');
+      dsVhUi.seq++;
+      if (existing) GinNav.closed('dsVitalHistory');
+    }
+
+    function loadVitalHistory() {
+      const seq = ++dsVhUi.seq;
+      dsVhUi.data = null;
+      dsVhUi.error = '';
+      renderVitalHistory();
+      dsVhUi.host.call('vitalHistory', { userId: dsVhUi.userId, endDate: dsVhUi.endDate, days: dsVhUi.days }).then((result) => {
+        if (seq !== dsVhUi.seq) return;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        dsVhUi.data = result;
+        renderVitalHistory();
+      }).catch((error) => {
+        if (seq !== dsVhUi.seq) return;
+        dsVhUi.error = typeof friendlyError === 'function' ? friendlyError(error) : String((error && error.message) || error);
+        renderVitalHistory();
+      });
+    }
+
+    function renderVitalHistory() {
+      const body = document.getElementById('dsVhBody');
+      if (!body) return;
+      const periods = `<div class="vh-periods" role="group" aria-label="期間">${[[14, '2週間'], [31, '1か月']].map(([days, label]) =>
+        `<button type="button" data-vh-days="${days}" aria-pressed="${String(dsVhUi.days === days)}">${label}</button>`).join('')}</div>`;
+      if (dsVhUi.error) {
+        body.innerHTML = `${periods}<div class="empty-state"><strong>読み込めませんでした</strong>${escapeHtml(dsVhUi.error)}<br><button type="button" data-vh-retry>もう一度読む</button></div>`;
+        return;
+      }
+      const data = dsVhUi.data;
+      if (!data) {
+        body.innerHTML = `${periods}<p class="ds-note">読み込んでいます…</p>`;
+        return;
+      }
+      const records = (data.records || []).map((record) => Object.assign({}, record, { businessDate: String(record.businessDate) }));
+      const byDate = {};
+      records.forEach((record) => { byDate[record.businessDate] = record; });
+      const dates = dsVhDates(data.startDate, data.endDate);
+      const range = `<p class="vh-range">${escapeHtml(dsVhShortDate(data.startDate))} 〜 ${escapeHtml(dsVhShortDate(data.endDate))}　測った日 <b>${records.length}</b>日</p>`;
+      if (!records.length) {
+        body.innerHTML = `${periods}${range}<div class="empty-state"><strong>この期間のバイタルの記録はありません</strong>スキャンの「バイタル」やケア記録で入れた値が、ここに出ます。</div>`;
+        return;
+      }
+      const charts = DS_VH_CHARTS.map((chart) => dsVhChartSvg(chart, dates, byDate)).filter(Boolean).join('');
+      const hasWeight = records.some((record) => dsVhNumber(record.weight) !== null);
+      const cell = (record, field, decimals) => {
+        const value = dsVhNumber(record[field]);
+        return value === null ? '<td class="vh-none">—</td>' : `<td>${escapeHtml(value.toFixed(decimals))}</td>`;
+      };
+      const rows = records.slice().reverse().map((record) => {
+        const high = dsVhNumber(record.bpHigh);
+        const low = dsVhNumber(record.bpLow);
+        const bp = high === null && low === null ? '<td class="vh-none">—</td>' : `<td>${high === null ? '—' : high}/${low === null ? '—' : low}</td>`;
+        return `<tr><th scope="row">${escapeHtml(dsVhShortDate(record.businessDate))}</th>${cell(record, 'temperature', 1)}${bp}${cell(record, 'pulse', 0)}${cell(record, 'spo2', 0)}${hasWeight ? cell(record, 'weight', 1) : ''}</tr>`;
+      }).join('');
+      body.innerHTML = `${periods}${range}
+        <div class="vh-charts">${charts}</div>
+        <div class="ds-table-wrap"><table class="vh-table">
+          <thead><tr><th scope="col">日付</th><th scope="col">体温<small>℃</small></th><th scope="col">血圧<small>mmHg</small></th><th scope="col">脈拍<small>回/分</small></th><th scope="col">SpO2<small>%</small></th>${hasWeight ? '<th scope="col">体重<small>kg</small></th>' : ''}</tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <p class="ds-legend">新しい日が上です。スキャンの「バイタル」・記録一覧・ケア記録で入れた値を表示しています（測っていない日は出ません）。</p>`;
     }
     /* @@DS_EXTRA_JS END@@ */
 
@@ -5551,6 +7439,11 @@
               detailRow('備考', user.note || user.detailMemo)
             ])}
             ${user.alertCard ? `<div class="care-note">⚠ ${escapeHtml(user.alertCard)}</div>` : ''}
+            ${detailSection('医療', [
+              detailRow('既往歴', user.medicalHistory || '未登録'),
+              detailRow('かかりつけ医', user.primaryDoctor || '未登録'),
+              detailRow('体重測定', user.weightRequired === 'あり' ? `測る${careLastWeightText(user) ? `（${careLastWeightText(user)}）` : ''}` : '測らない')
+            ])}
             ${detailSection('連絡先', [
               detailRow('緊急連絡先', emergencyName),
               phoneDetailRow('緊急電話', user.emergencyContactPhone),
