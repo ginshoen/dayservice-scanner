@@ -1721,6 +1721,17 @@
       #dsVitalHistory .nb-toolbar button, #dsVitalHistory .vh-periods { display: none !important; }
       .vh-chart { break-inside: avoid; }
     }
+
+    /* 連絡帳の行事のお知らせ(画面だけ。印刷には出さない) */
+    .nb-event-edit { margin: 10px 0 0; padding: 10px 12px; border-radius: 10px; background: #f1f6ff; color: #1f3a5f; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; font-size: 13px; display: grid; gap: 8px; }
+    .nb-event-edit p { margin: 0; }
+    .nb-event-edit button { justify-self: start; min-height: 40px; padding: 6px 14px; border: 1px solid #b7c6e0; border-radius: 999px; background: #fff; color: #1a56b8; font: inherit; font-weight: 600; cursor: pointer; }
+    .nb-event-edit button.primary { background: #1a56b8; border-color: #1a56b8; color: #fff; }
+    .nb-event-label { display: grid; gap: 6px; }
+    .nb-event-label textarea { width: 100%; box-sizing: border-box; min-height: 5em; padding: 8px 10px; border: 1px solid #9fb3d1; border-radius: 8px; font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif; resize: vertical; }
+    .nb-event-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .nb-event-msg.error { color: #b3261e; }
+    @media print { .nb-event-edit { display: none !important; } }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -4509,7 +4520,7 @@
     const CARE_FIELD_KEYS = [
       'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
       'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote',
-      'arrivalTransport', 'departureTransport', 'weight'
+      'arrivalTransport', 'departureTransport', 'weight', 'mealAmount'
     ];
     // 来所・送りの送迎。家族送迎(事業所が送迎しない片道)は送迎減算の確認に使う
     const CARE_TRANSPORT_CHOICES = [['facility', '施設送迎'], ['family', '家族送迎']];
@@ -4524,6 +4535,7 @@
       weight: { min: 20, max: 200, label: '体重' },
       mealMain: { min: 0, max: 10, label: '主食' },
       mealSide: { min: 0, max: 10, label: '副食' },
+      mealAmount: { min: 0, max: 10, label: '食事量' },
       snackAmount: { min: 0, max: 10, label: 'おやつ' },
       fluidMl: { min: 0, max: 3000, label: '水分量' }
     };
@@ -4609,6 +4621,26 @@
       return Number(x) === Number(y);
     }
 
+    // 食べた量の表示。10割は「全量」
+    function careAmountText(value) {
+      return String(value) === '10' ? '全量' : `${value}割`;
+    }
+
+    // 昼食の食事量(2026-11-09 から主食・副食を分けず1つ)。以前の記録の主食・副食はそのまま表示する
+    function careMealTexts(care, short) {
+      const c = care || {};
+      if (careHas(c.mealAmount)) return [`${short ? '' : '食事量 '}${careAmountText(c.mealAmount)}`];
+      const texts = [];
+      if (careHas(c.mealMain)) texts.push(`主食${short ? '' : ' '}${careAmountText(c.mealMain)}`);
+      if (careHas(c.mealSide)) texts.push(`副食${short ? '' : ' '}${careAmountText(c.mealSide)}`);
+      return texts;
+    }
+
+    function careHasLegacyMeal(care) {
+      const c = care || {};
+      return !careHas(c.mealAmount) && (careHas(c.mealMain) || careHas(c.mealSide));
+    }
+
     // シートが時刻を日時に変換していた場合も「09:30」に戻す
     function careTimeText(value) {
       const text = String(value == null ? '' : value);
@@ -4646,9 +4678,8 @@
       if (c.departureTransport === 'family') parts.push(['family', '送りは家族送迎']);
       if (careHas(c.lunchTime)) parts.push(['meal', `昼食 ${careTimeText(c.lunchTime)}`]);
       careVitalTexts(c).forEach((text) => parts.push(['vital', text]));
-      if (careHas(c.mealMain)) parts.push(['meal', `主食 ${c.mealMain}割`]);
-      if (careHas(c.mealSide)) parts.push(['meal', `副食 ${c.mealSide}割`]);
-      if (careHas(c.snackAmount)) parts.push(['snack', `おやつ ${c.snackAmount}割`]);
+      careMealTexts(c).forEach((text) => parts.push(['meal', text]));
+      if (careHas(c.snackAmount)) parts.push(['snack', `おやつ ${careAmountText(c.snackAmount)}`]);
       if (careHas(c.fluidMl)) parts.push(['fluid', `水分 ${c.fluidMl}ml`]);
       if (bathStatus === 'done') parts.push(['bath', (c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : '入浴')) + (careHas(c.bathTime) ? ` ${careTimeText(c.bathTime)}` : '')]);
       if (c.recreation === 'joined') parts.push(['rec', 'レク参加']);
@@ -4677,7 +4708,7 @@
 
     function careSelectField(key, label, value) {
       const options = ['<option value="">—</option>'].concat([10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map((amount) =>
-        `<option value="${amount}" ${String(value) === String(amount) ? 'selected' : ''}>${amount}割</option>`));
+        `<option value="${amount}" ${String(value) === String(amount) ? 'selected' : ''}>${careAmountText(amount)}</option>`));
       return `<label class="care-field"><span>${label}</span><select data-care="${key}" aria-label="${label}（割）">${options.join('')}</select></label>`;
     }
 
@@ -4732,11 +4763,11 @@
               ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime)}
               ${careTimeField('snackTime', 'おやつの時刻', v.snackTime)}
             </div>
-            <div class="care-grid three">
-              ${careSelectField('mealMain', '主食', v.mealMain)}
-              ${careSelectField('mealSide', '副食', v.mealSide)}
+            <div class="care-grid two">
+              ${careSelectField('mealAmount', '食事量', v.mealAmount)}
               ${careSelectField('snackAmount', 'おやつ', v.snackAmount)}
             </div>
+            ${careHasLegacyMeal(host.care(user.userId)) ? `<p class="care-hint">以前の入力：${escapeHtml(careMealTexts(host.care(user.userId)).join('・'))}</p>` : ''}
           </fieldset>
           <fieldset class="care-group"><legend>水分</legend>
             <div class="care-fluid">
@@ -5022,7 +5053,7 @@
     // QRの直後・一覧でまとめて直せる項目(サーバーの CARE_BULK_FIELDS と同じ)。日次実績(請求の元)には触れない
     const DS_EDIT_FIELDS = {
       arrival: [['arrivalTransport', '送迎']],
-      lunch: [['mealMain', '主食'], ['mealSide', '副食']],
+      lunch: [['mealAmount', '食事量']],
       snack: [['snackAmount', 'おやつ']],
       departure: [['departureTransport', '送迎']]
     };
@@ -5040,7 +5071,7 @@
       other: 'その他'
     };
     // drafts: 一覧で変えて、まだ保存していない値 { 利用者ID: { 項目: 値 } }
-    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, saving: false, status: '', statusError: false, confirmClose: false };
+    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, filled: {}, saving: false, status: '', statusError: false, confirmClose: false };
     const dsFeeUi = { host: null, userId: '', itemId: '', quantity: 1, saving: false, monthTotal: null, monthSeq: 0, confirmCancel: '' };
 
     function dsYen(value) {
@@ -5094,11 +5125,8 @@
       });
       services.bath.refused = record.bathStatus === 'refused';
       services.bath.detail = care.bathType === 'special' ? '特浴' : (care.bathType === 'general' ? '一般浴' : '');
-      const meal = [];
-      if (careHas(care.mealMain)) meal.push(`主食${care.mealMain}割`);
-      if (careHas(care.mealSide)) meal.push(`副食${care.mealSide}割`);
-      services.lunch.detail = meal.join(' ');
-      services.snack.detail = careHas(care.snackAmount) ? `${care.snackAmount}割` : '';
+      services.lunch.detail = careMealTexts(care, true).join(' ');
+      services.snack.detail = careHas(care.snackAmount) ? careAmountText(care.snackAmount) : '';
       services.arrival.detail = CARE_TRANSPORT_LABELS[care.arrivalTransport] || '';
       services.departure.detail = CARE_TRANSPORT_LABELS[care.departureTransport] || '';
       return {
@@ -5131,6 +5159,7 @@
       dsListUi.events = null;
       dsListUi.eventsError = false;
       dsListUi.drafts = {};
+      dsListUi.filled = {};
       dsListUi.saving = false;
       dsListUi.status = '';
       dsListUi.statusError = false;
@@ -5242,6 +5271,7 @@
           // 保存の途中で閉じると、保存した値が画面に入らないので待つ
           if (dsListUi.saving) return;
           dsListUi.drafts = {};
+          dsListUi.filled = {};
           closeRecordList();
         }
       });
@@ -5276,7 +5306,11 @@
       return dsIsDraft(userId, field) ? dsListUi.drafts[userId][field] : dsSavedValue(userId, field);
     }
 
-    function dsSetDraft(userId, field, value) {
+    // fromFill: 「空欄の方を…にする」で入れた値(保存のときにサーバーでもまだ空か確かめる)
+    function dsSetDraft(userId, field, value, fromFill) {
+      const filled = dsListUi.filled[userId] || (dsListUi.filled[userId] = {});
+      if (fromFill) filled[field] = true;
+      else delete filled[field];
       const drafts = dsListUi.drafts[userId] || {};
       if (String(value) === dsSavedValue(userId, field)) delete drafts[field];
       else drafts[field] = String(value);
@@ -5287,13 +5321,19 @@
     }
 
     // 空欄の方だけに入れる(入力済みの値は変えない)。value は '10'(割) または 'facility'(施設送迎)
+    // まだ入っていない欄か(以前の主食・副食の入力がある日は、食事量が空でも入力済みとみなす)
+    function dsFieldBlank(entry, field) {
+      if (dsCurrentValue(entry.userId, field)) return false;
+      return !(field === 'mealAmount' && careHasLegacyMeal(entry.care));
+    }
+
     function dsFillBlanks(value) {
       const host = dsListUi.host;
       const key = dsListUi.tab;
       const fields = (DS_EDIT_FIELDS[key] || []).map(([field]) => field);
       dsListEntries(host).filter((entry) => !entry.cancelled && entry.services[key] && entry.services[key].done).forEach((entry) => {
         fields.forEach((field) => {
-          if (!dsCurrentValue(entry.userId, field)) dsSetDraft(entry.userId, field, value);
+          if (dsFieldBlank(entry, field)) dsSetDraft(entry.userId, field, value, true);
         });
       });
     }
@@ -5307,7 +5347,7 @@
           `<button type="button" data-ds-seg-value="${choice}" aria-pressed="${String(value === choice)}">${text}</button>`).join('')}</div>`;
       }
       const options = ['<option value="">—</option>'].concat(DS_AMOUNTS.map((amount) =>
-        `<option value="${amount}" ${value === String(amount) ? 'selected' : ''}>${amount}割</option>`));
+        `<option value="${amount}" ${value === String(amount) ? 'selected' : ''}>${careAmountText(amount)}</option>`));
       return `<label class="ds-edit-field${changed}"><span>${label}</span><select data-ds-edit="${field}" data-ds-user="${userId}" aria-label="${escapeHtml(entry.user.displayName)}様の${label}（割）">${options.join('')}</select></label>`;
     }
 
@@ -5338,6 +5378,7 @@
       document.body.classList.remove('dslist-open');
       dsListUi.seq++;
       dsListUi.drafts = {};
+      dsListUi.filled = {};
       dsListUi.confirmClose = false;
       if (existing) GinNav.closed('dsRecordList');
     }
@@ -5350,8 +5391,12 @@
     async function saveRecordListDrafts() {
       const host = dsListUi.host;
       if (!host || dsListUi.saving) return;
-      const items = Object.keys(dsListUi.drafts).map((userId) => Object.assign({ userId }, dsListUi.drafts[userId]))
-        .filter((item) => Object.keys(item).length > 1);
+      const items = Object.keys(dsListUi.drafts).map((userId) => {
+        const item = Object.assign({ userId }, dsListUi.drafts[userId]);
+        const filled = Object.keys(dsListUi.filled[userId] || {}).filter((field) => field in item);
+        if (filled.length) item.onlyIfBlank = filled;
+        return item;
+      }).filter((item) => Object.keys(item).filter((key) => key !== 'onlyIfBlank').length > 1);
       if (!items.length) {
         if (dsListUi.confirmClose) closeRecordList();
         return;
@@ -5392,7 +5437,10 @@
           const drafts = dsListUi.drafts[item.userId];
           if (!drafts) return;
           Object.keys(item).forEach((field) => {
-            if (field !== 'userId' && drafts[field] === item[field]) delete drafts[field];
+            if (field !== 'userId' && field !== 'onlyIfBlank' && drafts[field] === item[field]) {
+              delete drafts[field];
+              if (dsListUi.filled[item.userId]) delete dsListUi.filled[item.userId][field];
+            }
           });
           if (!Object.keys(drafts).length) delete dsListUi.drafts[item.userId];
         });
@@ -5518,15 +5566,17 @@
       const row = (entry) => {
         const service = entry.services[key];
         const how = dsHowText(service);
-        const small = (fields.length ? [how] : [service.detail, how]).filter(Boolean).map(escapeHtml).join(' ・ ');
+        // 食事量が1項目になる前の記録(主食・副食)は、空欄に見えないよう以前の入力を添える
+        const legacy = key === 'lunch' && careHasLegacyMeal(entry.care) ? `以前の入力：${careMealTexts(entry.care, true).join(' ')}` : '';
+        const small = (fields.length ? [legacy, how] : [service.detail, how]).filter(Boolean).map(escapeHtml).join(' ・ ');
         const inner = `<span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${small}</small></span>`;
         return `<div class="ds-row${fields.length ? ' ds-edit-row' : ''}" style="--c:${DS_SERVICE_COLORS[key]}">${open(entry, inner)}${fields.length ? `<div class="ds-edit">${fields.map(([field, label]) => dsEditControl(entry, field, label)).join('')}</div>` : ''}</div>`;
       };
       const mutedRow = (entry, text) => `<div class="ds-row muted">${open(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${text}</small></span>`)}</div>`;
       const isTransport = fields.some(([field]) => DS_TRANSPORT_FIELDS.includes(field));
-      const blanks = done.some((entry) => fields.some(([field]) => !dsCurrentValue(entry.userId, field)));
+      const blanks = done.some((entry) => fields.some(([field]) => dsFieldBlank(entry, field)));
       const tools = fields.length && done.length ? `<div class="ds-edit-tools"><p>${isTransport ? '家族送迎の方は「家族送迎」を押してください。' : '食べた量を選んでください。'}変えたら下の「変更を保存」を押します。</p>${blanks
-        ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を10割にする'}</button>` : ''}${key === 'arrival'
+        ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を全量にする'}</button>` : ''}${key === 'arrival'
         ? `<button type="button" data-ds-tab-go="${DS_VITAL_TAB}">バイタルをまとめて入力 ›</button>` : ''}</div>` : '';
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_SERVICE_COLORS[key]}"><span><b>${done.length}</b>名 記録済み</span>${waiting.length ? `<span class="wait"><b>${waiting.length}</b>名 まだ</span>` : ''}${refused.length ? `<span class="wait"><b>${refused.length}</b>名 入浴拒否</span>` : ''}</div>
@@ -5601,13 +5651,13 @@
             `<button type="button" data-quick-field="${field}" data-quick-value="${choice}" aria-pressed="${String(value(field) === choice)}">${text}</button>`).join('')}</div>`;
         }
         return `<div class="ds-quick-row"><span class="ds-quick-label">${label}</span><div class="ds-quick-amounts" role="group" aria-label="${label}（割）">${DS_AMOUNTS.map((amount) =>
-          `<button type="button" data-quick-field="${field}" data-quick-value="${amount}" aria-pressed="${String(value(field) === String(amount))}">${amount}<small>割</small></button>`).join('')}</div></div>`;
+          `<button type="button" data-quick-field="${field}" data-quick-value="${amount}" aria-pressed="${String(value(field) === String(amount))}">${amount === 10 ? '全量' : `${amount}<small>割</small>`}</button>`).join('')}</div></div>`;
       }).join('');
       const isMeal = service === 'lunch' || service === 'snack';
+      const legacy = service === 'lunch' && careHasLegacyMeal(care) ? `<p class="care-hint">以前の入力：${escapeHtml(careMealTexts(care, true).join(' '))}</p>` : '';
       return `<div class="ds-quick" style="--c:${DS_SERVICE_COLORS[service]}">
         <p class="ds-quick-title">${isMeal ? '食べた量' : '送迎'}<small>押すとすぐ保存します。あとで一覧からも直せます。</small></p>
-        ${rows}
-        ${service === 'lunch' ? '<button type="button" class="ds-quick-all" data-quick-all>主食・副食とも10割</button>' : ''}
+        ${legacy}${rows}
         <p class="ds-quick-status" role="status" aria-live="polite"></p>
       </div>`;
     }
@@ -5727,15 +5777,11 @@
           openVitalHistory(host, userId, businessDate);
           return;
         }
-        if (event.target.closest('[data-quick-all]')) {
-          save({ mealMain: '10', mealSide: '10' }, '主食・副食とも10割');
-          return;
-        }
         const button = event.target.closest('[data-quick-field]');
         if (!button) return;
         const field = button.dataset.quickField;
         const value = button.dataset.quickValue;
-        const label = DS_TRANSPORT_FIELDS.includes(field) ? CARE_TRANSPORT_LABELS[value] : `${labels[field]} ${value}割`;
+        const label = DS_TRANSPORT_FIELDS.includes(field) ? CARE_TRANSPORT_LABELS[value] : `${labels[field]} ${careAmountText(value)}`;
         save({ [field]: value }, label);
       });
     }
@@ -6002,33 +6048,151 @@
       render();
     }
 
+    // ===== 連絡帳の行事のお知らせ(壱番館 行事予定表から自動で作る一文) =====
+    // サーバー(notebookEvents)が行事予定表の「その日から2週間分の行事」を返す。一文はここで作る。
+    // 職員が直した文(ケア記録の notebookEventNote、印 notebookEventEdited=yes)は、そのまま出して自動では一切変えない。
+    const dsEventCache = {};
+
+    function dsLoadNotebookEvents(host, dateText) {
+      if (!host || !host.call) return Promise.resolve({ ok: false, events: {} });
+      const cached = dsEventCache[dateText];
+      if (cached && cached.result && Date.now() - cached.at < 10 * 60 * 1000) return Promise.resolve(cached.result);
+      if (cached && cached.promise) return cached.promise;
+      const promise = Promise.resolve()
+        .then(() => host.call('notebookEvents', { businessDate: dateText }))
+        .then((result) => {
+          const value = result && result.ok ? result : { ok: false, events: {}, error: (result && result.error) || '' };
+          dsEventCache[dateText] = { at: Date.now(), result: value };
+          return value;
+        })
+        .catch(() => {
+          delete dsEventCache[dateText];
+          return { ok: false, events: {}, error: '行事予定表を読めませんでした。' };
+        });
+      dsEventCache[dateText] = { promise };
+      return promise;
+    }
+
+    function dsCachedNotebookEvents(dateText) {
+      const cached = dsEventCache[dateText];
+      return cached && cached.result ? cached.result : null;
+    }
+
+    function dsUserWeekdays(user) {
+      let text = user && user.serviceWeekdays ? String(user.serviceWeekdays) : '';
+      if (!text && user && user.defaultServicePattern) {
+        try {
+          const pattern = typeof user.defaultServicePattern === 'string' ? JSON.parse(user.defaultServicePattern) : user.defaultServicePattern;
+          text = String((pattern && pattern.weekdays) || '');
+        } catch (error) {
+          text = '';
+        }
+      }
+      return text;
+    }
+
+    function dsAddDays(dateText, days) {
+      const [year, month, day] = String(dateText).split('-').map(Number);
+      const date = new Date(year, month - 1, day + days);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    function dsEventQuote(items) {
+      return items.map((item) => `「${item.title}」`).join('と');
+    }
+
+    function dsEventPeriod(item) {
+      return Number(String(item.start).split(':')[0]) < 12 ? '午前' : '午後';
+    }
+
+    // その日の行事と、次回ご利用予定日の行事から一文を作る。行事がなければ空。
+    // その日の行事は、来所より前に終わったもの・お帰りの後に始まるものを除く(記録の時刻がわかるときだけ)。
+    function dsEventSentence(user, care, dateText, events) {
+      const all = events || {};
+      const c = care || {};
+      const arrival = careTimeText(c.arrivalTime);
+      const departure = careTimeText(c.departureTime);
+      const fits = (item) => {
+        if (!item.start) return true;
+        if (departure && item.start >= departure) return false;
+        if (arrival && item.end && item.end <= arrival) return false;
+        return true;
+      };
+      const today = (all[dateText] || []).filter(fits);
+      const span = today.filter((item) => item.span > 1);
+      const allDay = today.filter((item) => item.span <= 1 && !item.start);
+      const timed = today.filter((item) => item.span <= 1 && item.start);
+      const parts = [];
+      if (span.length) parts.push(`今週は${dsEventQuote(span)}です。`);
+      if (allDay.length) parts.push(`本日は${dsEventQuote(allDay)}でした。`);
+      if (timed.length) parts.push(`${allDay.length ? 'また、' : '本日は'}${dsEventPeriod(timed[0])}に${dsEventQuote(timed)}がありました。`);
+      // 次回ご利用予定日(利用曜日から2週間以内で最初の日)
+      const weekdays = dsUserWeekdays(user);
+      const spanTitles = new Set((all[dateText] || []).filter((item) => item.span > 1).map((item) => item.title));
+      for (let i = 1; weekdays && i <= 14; i++) {
+        const date = dsAddDays(dateText, i);
+        const [year, month, day] = date.split('-').map(Number);
+        const weekday = '日月火水木金土'.charAt(new Date(year, month - 1, day).getDay());
+        if (!weekdays.includes(weekday)) continue;
+        const next = (all[date] || []).filter((item) => !spanTitles.has(item.title));
+        if (next.length) {
+          const sameMonth = date.slice(0, 7) === String(dateText).slice(0, 7);
+          const label = `${sameMonth ? '' : `${month}月`}${day}日（${weekday}）`;
+          const nextAllDay = next.filter((item) => !item.start);
+          const nextTimed = next.filter((item) => item.start);
+          let text = `次回ご利用予定の${label}は`;
+          if (nextAllDay.length && nextTimed.length) {
+            text += `${dsEventQuote(nextAllDay)}で、${dsEventPeriod(nextTimed[0])}には${dsEventQuote(nextTimed)}があります。`;
+          } else if (nextAllDay.length) {
+            text += `${dsEventQuote(nextAllDay)}です。`;
+          } else {
+            text += `${dsEventPeriod(nextTimed[0])}に${dsEventQuote(nextTimed)}があります。`;
+          }
+          const notes = next.reduce((list, item) => list.concat(item.notes || []), []);
+          parts.push(`${text}${notes.join('')}どうぞお楽しみに。`);
+        }
+        break;
+      }
+      return parts.join('');
+    }
+
+    function dsEventEdited(care) {
+      return Boolean(care) && String(care.notebookEventEdited || '') === 'yes';
+    }
+
+    // 連絡帳に出す行事のお知らせ。職員が直した文があればその文だけ(空にした場合も空のまま)
+    function dsNotebookEventText(entry, dateText, eventsResult) {
+      if (dsEventEdited(entry.care)) return String(entry.care.notebookEventNote == null ? '' : entry.care.notebookEventNote);
+      if (!eventsResult || !eventsResult.ok) return '';
+      return dsEventSentence(entry.user, entry.care, dateText, eventsResult.events);
+    }
+
     // ===== 連絡帳(Scanner.html と Index.html で共通) =====
     // 「連絡帳」→ 今日の方 全員 / いつもの方(名前を付けたまとまり) / 選んで印刷 の3通り。どれも1回押せば印刷画面まで進む。
     // host で受け取るもの(記録一覧・実費と同じ host に加えて):
     //   bathState(id) / notebookCandidates() … その日の連絡帳の対象(来所を記録した方・ケア記録がある方。キャンセルは除く)
     //   notebookGroups() / setNotebookGroups(groups)
 
-    function careNotebookRows(care, bathStatus) {
+    // eventText: 行事のお知らせ(連絡事項の後ろに続けて出す)
+    function careNotebookRows(care, bathStatus, eventText) {
       const c = care || {};
       const vitals = careVitalTexts(c);
-      const meal = [];
-      if (careHas(c.mealMain)) meal.push(`主食 ${c.mealMain}割`);
-      if (careHas(c.mealSide)) meal.push(`副食 ${c.mealSide}割`);
+      const meal = careMealTexts(c);
       const bath = bathStatus === 'done' ? '入浴されました' : (bathStatus === 'refused' ? '本日は入浴されませんでした' : '');
       const recreation = c.recreation === 'joined' ? '参加されました' : (c.recreation === 'absent' ? '本日は参加されませんでした' : '');
       return [
         { label: 'バイタル', value: vitals.join('　') },
         { label: '昼食', value: meal.join('　') },
-        { label: 'おやつ', value: careHas(c.snackAmount) ? `${c.snackAmount}割` : '' },
+        { label: 'おやつ', value: careHas(c.snackAmount) ? careAmountText(c.snackAmount) : '' },
         { label: '水分', value: careHas(c.fluidMl) ? `${c.fluidMl} ml` : '' },
         { label: '入浴', value: bath },
         { label: 'レクリエーション', value: recreation },
-        { label: '連絡事項', value: careHas(c.notebookNote) ? String(c.notebookNote) : '', note: true }
+        { label: '連絡事項', value: [careHas(c.notebookNote) ? String(c.notebookNote) : '', eventText || ''].filter(Boolean).join('\n'), note: true }
       ];
     }
 
     function careNotebookCardHtml(entry, dateText) {
-      const rows = careNotebookRows(entry.care, entry.bathStatus);
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
       const missing = rows.filter((row) => !row.note && !row.value).map((row) => row.label);
       return `<article class="nb-card">
         <header><h2>連絡帳</h2><span>${escapeHtml(careDateLabel(dateText))}</span></header>
@@ -6036,7 +6200,15 @@
         <table class="nb-table"><tbody>${rows.map((row) => `<tr class="${row.note ? 'nb-note' : ''}"><th scope="row">${row.label}</th><td>${row.value ? escapeHtml(row.value) : (row.note ? '' : '<span class="nb-empty">—</span>')}</td></tr>`).join('')}</tbody></table>
         <footer>${escapeHtml(CARE_FACILITY_NAME)}</footer>
         ${missing.length ? `<p class="nb-missing">未記録: ${escapeHtml(missing.join('・'))}（この表示は印刷されません）</p>` : ''}
+        ${entry.canEditEvent ? `<div class="nb-event-edit" data-nb-event-user="${escapeHtml(entry.user.userId)}"><p>${escapeHtml(dsNotebookEventState(entry))}</p><button type="button" data-nb-event-edit>行事のお知らせを直す</button></div>` : ''}
       </article>`;
+    }
+
+    function dsNotebookEventState(entry) {
+      if (dsEventEdited(entry.care)) return '行事のお知らせ：職員が直した文です。自動では変わりません。';
+      if (entry.eventState === 'loading') return '行事のお知らせ：行事予定表を読んでいます…';
+      if (entry.eventState === 'error') return '行事のお知らせ：行事予定表を読めませんでした。必要なら「直す」から書いてください。';
+      return entry.eventText ? '行事のお知らせ：行事予定表から自動で入れています（連絡事項の後ろ）。' : '行事のお知らせ：この日の行事は予定表にありません。';
     }
 
     function dsNotebookEntries(host, userIds) {
@@ -6052,6 +6224,15 @@
       const opts = options || {};
       const dateText = host.businessDate();
       const entries = dsNotebookEntries(host, userIds);
+      const canLoad = Boolean(host.call);
+      const applyEvents = (result, state) => entries.forEach((entry) => {
+        entry.canEditEvent = Boolean(host.save);
+        entry.eventState = state;
+        entry.eventText = dsNotebookEventText(entry, dateText, result);
+      });
+      const cachedEvents = dsCachedNotebookEvents(dateText);
+      const loading = canLoad && !cachedEvents;
+      applyEvents(cachedEvents, loading ? 'loading' : (cachedEvents && !cachedEvents.ok ? 'error' : 'ready'));
       const missingCount = entries.filter((entry) =>
         careNotebookRows(entry.care, entry.bathStatus).some((row) => !row.note && !row.value)).length;
       const previousNotebook = document.getElementById('careNotebook');
@@ -6066,7 +6247,7 @@
         <div class="nb-toolbar">
           <button type="button" data-nb-close>← 戻る</button>
           <div class="nb-title"><strong>連絡帳${opts.title ? `（${escapeHtml(opts.title)}）` : ''}</strong><span>${escapeHtml(careDateLabel(dateText))} ・ ${entries.length}名</span></div>
-          <button type="button" class="primary" data-nb-print ${entries.length ? '' : 'disabled'}>印刷</button>
+          <button type="button" class="primary" data-nb-print ${entries.length && !loading ? '' : 'disabled'}>${loading && entries.length ? '準備中…' : '印刷'}</button>
         </div>
         <p class="nb-hint">A4用紙1枚に2名分を印刷します。${missingCount ? `未記録の項目がある方が${missingCount}名います。` : ''}</p>
         <div class="nb-print-help hidden" id="nbPrintHelp" role="status"></div>
@@ -6081,7 +6262,77 @@
         if (event.key === 'Escape') closeCareNotebook();
       });
       overlay.querySelector('[data-nb-close]').focus({ preventScroll: true });
-      if (opts.autoPrint && entries.length) dsPrintNotebook(entries, dateText);
+      overlay.addEventListener('click', (event) => dsNotebookEventClick(event, host, entries, dateText));
+      if (!loading) {
+        if (opts.autoPrint && entries.length) dsPrintNotebook(entries, dateText);
+        return;
+      }
+      // 行事予定表を読み終わってから印刷できるようにする(読めなくても印刷はできる)
+      dsLoadNotebookEvents(host, dateText).then((result) => {
+        if (document.getElementById('careNotebook') !== overlay) return;
+        applyEvents(result, result.ok ? 'ready' : 'error');
+        dsRenderNotebookPages(overlay, entries, dateText);
+        const print = overlay.querySelector('[data-nb-print]');
+        print.textContent = '印刷';
+        print.disabled = !entries.length;
+        if (opts.autoPrint && entries.length) dsPrintNotebook(entries, dateText);
+      });
+    }
+
+    function dsRenderNotebookPages(overlay, entries, dateText) {
+      const pages = overlay.querySelector('.nb-pages');
+      if (pages && entries.length) pages.innerHTML = entries.map((entry) => careNotebookCardHtml(entry, dateText)).join('');
+    }
+
+    // 連絡帳の画面で、行事のお知らせをその場で直す。保存した文は職員の文として残り、自動では変わらない
+    function dsNotebookEventClick(event, host, entries, dateText) {
+      const box = event.target.closest('.nb-event-edit');
+      if (!box) return;
+      const entry = entries.find((item) => item.user.userId === box.dataset.nbEventUser);
+      if (!entry) return;
+      const overlay = document.getElementById('careNotebook');
+      const rerender = () => { if (overlay) dsRenderNotebookPages(overlay, entries, dateText); };
+      const save = (patch) => {
+        const message = box.querySelector('.nb-event-msg');
+        box.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+        if (message) { message.textContent = '保存しています…'; message.classList.remove('error'); }
+        return Promise.resolve()
+          .then(() => host.save(Object.assign({ businessDate: dateText, userId: entry.user.userId }, patch)))
+          .then((result) => {
+            host.applySaved(entry.user.userId, result || {});
+            entry.care = host.care(entry.user.userId);
+            entry.eventText = dsNotebookEventText(entry, dateText, dsCachedNotebookEvents(dateText));
+            rerender();
+          })
+          .catch((error) => {
+            box.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+            if (message) { message.textContent = `保存できませんでした。${friendlyError(error)}`; message.classList.add('error'); }
+          });
+      };
+      if (event.target.closest('[data-nb-event-edit]')) {
+        box.innerHTML = `<label class="nb-event-label"><span>行事のお知らせ（連絡事項の後ろに入ります。保存すると、この文がそのまま連絡帳に出ます）</span>
+          <textarea data-nb-event-text rows="3" maxlength="500">${escapeHtml(entry.eventText || '')}</textarea></label>
+          <div class="nb-event-actions"><button type="button" class="primary" data-nb-event-save>保存</button><button type="button" data-nb-event-cancel>やめる</button>${dsEventEdited(entry.care) ? '<button type="button" data-nb-event-auto>自動の文に戻す</button>' : ''}</div>
+          <p class="nb-event-msg" role="status" aria-live="polite"></p>`;
+        box.querySelector('textarea').focus();
+        return;
+      }
+      if (event.target.closest('[data-nb-event-cancel]')) {
+        rerender();
+        return;
+      }
+      if (event.target.closest('[data-nb-event-save]')) {
+        const value = box.querySelector('[data-nb-event-text]').value;
+        if (!dsEventEdited(entry.care) && value === (entry.eventText || '')) {
+          rerender();
+          return;
+        }
+        save({ notebookEventNote: value, notebookEventEdited: 'yes' });
+        return;
+      }
+      if (event.target.closest('[data-nb-event-auto]')) {
+        save({ notebookEventNote: '', notebookEventEdited: '' });
+      }
     }
 
     function closeCareNotebook() {
@@ -6137,7 +6388,7 @@
     let dsNotebookPdfCache = null;
 
     function dsShareNotebookPdf(entries, dateText) {
-      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus])]);
+      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus, entry.eventText || ''])]);
       let bytes;
       try {
         bytes = dsNotebookPdfCache && dsNotebookPdfCache.key === key ? dsNotebookPdfCache.bytes : dsNotebookPdf(entries, dateText);
@@ -6260,7 +6511,7 @@
       ctx.font = `700 33px ${DS_PDF_SERIF}`;
       ctx.fillText(`${entry.user.displayName} 様`, left, top + 32);
       top += 52;
-      const rows = careNotebookRows(entry.care, entry.bathStatus);
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
       const labelWidth = 230;
       const rowHeight = 62;
       const lineHeight = 36;
