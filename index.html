@@ -1732,6 +1732,68 @@
     .nb-event-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .nb-event-msg.error { color: #b3261e; }
     @media print { .nb-event-edit { display: none !important; } }
+
+    /* ===== 職員向けの今日の予定表・特記事項(2026-11-13) ===== */
+    .sb-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; width: 100%; min-height: 56px; margin: 0 0 12px; padding: 10px 14px; border: 1px solid #e3d9f6; border-radius: 14px; background: #f6f1fd; color: #3c3550; font: inherit; text-align: left; cursor: pointer; }
+    .sb-bar-title { grid-column: 1; font-weight: 700; font-size: 15px; }
+    .sb-bar-detail { grid-column: 1; font-size: 13px; color: #5f5878; line-height: 1.5; overflow-wrap: anywhere; }
+    .sb-bar-go { grid-column: 2; grid-row: 1 / span 2; font-size: 24px; color: #7c6bb0; }
+    .ds-board { background: #faf8fd; }
+    .sb-body { max-width: 720px; margin: 0 auto; padding: 12px 14px calc(28px + env(safe-area-inset-bottom)); }
+    .sb-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .sb-tile { padding: 10px 4px; border-radius: 12px; background: #f1ebfa; text-align: center; font-size: 12px; color: #4b4463; }
+    .sb-tile b { display: block; font-size: 22px; line-height: 1.2; color: #3c3550; }
+    .sb-card { margin: 0 0 12px; padding: 12px 14px; border: 1px solid #e9e2f3; border-radius: 14px; background: #fff; }
+    .sb-card h3 { margin: 0 0 6px; font-size: 15px; }
+    .sb-row { padding: 9px 0; border-top: 1px dashed #ece6f5; }
+    .sb-card h3 + .sb-row { border-top: 0; }
+    .sb-row-main { display: flex; gap: 8px; justify-content: space-between; align-items: flex-start; }
+    .sb-person { min-width: 0; display: grid; gap: 2px; }
+    .sb-person strong { font-size: 15px; }
+    .sb-sub { font-size: 13px; color: #5f5878; line-height: 1.5; overflow-wrap: anywhere; }
+    .sb-text { white-space: pre-wrap; color: #3c3550; font-size: 14px; }
+    .sb-by, .sb-edited { font-size: 12px; color: #7a7392; }
+    .sb-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; flex: 0 0 auto; max-width: 48%; }
+    .sb-chip { padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; background: #eeeaf5; color: #4b4463; }
+    .sb-chip.off, .sb-chip.absence { background: #fde4e4; color: #9b3a3f; }
+    .sb-chip.fee { background: #f6d9ee; color: #8a2f71; }
+    .sb-chip.nofee { background: #eef0f2; color: #55606b; }
+    .sb-chip.extra { background: #dff3e6; color: #26683f; }
+    .sb-chip.trial { background: #fff1cf; color: #7a570c; }
+    .sb-chip.hospital { background: #dcebfb; color: #27578c; }
+    .sb-chip.pickup { background: #e2f3f5; color: #1f6470; }
+    .sb-chip.event { background: #ece6fb; color: #56429a; }
+    .sb-link { min-height: 36px; margin-top: 4px; padding: 0 2px; border: 0; background: none; color: #6b55a8; font: inherit; font-size: 13px; font-weight: 700; text-decoration: underline; cursor: pointer; }
+    .sb-empty, .sb-legend, .sb-hint { margin: 6px 0 0; font-size: 13px; color: #6b6385; line-height: 1.6; }
+    .sb-legend { padding-top: 8px; border-top: 1px dashed #ece6f5; font-size: 12px; }
+    .sb-add { width: 100%; min-height: 46px; margin-top: 10px; border: 0; border-radius: 12px; background: #e6dcf5; color: #3c3550; font: inherit; font-weight: 700; cursor: pointer; }
+    .sb-form, .sb-fee-edit { margin-top: 10px; padding: 12px; border-radius: 12px; background: #f8f5fd; display: grid; gap: 10px; }
+    .sb-field { display: grid; gap: 5px; font-size: 13px; font-weight: 700; color: #4b4463; }
+    .sb-field input, .sb-field select, .sb-field textarea, .un-note textarea { width: 100%; min-height: 44px; padding: 9px 11px; border: 1.5px solid #d9cfee; border-radius: 10px; background: #fff; color: #1f2933; font: inherit; font-size: 16px; font-weight: 400; box-sizing: border-box; }
+    .sb-choice { display: flex; flex-wrap: wrap; gap: 6px; }
+    .sb-choice button { min-height: 42px; padding: 0 14px; border: 1.5px solid #d9cfee; border-radius: 999px; background: #fff; color: #3c3550; font: inherit; font-size: 14px; cursor: pointer; }
+    .sb-choice button[aria-pressed="true"] { border-color: #7c6bb0; background: #e6dcf5; font-weight: 700; }
+    .sb-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .sb-actions button { min-height: 44px; padding: 0 16px; border: 1.5px solid #d9cfee; border-radius: 12px; background: #fff; color: #3c3550; font: inherit; font-weight: 700; cursor: pointer; }
+    .sb-actions button.primary { border-color: #7c6bb0; background: #7c6bb0; color: #fff; }
+    .sb-actions button:disabled { opacity: .6; }
+    .sb-message { margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: #eef7f0; color: #26683f; font-size: 14px; font-weight: 700; }
+    .sb-menu { margin: 0; padding: 0 0 0 1.2em; font-size: 15px; line-height: 1.8; }
+    .sb-snack { margin: 8px 0 0; font-size: 14px; }
+    .sb-snack span { margin-right: 8px; padding: 2px 8px; border-radius: 999px; background: #fff1cf; color: #7a570c; font-size: 12px; font-weight: 700; }
+    .un-note { padding: 10px 0; border-top: 1px dashed #ece6f5; }
+    .sb-card h3 + .un-note { border-top: 0; }
+    .un-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: #6b6385; }
+    .un-text { margin: 4px 0 0; font-size: 15px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .un-tools { display: flex; gap: 16px; }
+    .ds-notes-open { min-height: 40px; margin-top: 8px; padding: 0 12px; border: 1px solid #d9cfee; border-radius: 10px; background: #f6f1fd; color: #4b3d85; font: inherit; font-weight: 700; cursor: pointer; }
+    @media (max-width: 420px) {
+      .sb-row-main { flex-direction: column; }
+      .sb-chips { max-width: none; justify-content: flex-start; }
+    }
+    @media print {
+      #dsStaffBoard, #dsUserNotes { display: none !important; }
+    }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2125,6 +2187,7 @@
     <main>
       <section id="scanView" class="view">
         <div class="page-heading"><div><div class="eyebrow">毎日の記録</div><h1>スキャン</h1><p>記録する内容を選んで、QRコードを読み取ります。</p></div></div>
+        <div id="scanBoardBar"></div>
         <div class="scan-workspace">
         <div class="scan-primary">
         <p class="scan-label">1. 記録する内容</p>
@@ -2185,6 +2248,7 @@
 
       <section id="todayView" class="view">
         <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
+        <div id="todayBoardBar"></div>
         <div class="plan-bar" aria-live="polite">
           <div><span class="plan-bar-count" id="planBarCount">今日の予定</span><span class="plan-bar-detail" id="planBarDetail"></span></div>
           <button id="openPlanSheet">予定の変更・追加</button>
@@ -3040,6 +3104,19 @@
       setStatusLine(`利用者 ${app.users.length}名 / ${state.businessDate || todayStr()}${suffix}`);
       renderUsers();
       renderToday();
+      // 今日の予定表(トップの1行)。前回取得分を出しているあいだは読みに行かない
+      refreshStaffBoardBars(false, fromCache);
+    }
+
+    // スキャンと今日の記録の上に出す「今日の予定表」。押すと開く(shared/ds-extra.js)
+    function refreshStaffBoardBars(force, skipLoad) {
+      try {
+        if (!app.token) return;
+        ['scanBoardBar', 'todayBoardBar'].forEach((id) => mountStaffBoardBar(scannerDsHost, document.getElementById(id)));
+        if (!skipLoad) dsEnsureStaffBoard(scannerDsHost, force);
+      } catch (error) {
+        // 画面の準備が終わる前に呼ばれたときは、次の更新で出す
+      }
     }
 
     function cacheState(state) {
@@ -3508,6 +3585,8 @@
         if (panel) {
           panel.insertAdjacentHTML('beforeend', '<button type="button" class="ds-vhist-open" data-info-vhist>過去2週間のバイタルを見る</button>');
           panel.querySelector('[data-info-vhist]').addEventListener('click', () => openVitalHistory(scannerCareHost, user.userId, todayStr()));
+          panel.insertAdjacentHTML('beforeend', '<button type="button" class="ds-notes-open" data-info-notes>特記事項を見る・書く</button>');
+          panel.querySelector('[data-info-notes]').addEventListener('click', () => openUserNotes(scannerDsHost, user.userId));
         }
         addRecent({ label: user.displayName, status: '確認', serviceType: 'info' });
         return;
@@ -4792,6 +4871,7 @@
           </div>
           <div class="care-links">
             <button type="button" data-care-notebook>この方の連絡帳を見る</button>
+            ${host.call ? '<button type="button" data-care-notes>特記事項を見る・書く</button>' : ''}
             ${host.call ? '<button type="button" data-care-fee>実費（おむつ・マスクなど）</button>' : ''}
             ${host.openDayMenu ? '<button type="button" data-care-day>キャンセル・午前終了など</button>' : ''}
           </div>
@@ -4873,6 +4953,8 @@
         closeCareForm(true);
         openCareNotebook(host, [userId]);
       });
+      const notesButton = form.querySelector('[data-care-notes]');
+      if (notesButton) notesButton.addEventListener('click', () => openUserNotes(careUi.host, careUi.userId));
       const feeButton = form.querySelector('[data-care-fee]');
       if (feeButton) feeButton.addEventListener('click', () => {
         if (careIsDirty()) {
@@ -7120,6 +7202,560 @@
         </table></div>
         <p class="ds-legend">新しい日が上です。スキャンの「バイタル」・記録一覧・ケア記録で入れた値を表示しています（測っていない日は出ません）。</p>`;
     }
+
+    // ===== 職員向けの今日の予定表(お休み・キャンセル料・連絡・献立)と、利用者ごとの特記事項 =====
+    // 2026-11-13 原山さん。サーバーは staffBoard / saveDayNotice / deleteDayNotice / setCancelFee / userNotes / addUserNote / updateUserNote。
+    // キャンセル料は決まりどおりの見込みを出し、職員が変えられる(請求はしない)。特記事項は連絡帳に出さない。
+    const sbUi = { host: null, date: '', board: null, error: '', seq: 0, loadedAt: 0, form: null, feeEdit: '', saving: false, message: '' };
+    const SB_KIND_LABELS = { off: 'お休み', cancelled: '当日キャンセル' };
+    const SB_CATEGORY_ORDER = ['trial', 'extra', 'absence', 'hospital', 'pickup', 'other'];
+    const SB_CATEGORY_NEEDS_NAME = { trial: true };
+
+    function sbErrorText(error) {
+      return typeof friendlyError === 'function' ? friendlyError(error) : String((error && error.message) || error);
+    }
+
+    function sbDateTitle(dateText) {
+      const parts = String(dateText || '').split('-').map(Number);
+      if (parts.length !== 3 || parts.some((n) => !isFinite(n))) return String(dateText || '');
+      const day = new Date(parts[0], parts[1] - 1, parts[2]);
+      return `${parts[1]}月${parts[2]}日（${'日月火水木金土'[day.getDay()]}）`;
+    }
+
+    function sbYen(value) {
+      return Number(value || 0).toLocaleString('ja-JP') + '円';
+    }
+
+    function sbFeeChip(item, yen) {
+      return item.fee === 'charge'
+        ? `<span class="sb-chip fee">キャンセル料 ${escapeHtml(sbYen(yen))}</span>`
+        : '<span class="sb-chip nofee">料金なし</span>';
+    }
+
+    function sbTimingText(item) {
+      if (item.kind === 'cancelled') return '当日の連絡';
+      return item.timing === 'sameDay' ? '当日の連絡' : '前日までの連絡';
+    }
+
+    // 予定表を読む。バー(トップの1行)と、開いた予定表の両方がこの結果を使う
+    function dsLoadStaffBoard(host, options) {
+      if (!host || !host.call) return Promise.resolve(null);
+      const date = host.businessDate();
+      const seq = ++sbUi.seq;
+      sbUi.host = host;
+      if (sbUi.date !== date) sbUi.board = null;
+      sbUi.date = date;
+      sbUi.error = '';
+      if (!(options && options.quiet)) dsRenderStaffBoard();
+      return host.call('staffBoard', { businessDate: date }).then((result) => {
+        if (seq !== sbUi.seq) return null;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        sbUi.board = result;
+        sbUi.loadedAt = Date.now();
+        dsRenderStaffBoard();
+        return result;
+      }).catch((error) => {
+        if (seq !== sbUi.seq) return null;
+        sbUi.error = sbErrorText(error);
+        dsRenderStaffBoard();
+        return null;
+      });
+    }
+
+    // 画面を開いたとき・更新したときに呼ぶ。直前に読んだばかりなら読み直さない(スキャンのたびに通信しないため)
+    function dsEnsureStaffBoard(host, force) {
+      if (!host || !host.call) return;
+      const fresh = sbUi.board && sbUi.date === host.businessDate() && Date.now() - sbUi.loadedAt < 120000;
+      if (fresh && !force) return dsRenderStaffBoardBars();
+      dsLoadStaffBoard(host, { quiet: true });
+    }
+
+    function dsRenderStaffBoard() {
+      dsRenderStaffBoardBars();
+      renderStaffBoard();
+    }
+
+    // トップに置く1行。押すと予定表が開く。data-staff-board-bar を付けた入れ物すべてに出す
+    function dsRenderStaffBoardBars() {
+      document.querySelectorAll('[data-staff-board-bar]').forEach((bar) => {
+        const board = sbUi.board;
+        let detail = '読み込んでいます…';
+        if (sbUi.error && !board) detail = '読み込めませんでした。押すともう一度読みます';
+        if (board) {
+          const parts = [`利用予定 ${board.plannedCount}名`];
+          if (board.absences.length) parts.push(`お休み ${board.absences.length}名`);
+          const feeCount = board.absences.filter((item) => item.fee === 'charge').length;
+          if (feeCount) parts.push(`キャンセル料 ${feeCount}名`);
+          if (board.additions.length) parts.push(`追加 ${board.additions.length}名`);
+          const noticeCount = board.notices.length + (board.events || []).length;
+          if (noticeCount) parts.push(`連絡 ${noticeCount}件`);
+          const lunch = board.menu && board.menu.lunch && board.menu.lunch[0];
+          if (lunch) parts.push(`昼食 ${lunch}`);
+          detail = parts.join('・');
+        }
+        bar.innerHTML = `<button type="button" class="sb-bar" data-sb-open>
+          <span class="sb-bar-title">${escapeHtml(sbDateTitle(sbUi.date || (sbUi.host && sbUi.host.businessDate()) || ''))}の予定表</span>
+          <span class="sb-bar-detail">${escapeHtml(detail)}</span>
+          <span class="sb-bar-go" aria-hidden="true">›</span>
+        </button>`;
+      });
+    }
+
+    function mountStaffBoardBar(host, container) {
+      if (!container || !host || !host.call) return;
+      container.setAttribute('data-staff-board-bar', '');
+      if (!container.dataset.sbBound) {
+        container.dataset.sbBound = '1';
+        container.addEventListener('click', (event) => {
+          if (event.target.closest('[data-sb-open]')) openStaffBoard(host);
+        });
+      }
+      sbUi.host = host;
+      if (sbUi.date !== host.businessDate()) {
+        sbUi.board = null;
+        sbUi.date = host.businessDate();
+      }
+      dsRenderStaffBoardBars();
+    }
+
+    function openStaffBoard(host) {
+      if (!host || !host.call) return;
+      sbUi.host = host;
+      sbUi.form = null;
+      sbUi.feeEdit = '';
+      sbUi.message = '';
+      sbUi.saving = false;
+      const previous = document.getElementById('dsStaffBoard');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsStaffBoard';
+      overlay.className = 'nb-overlay ds-board';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '今日の予定表');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-sb-close>← 戻る</button>
+          <div class="nb-title"><strong id="sbTitle">予定表</strong><span>お休み・連絡・献立</span></div>
+          <button type="button" data-sb-reload>更新</button>
+        </div>
+        <div class="sb-body" id="dsSbBody"></div>`;
+      document.body.appendChild(overlay);
+      if (!GinNav.isTop('dsStaffBoard')) GinNav.push('dsStaffBoard', closeStaffBoard);
+      overlay.addEventListener('click', sbBoardClick);
+      overlay.addEventListener('input', sbBoardInput);
+      overlay.addEventListener('change', sbBoardInput);
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          closeStaffBoard();
+        }
+      });
+      renderStaffBoard();
+      dsLoadStaffBoard(host, { quiet: Boolean(sbUi.board) });
+      overlay.querySelector('[data-sb-close]').focus({ preventScroll: true });
+    }
+
+    function closeStaffBoard() {
+      const existing = document.getElementById('dsStaffBoard');
+      if (existing) existing.remove();
+      sbUi.form = null;
+      sbUi.feeEdit = '';
+      if (existing) GinNav.closed('dsStaffBoard');
+    }
+
+    function sbFeeEditorHtml(item, board) {
+      const choices = [['charge', `とる（${sbYen(board.cancelFeeYen)}）`], ['none', 'とらない']];
+      return `<div class="sb-fee-edit" data-sb-fee-box="${escapeHtml(item.userId)}">
+        <p class="sb-hint">決まりでは「${item.feeAuto === 'charge' ? 'キャンセル料あり' : '料金なし'}」です（${escapeHtml(sbTimingText(item))}）。事情があるときだけ変えてください。</p>
+        <div class="sb-choice" role="group" aria-label="キャンセル料">${choices.map(([value, label]) =>
+          `<button type="button" data-sb-fee-set="${value}" aria-pressed="${String(item.fee === value)}">${escapeHtml(label)}</button>`).join('')}</div>
+        <label class="sb-field"><span>変える理由（任意）</span><input type="text" data-sb-fee-note maxlength="100" value="${escapeHtml(item.feeNote || '')}" placeholder="例: 入院のため" autocomplete="off"></label>
+        <div class="sb-actions">
+          ${item.feeEdited ? '<button type="button" data-sb-fee-set="auto">決まりどおりに戻す</button>' : ''}
+          <button type="button" data-sb-fee-cancel>やめる</button>
+        </div>
+      </div>`;
+    }
+
+    function sbAbsenceRowHtml(item, board) {
+      const detail = [sbTimingText(item)];
+      if (item.reason) detail.push(item.reason);
+      if (item.note) detail.push(item.note);
+      const edited = item.feeEdited ? `<span class="sb-edited">職員が変更${item.feeUpdatedBy ? `（${escapeHtml(item.feeUpdatedBy)}）` : ''}${item.feeNote ? `：${escapeHtml(item.feeNote)}` : ''}</span>` : '';
+      const editing = sbUi.feeEdit === item.userId;
+      return `<div class="sb-row">
+        <div class="sb-row-main">
+          <div class="sb-person"><strong>${escapeHtml(item.displayName)} 様</strong><span class="sb-sub">${escapeHtml(detail.join('・'))}</span>${edited}</div>
+          <div class="sb-chips"><span class="sb-chip off">${escapeHtml(SB_KIND_LABELS[item.kind] || 'お休み')}</span>${sbFeeChip(item, board.cancelFeeYen)}</div>
+        </div>
+        ${board.canWrite && !editing ? `<button type="button" class="sb-link" data-sb-fee-edit="${escapeHtml(item.userId)}">キャンセル料を変える</button>` : ''}
+        ${editing ? sbFeeEditorHtml(item, board) : ''}
+      </div>`;
+    }
+
+    function sbNoticeFormHtml(board) {
+      const form = sbUi.form;
+      const users = (sbUi.host.users() || []).slice().sort((a, b) => String(a.kana || a.displayName).localeCompare(String(b.kana || b.displayName), 'ja'));
+      const outside = form.person === '__other';
+      return `<div class="sb-form" id="sbNoticeForm">
+        <div class="sb-field"><span>種類</span>
+          <div class="sb-choice" role="group" aria-label="連絡の種類">${SB_CATEGORY_ORDER.filter((key) => board.categories[key]).map((key) =>
+            `<button type="button" data-sb-category="${key}" aria-pressed="${String(form.category === key)}">${escapeHtml(board.categories[key])}</button>`).join('')}</div>
+        </div>
+        <label class="sb-field"><span>どなたのこと</span>
+          <select data-sb-person>
+            <option value=""${form.person === '' ? ' selected' : ''}>全体への連絡（お名前なし）</option>
+            <option value="__other"${outside ? ' selected' : ''}>登録のない方（お名前を入力）</option>
+            ${users.map((user) => `<option value="${escapeHtml(user.userId)}"${form.person === String(user.userId) ? ' selected' : ''}>${escapeHtml(user.displayName)} 様</option>`).join('')}
+          </select>
+        </label>
+        ${outside ? `<label class="sb-field"><span>お名前</span><input type="text" data-sb-name maxlength="30" value="${escapeHtml(form.personName)}" placeholder="例: 見学の方のお名前" autocomplete="off"></label>` : ''}
+        <label class="sb-field"><span>内容</span><textarea data-sb-body rows="3" maxlength="200" placeholder="例: 10時から見学、昼食まで。">${escapeHtml(form.body)}</textarea></label>
+        <div class="sb-actions">
+          <button type="button" class="primary" data-sb-notice-save ${sbUi.saving ? 'disabled' : ''}>${sbUi.saving ? '保存しています…' : '保存'}</button>
+          <button type="button" data-sb-notice-cancel ${sbUi.saving ? 'disabled' : ''}>やめる</button>
+        </div>
+      </div>`;
+    }
+
+    function renderStaffBoard() {
+      const body = document.getElementById('dsSbBody');
+      if (!body) return;
+      const title = document.getElementById('sbTitle');
+      if (title) title.textContent = `${sbDateTitle(sbUi.date)}の予定表`;
+      const board = sbUi.board;
+      if (!board) {
+        body.innerHTML = sbUi.error
+          ? `<div class="empty-state"><strong>読み込めませんでした</strong>${escapeHtml(sbUi.error)}<br><button type="button" data-sb-reload>もう一度読む</button></div>`
+          : '<p class="ds-note">読み込んでいます…</p>';
+        return;
+      }
+      const trialCount = board.notices.filter((notice) => notice.category === 'trial').length;
+      const tiles = [[board.plannedCount, '利用予定'], [board.absences.length, 'お休み'], [board.additions.length, '追加'], [trialCount, 'お試し']]
+        .map(([count, label]) => `<div class="sb-tile"><b>${count}</b>${label}</div>`).join('');
+      const absences = board.absences.length
+        ? board.absences.map((item) => sbAbsenceRowHtml(item, board)).join('')
+        : '<p class="sb-empty">お休み・キャンセルの方はいません。</p>';
+      const rows = [];
+      board.additions.forEach((item) => {
+        rows.push(`<div class="sb-row"><div class="sb-row-main"><div class="sb-person"><strong>${escapeHtml(item.displayName)} 様</strong><span class="sb-sub">${escapeHtml([item.usage === 'half_am' ? '午前のみ' : '', item.note].filter(Boolean).join('・') || 'この日だけの利用')}</span></div><div class="sb-chips"><span class="sb-chip extra">追加利用</span></div></div></div>`);
+      });
+      board.notices.forEach((notice) => {
+        const mine = board.canEditAll || notice.createdBy === board.actorName;
+        rows.push(`<div class="sb-row"><div class="sb-row-main"><div class="sb-person"><strong>${notice.displayName ? `${escapeHtml(notice.displayName)} 様` : '全体'}</strong><span class="sb-sub sb-text">${escapeHtml(notice.body)}</span><span class="sb-by">${escapeHtml(notice.createdBy)} が記入</span></div><div class="sb-chips"><span class="sb-chip ${escapeHtml(notice.category)}">${escapeHtml(board.categories[notice.category] || '連絡')}</span></div></div>${mine ? `<button type="button" class="sb-link" data-sb-notice-delete="${escapeHtml(notice.noticeId)}">この連絡を消す</button>` : ''}</div>`);
+      });
+      (board.events || []).forEach((item) => {
+        const time = item.start ? `${item.start}${item.end ? `〜${item.end}` : ''} ` : '';
+        rows.push(`<div class="sb-row"><div class="sb-row-main"><div class="sb-person"><strong>全体</strong><span class="sb-sub">${escapeHtml(time + item.title)}（行事予定表より）</span></div><div class="sb-chips"><span class="sb-chip event">行事</span></div></div></div>`);
+      });
+      const notices = rows.length ? rows.join('') : '<p class="sb-empty">連絡事項はまだありません。</p>';
+      const menu = board.menu || {};
+      let menuHtml;
+      if (menu.ok === false) menuHtml = `<p class="sb-empty">${escapeHtml(menu.error || '献立表を読めませんでした。')}</p>`;
+      else if (menu.missing) menuHtml = '<p class="sb-empty">この月の献立表がまだ見つかりません。</p>';
+      else if (!(menu.lunch || []).length && !(menu.snack || []).length) menuHtml = '<p class="sb-empty">この日の献立は献立表にありません。</p>';
+      else {
+        menuHtml = `${(menu.lunch || []).length ? `<ul class="sb-menu">${menu.lunch.map((dish) => `<li>${escapeHtml(dish)}</li>`).join('')}</ul>` : ''}
+          ${(menu.snack || []).length ? `<p class="sb-snack"><span>おやつ</span>${escapeHtml(menu.snack.join('、'))}</p>` : ''}`;
+      }
+      body.innerHTML = `
+        ${sbUi.message ? `<p class="sb-message" role="status">${escapeHtml(sbUi.message)}</p>` : ''}
+        <div class="sb-tiles">${tiles}</div>
+        <section class="sb-card"><h3>お休み・キャンセル</h3>${absences}
+          <p class="sb-legend">前日までの連絡は無料、当日の連絡はキャンセル料 ${escapeHtml(sbYen(board.cancelFeeYen))}（重要事項説明書の決まり）。お休みの登録は「予定の変更・追加」、当日は「当日キャンセル」から行います。</p>
+        </section>
+        <section class="sb-card"><h3>連絡事項</h3>${notices}
+          ${sbUi.form ? sbNoticeFormHtml(board) : (board.canWrite ? '<button type="button" class="sb-add" data-sb-notice-new>＋ 連絡を書く</button>' : '<p class="sb-legend">過ぎた日の連絡は、主任・管理者が書けます。</p>')}
+        </section>
+        <section class="sb-card"><h3>今日の献立</h3>${menuHtml}</section>`;
+    }
+
+    function sbBoardInput(event) {
+      if (!sbUi.form) return;
+      const target = event.target;
+      if (target.matches('[data-sb-body]')) sbUi.form.body = target.value;
+      if (target.matches('[data-sb-name]')) sbUi.form.personName = target.value;
+      if (target.matches('[data-sb-person]') && event.type === 'change') {
+        sbUi.form.person = target.value;
+        renderStaffBoard();
+      }
+    }
+
+    function sbBoardClick(event) {
+      const host = sbUi.host;
+      const pick = (selector) => event.target.closest(selector);
+      if (pick('[data-sb-close]')) return closeStaffBoard();
+      if (pick('[data-sb-reload]')) {
+        sbUi.message = '';
+        return dsLoadStaffBoard(host);
+      }
+      if (!sbUi.board || sbUi.saving) return;
+      if (pick('[data-sb-notice-new]')) {
+        sbUi.form = { category: 'other', person: '', personName: '', body: '' };
+        sbUi.feeEdit = '';
+        sbUi.message = '';
+        renderStaffBoard();
+        const form = document.getElementById('sbNoticeForm');
+        if (form && form.scrollIntoView) form.scrollIntoView({ block: 'nearest' });
+        return;
+      }
+      if (pick('[data-sb-notice-cancel]')) {
+        sbUi.form = null;
+        return renderStaffBoard();
+      }
+      const category = pick('[data-sb-category]');
+      if (category && sbUi.form) {
+        sbUi.form.category = category.dataset.sbCategory;
+        // お試し利用は登録のない方が多いので、お名前の欄を先に出す
+        if (SB_CATEGORY_NEEDS_NAME[sbUi.form.category] && sbUi.form.person === '') sbUi.form.person = '__other';
+        return renderStaffBoard();
+      }
+      if (pick('[data-sb-notice-save]') && sbUi.form) return sbSaveNotice();
+      const remove = pick('[data-sb-notice-delete]');
+      if (remove) {
+        if (!window.confirm('この連絡を消しますか？')) return;
+        return sbRun(host.call('deleteDayNotice', { noticeId: remove.dataset.sbNoticeDelete }), '連絡を消しました。');
+      }
+      const feeEdit = pick('[data-sb-fee-edit]');
+      if (feeEdit) {
+        sbUi.feeEdit = feeEdit.dataset.sbFeeEdit;
+        sbUi.form = null;
+        return renderStaffBoard();
+      }
+      if (pick('[data-sb-fee-cancel]')) {
+        sbUi.feeEdit = '';
+        return renderStaffBoard();
+      }
+      const feeSet = pick('[data-sb-fee-set]');
+      if (feeSet) {
+        const box = feeSet.closest('[data-sb-fee-box]');
+        const note = box.querySelector('[data-sb-fee-note]');
+        return sbRun(host.call('setCancelFee', {
+          businessDate: sbUi.date,
+          userId: box.dataset.sbFeeBox,
+          cancelFee: feeSet.dataset.sbFeeSet,
+          note: note ? note.value : ''
+        }), feeSet.dataset.sbFeeSet === 'auto' ? '決まりどおりに戻しました。' : 'キャンセル料の扱いを変えました。');
+      }
+    }
+
+    function sbSaveNotice() {
+      const form = sbUi.form;
+      const payload = { businessDate: sbUi.date, category: form.category, body: form.body };
+      if (form.person === '__other') payload.personName = form.personName;
+      else if (form.person) payload.userId = form.person;
+      if (!String(form.body || '').trim() && !(payload.userId || String(payload.personName || '').trim())) {
+        sbUi.message = 'どなたのことか、または連絡の内容を入れてください。';
+        return renderStaffBoard();
+      }
+      return sbRun(sbUi.host.call('saveDayNotice', payload), '連絡を保存しました。', true);
+    }
+
+    // 保存・消す・変えるのあと、予定表を読み直して結果を出す。失敗したら入力は残す
+    function sbRun(promise, doneText, closeForm) {
+      sbUi.saving = true;
+      sbUi.message = '';
+      renderStaffBoard();
+      return promise.then((result) => {
+        if (!result || result.ok === false) throw new Error((result && result.error) || '保存できませんでした。');
+        sbUi.saving = false;
+        if (closeForm) sbUi.form = null;
+        sbUi.feeEdit = '';
+        sbUi.message = doneText;
+        return dsLoadStaffBoard(sbUi.host, { quiet: true });
+      }).catch((error) => {
+        sbUi.saving = false;
+        sbUi.message = sbErrorText(error);
+        renderStaffBoard();
+      });
+    }
+
+    // ----- 利用者ごとの特記事項 -----
+    const unUi = { host: null, userId: '', data: null, error: '', seq: 0, draft: '', editId: '', editText: '', saving: false, message: '' };
+
+    function unDateText(dateText) {
+      const parts = String(dateText || '').split('-').map(Number);
+      if (parts.length !== 3 || parts.some((n) => !isFinite(n))) return String(dateText || '');
+      const day = new Date(parts[0], parts[1] - 1, parts[2]);
+      return `${parts[0]}/${parts[1]}/${parts[2]}（${'日月火水木金土'[day.getDay()]}）`;
+    }
+
+    function openUserNotes(host, userId) {
+      if (!host || !host.call) return;
+      const user = host.findUser(userId) || {};
+      Object.assign(unUi, { host: host, userId: normalizeClientUserId(userId), data: null, error: '', draft: '', editId: '', editText: '', saving: false, message: '' });
+      const previous = document.getElementById('dsUserNotes');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsUserNotes';
+      overlay.className = 'nb-overlay ds-board ds-unotes';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '特記事項');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-un-close>← 戻る</button>
+          <div class="nb-title"><strong>特記事項</strong><span id="unName">${escapeHtml(user.displayName || '')} 様</span></div>
+          <button type="button" data-un-reload>更新</button>
+        </div>
+        <div class="sb-body" id="dsUnBody"></div>`;
+      document.body.appendChild(overlay);
+      if (!GinNav.isTop('dsUserNotes')) GinNav.push('dsUserNotes', userNotesBack);
+      overlay.addEventListener('click', unClick);
+      overlay.addEventListener('input', (event) => {
+        if (event.target.matches('[data-un-draft]')) unUi.draft = event.target.value;
+        if (event.target.matches('[data-un-edit-text]')) unUi.editText = event.target.value;
+      });
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          requestCloseUserNotes();
+        }
+      });
+      loadUserNotes();
+      overlay.querySelector('[data-un-close]').focus({ preventScroll: true });
+    }
+
+    function unHasUnsaved() {
+      return Boolean(String(unUi.draft || '').trim()) || Boolean(unUi.editId);
+    }
+
+    function requestCloseUserNotes() {
+      if (unUi.saving) return;
+      if (unHasUnsaved() && !window.confirm('保存していない入力があります。閉じますか？')) return;
+      closeUserNotes();
+    }
+
+    function closeUserNotes() {
+      const existing = document.getElementById('dsUserNotes');
+      if (existing) existing.remove();
+      unUi.seq++;
+      unUi.draft = '';
+      unUi.editId = '';
+      if (existing) GinNav.closed('dsUserNotes');
+    }
+
+    // スマホ・ブラウザの「戻る」で閉じる。保存していない入力があれば確かめ、閉じないときは履歴を積み直す
+    function userNotesBack() {
+      if (!document.getElementById('dsUserNotes')) return;
+      if (unUi.saving || (unHasUnsaved() && !window.confirm('保存していない入力があります。閉じますか？'))) {
+        GinNav.push('dsUserNotes', userNotesBack);
+        return;
+      }
+      closeUserNotes();
+    }
+
+    function loadUserNotes(quiet) {
+      const seq = ++unUi.seq;
+      unUi.error = '';
+      if (!quiet) {
+        unUi.data = null;
+        renderUserNotes();
+      }
+      return unUi.host.call('userNotes', { userId: unUi.userId }).then((result) => {
+        if (seq !== unUi.seq) return;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        unUi.data = result;
+        renderUserNotes();
+      }).catch((error) => {
+        if (seq !== unUi.seq) return;
+        unUi.error = sbErrorText(error);
+        renderUserNotes();
+      });
+    }
+
+    function renderUserNotes() {
+      const body = document.getElementById('dsUnBody');
+      if (!body) return;
+      const data = unUi.data;
+      if (!data) {
+        body.innerHTML = unUi.error
+          ? `<div class="empty-state"><strong>読み込めませんでした</strong>${escapeHtml(unUi.error)}<br><button type="button" data-un-reload>もう一度読む</button></div>`
+          : '<p class="ds-note">読み込んでいます…</p>';
+        return;
+      }
+      const name = document.getElementById('unName');
+      if (name && data.displayName) name.textContent = `${data.displayName} 様`;
+      const notes = data.notes.map((note) => {
+        const editing = unUi.editId === note.noteId;
+        const edited = note.updatedBy ? `<span class="sb-by">${escapeHtml(note.updatedBy)} が直しました</span>` : '';
+        return `<div class="un-note">
+          <div class="un-meta"><b>${escapeHtml(unDateText(note.noteDate))}</b><span>${escapeHtml(note.createdBy)}</span></div>
+          ${editing
+            ? `<textarea data-un-edit-text rows="4" maxlength="500" aria-label="特記事項を直す">${escapeHtml(unUi.editText)}</textarea>
+               <div class="sb-actions"><button type="button" class="primary" data-un-edit-save ${unUi.saving ? 'disabled' : ''}>直した内容で保存</button><button type="button" data-un-edit-cancel ${unUi.saving ? 'disabled' : ''}>やめる</button></div>`
+            : `<p class="un-text">${escapeHtml(note.body)}</p>${edited}
+               ${data.canEdit ? `<div class="un-tools"><button type="button" class="sb-link" data-un-edit="${escapeHtml(note.noteId)}">直す</button><button type="button" class="sb-link" data-un-delete="${escapeHtml(note.noteId)}">消す</button></div>` : ''}`}
+        </div>`;
+      }).join('');
+      body.innerHTML = `
+        ${unUi.message ? `<p class="sb-message" role="status">${escapeHtml(unUi.message)}</p>` : ''}
+        <section class="sb-card">
+          <label class="sb-field"><span>特記事項を書く</span><textarea data-un-draft rows="3" maxlength="500" placeholder="例: お風呂がぬるいと話されていた。次回は湯温を確かめてから声をかける。">${escapeHtml(unUi.draft)}</textarea></label>
+          <div class="sb-actions"><button type="button" class="primary" data-un-add ${unUi.saving ? 'disabled' : ''}>${unUi.saving && !unUi.editId ? '保存しています…' : '保存'}</button></div>
+          <p class="sb-legend">書いた日とあなたの名前が自動で残ります。職員だけが見られ、連絡帳（ご家族あて）には出ません。${data.canEdit ? '' : '直す・消すは主任・管理者に頼んでください。'}</p>
+        </section>
+        <section class="sb-card"><h3>これまでの特記事項${data.total ? `（${data.total}件）` : ''}</h3>
+          ${notes || '<p class="sb-empty">特記事項はまだありません。</p>'}
+        </section>`;
+    }
+
+    function unRun(promise, doneText, after) {
+      unUi.saving = true;
+      unUi.message = '';
+      renderUserNotes();
+      return promise.then((result) => {
+        if (!result || result.ok === false) throw new Error((result && result.error) || '保存できませんでした。');
+        unUi.saving = false;
+        unUi.message = doneText;
+        if (after) after();
+        return loadUserNotes(true);
+      }).catch((error) => {
+        unUi.saving = false;
+        unUi.message = sbErrorText(error);
+        renderUserNotes();
+      });
+    }
+
+    function unClick(event) {
+      const pick = (selector) => event.target.closest(selector);
+      if (pick('[data-un-close]')) return requestCloseUserNotes();
+      if (pick('[data-un-reload]')) return loadUserNotes(Boolean(unUi.data));
+      if (!unUi.data || unUi.saving) return;
+      if (pick('[data-un-add]')) {
+        if (!String(unUi.draft || '').trim()) {
+          unUi.message = '特記事項の内容を入れてください。';
+          return renderUserNotes();
+        }
+        return unRun(unUi.host.call('addUserNote', { userId: unUi.userId, body: unUi.draft }), '特記事項を保存しました。', () => { unUi.draft = ''; });
+      }
+      const edit = pick('[data-un-edit]');
+      if (edit) {
+        const note = unUi.data.notes.find((item) => item.noteId === edit.dataset.unEdit);
+        if (!note) return;
+        unUi.editId = note.noteId;
+        unUi.editText = note.body;
+        unUi.message = '';
+        return renderUserNotes();
+      }
+      if (pick('[data-un-edit-cancel]')) {
+        unUi.editId = '';
+        return renderUserNotes();
+      }
+      if (pick('[data-un-edit-save]')) {
+        if (!String(unUi.editText || '').trim()) {
+          unUi.message = '特記事項の内容を入れてください。';
+          return renderUserNotes();
+        }
+        return unRun(unUi.host.call('updateUserNote', { noteId: unUi.editId, body: unUi.editText }), '特記事項を直しました。', () => { unUi.editId = ''; });
+      }
+      const remove = pick('[data-un-delete]');
+      if (remove) {
+        if (!window.confirm('この特記事項を消しますか？')) return;
+        return unRun(unUi.host.call('updateUserNote', { noteId: remove.dataset.unDelete, remove: true }), '特記事項を消しました。');
+      }
+    }
     /* @@DS_EXTRA_JS END@@ */
 
     // ===== 日ごとの利用予定(臨時の追加・お休み・振替)。Scanner.html と Index.html で同じ処理 =====
@@ -7419,6 +8055,7 @@
         const detail = open ? `
           <div class="user-card-detail">
             ${photoSlotHtml(user, 'detail-photo')}
+            <button type="button" class="ds-notes-open" data-user-notes="${escapeHtml(user.userId)}">特記事項を見る・書く</button>
             ${detailSection('基本情報', [
               detailRow('性別', user.gender),
               detailRow('生年月日', user.birthDate),
@@ -7475,6 +8112,9 @@
           renderUsers();
           list.querySelector(`[data-kana-group="${key}"]`)?.focus({ preventScroll: true });
         });
+      });
+      list.querySelectorAll('[data-user-notes]').forEach((button) => {
+        button.addEventListener('click', () => openUserNotes(scannerDsHost, button.dataset.userNotes));
       });
       list.querySelectorAll('.user-card-head').forEach((head) => {
         head.addEventListener('click', () => {
