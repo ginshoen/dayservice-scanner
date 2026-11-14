@@ -1794,6 +1794,35 @@
     @media print {
       #dsStaffBoard, #dsUserNotes { display: none !important; }
     }
+
+    /* ===== 新規の方のお知らせ(2026-11-14) ===== */
+    [data-new-user-bar][hidden] { display: none; }
+    .nu-bar { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 10px; padding: 10px 12px; border: 1px solid #f0b429; border-radius: 12px; background: #fff7e0; color: #5c3d00; text-align: left; font: inherit; cursor: pointer; }
+    .nu-bar-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .nu-bar-text strong { font-size: 15px; }
+    .nu-bar-text span { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nu-bar-badge { flex: none; display: inline-block; padding: 2px 8px; border-radius: 999px; background: #c2410c; color: #fff; font-size: 12px; font-weight: 700; }
+    .nu-card { margin: 0 0 12px; padding: 12px 14px; border: 1px solid #e9e2f3; border-radius: 14px; background: #fff; }
+    .nu-card header { display: flex; align-items: center; gap: 8px; }
+    .nu-card header strong { font-size: 17px; }
+    .nu-meta { margin: 4px 0 6px; color: #6b6385; font-size: 13px; }
+    .nu-link { display: inline-block; margin: 0 0 6px; color: #4b3d85; font-size: 14px; font-weight: 700; }
+    .nu-card .sb-actions { margin-top: 8px; }
+    .nu-error { margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: #fdecea; color: #8a1c12; font-size: 14px; font-weight: 700; }
+    @media print { #dsNewUsers, [data-new-user-bar] { display: none !important; } }
+    .nu-warn { margin: 6px 0; padding: 8px 10px; border-radius: 8px; background: #fdecea; color: #8a1c12; font-size: 13px; }
+    .nu-draft { display: grid; gap: 4px; margin: 8px 0; }
+    .nu-draft div { display: grid; grid-template-columns: 9em 1fr; gap: 8px; font-size: 14px; }
+    .nu-draft dt { color: #6b6385; }
+    .nu-draft dd { margin: 0; overflow-wrap: anywhere; }
+    .nu-tag { display: inline-block; margin-left: 4px; padding: 0 6px; border-radius: 6px; background: #eef2f6; color: #3b4652; font-size: 11px; }
+    .nu-tag.warn { background: #fff1c2; color: #6b4a00; }
+    .nu-handled { margin: 12px 0 0; padding: 10px 14px; border: 1px solid #e9e2f3; border-radius: 14px; background: #fff; }
+    .nu-handled summary { min-height: 36px; display: flex; align-items: center; font-weight: 700; color: #4b3d85; cursor: pointer; }
+    .nu-handled-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px dashed #ece6f5; }
+    .nu-handled-row .nu-meta { display: block; margin: 2px 0 0; }
+    .nu-handled-row button { flex: none; min-height: 40px; padding: 0 14px; border: 1.5px solid #d9cfee; border-radius: 12px; background: #fff; color: #3c3550; font: inherit; font-weight: 700; cursor: pointer; }
+    @media (max-width: 420px) { .nu-draft div { grid-template-columns: 1fr; gap: 0; } }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2015,6 +2044,15 @@
     @media (hover: none) {
       .day-row:hover:not(:disabled) { box-shadow: none; }
     }
+    /* 2026-11-14 今日の集計にバイタル(測った方/来所した方)。タイルは7つ。
+       スマホは今までどおり3つずつ、それより広い画面は4つずつ。「一覧 ›」は名前の下の段に置き、名前と重ねない */
+    #todaySummary.today-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+    #todaySummary button.metric { padding-bottom: 18px; }
+    .metric-vital strong small { font-size: 12px; }
+    .flags .flag[data-service="vital"] { font-size: 10px !important; letter-spacing: -.06em; }
+    @media (max-width: 600px) {
+      #todaySummary.today-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+    }
   </style>
   <script>
     /* @@GIN_NAV BEGIN@@ 共通UI/gin-nav.js の写し。直すときは 共通UI 側を直して node 共通UI/sync.js */
@@ -2187,6 +2225,7 @@
     <main>
       <section id="scanView" class="view">
         <div class="page-heading"><div><div class="eyebrow">毎日の記録</div><h1>スキャン</h1><p>記録する内容を選んで、QRコードを読み取ります。</p></div></div>
+        <div id="scanNewUserBar" hidden></div>
         <div id="scanBoardBar"></div>
         <div class="scan-workspace">
         <div class="scan-primary">
@@ -2248,6 +2287,7 @@
 
       <section id="todayView" class="view">
         <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
+        <div id="todayNewUserBar" hidden></div>
         <div id="todayBoardBar"></div>
         <div class="plan-bar" aria-live="polite">
           <div><span class="plan-bar-count" id="planBarCount">今日の予定</span><span class="plan-bar-detail" id="planBarDetail"></span></div>
@@ -2828,7 +2868,8 @@
         response = await fetch(app.config.url, {
           method: 'POST',
           // 本番とデモの取り違え防止: サーバーが自分と違う環境なら何もせずに断る
-          body: JSON.stringify({ action: action, payload: body, env: IS_DEMO ? 'demo' : 'production' })
+          // 端末の番号も添える(一般職員は「施設の端末」に登録された端末だけで使えるようにするため)
+          body: JSON.stringify({ action: action, payload: body, env: IS_DEMO ? 'demo' : 'production', device: { id: app.deviceId, name: app.config.deviceName || '', screen: 'scanner' } })
         });
       } catch (error) {
         throw new Error('通信できません。電波状況を確認して、もう一度お試しください。');
@@ -2847,6 +2888,11 @@
         if (message.indexOf('SESSION_EXPIRED') !== -1 && LOGIN_FREE_ACTIONS.indexOf(action) === -1) {
           handleSessionExpired();
           throw new Error('ログインの有効期限が切れました。');
+        }
+        // 施設の端末でないと断られたら、ログイン画面に戻してわけを出す(未送信の記録は端末に残る)
+        if (data && data.errorCode === 'DEVICE_NOT_ALLOWED' && LOGIN_FREE_ACTIONS.indexOf(action) === -1) {
+          handleDeviceRefused(message);
+          throw new Error(message);
         }
         throw new Error(message);
       }
@@ -3053,6 +3099,11 @@
       localStorage.removeItem(STORAGE.token);
       localStorage.removeItem(STORAGE.staffName);
       localStorage.removeItem(STORAGE.staffRole);
+      // 新規の方のお知らせは、ログインした人によって見える中身が違うので読み直す
+      nuUi.data = null;
+      nuUi.loadedAt = 0;
+      closeNewUserNotices();
+      dsRenderNewUserBars();
     }
 
     // 記録は端末に残したまま、ログインだけやり直してもらう
@@ -3062,6 +3113,17 @@
       stopCamera();
       clearSession();
       showLogin('ログインの有効期限が切れました。もう一度ログインしてください。未送信の記録は残っています。')
+        .finally(() => {
+          app.handlingSessionExpiry = false;
+        });
+    }
+
+    function handleDeviceRefused(message) {
+      if (app.handlingSessionExpiry) return;
+      app.handlingSessionExpiry = true;
+      stopCamera();
+      clearSession();
+      showLogin(message + ' 未送信の記録は残っています。')
         .finally(() => {
           app.handlingSessionExpiry = false;
         });
@@ -3113,7 +3175,10 @@
       try {
         if (!app.token) return;
         ['scanBoardBar', 'todayBoardBar'].forEach((id) => mountStaffBoardBar(scannerDsHost, document.getElementById(id)));
+        // 新規の方のお知らせ(対応されるまで出し続ける)
+        ['scanNewUserBar', 'todayNewUserBar'].forEach((id) => mountNewUserBar(scannerDsHost, document.getElementById(id)));
         if (!skipLoad) dsEnsureStaffBoard(scannerDsHost, force);
+        if (!skipLoad) dsLoadNewUserNotices(scannerDsHost, force);
       } catch (error) {
         // 画面の準備が終わる前に呼ばれたときは、次の更新で出す
       }
@@ -4218,21 +4283,30 @@
       document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
       document.getElementById('clearTodaySearch').classList.toggle('hidden', !rawQuery);
       document.querySelectorAll('[data-today-filter]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.todayFilter === app.todayFilter)));
-      const counts = { arrival: 0, bath: 0, lunch: 0, snack: 0, departure: 0, cancelled: 0 };
+      const counts = { arrival: 0, bath: 0, lunch: 0, snack: 0, departure: 0, cancelled: 0, vital: 0 };
       const entries = app.users.slice().sort(kanaSort).map((user) => {
         const record = recordFor(user.userId);
         const cancelled = Boolean(record && record.attendanceStatus === 'cancelled');
         const flags = localFlagsFor(user.userId);
         const plan = planFor(app.plans, user.userId);
+        // バイタルは記録一覧の「バイタル」タブと同じく、体温・血圧・脈拍・SpO2 のどれかが入っていれば「測った」とする
+        const vital = !cancelled && scannerVitalMeasured(user.userId);
         if (cancelled) counts.cancelled++;
         else Object.keys(SERVICE_META).forEach((key) => { if (flags[key]) counts[key]++; });
-        return { user, record, cancelled, flags, plan, planned: Boolean(plan && plan.planned) };
+        if (vital && flags.arrival) counts.vital++;
+        return { user, record, cancelled, flags, plan, vital, planned: Boolean(plan && plan.planned) };
       });
       renderPlanBar(entries);
       // 押すと、その記録をした方の一覧(名前・時刻・食べた量・送迎)が開く。キャンセルは下の一覧をキャンセルで絞り込む
+      // バイタルは「来所した方のうち測った方 / 来所した方」。押すと記録一覧の「バイタル」タブ(その場で入力できる)
       document.getElementById('todaySummary').innerHTML = [
-        ['arrival', '来所'], ['bath', '入浴'], ['lunch', '昼食'], ['snack', 'おやつ'], ['departure', '送り'], ['cancelled', 'キャンセル']
-      ].map(([key, label]) => `<button type="button" class="metric" data-metric="${key}" style="--c:${key === 'cancelled' ? '#c2410c' : SERVICE_META[key].color}" aria-label="${label} ${counts[key]}名。押すと一覧を表示"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${counts[key]}<small>名</small></strong><span>${label}</span></button>`).join('');
+        ['arrival', '来所'], ['vital', 'バイタル'], ['bath', '入浴'], ['lunch', '昼食'], ['snack', 'おやつ'], ['departure', '送り'], ['cancelled', 'キャンセル']
+      ].map(([key, label]) => {
+        const color = key === 'cancelled' ? '#c2410c' : (key === 'vital' ? MODE_META.vital.color : SERVICE_META[key].color);
+        const count = key === 'vital' ? `${counts.vital}<small>/${counts.arrival}名</small>` : `${counts[key]}<small>名</small>`;
+        const spoken = key === 'vital' ? `バイタル 来所${counts.arrival}名のうち${counts.vital}名が測定済み。押すとバイタルの一覧を表示` : `${label} ${counts[key]}名。押すと一覧を表示`;
+        return `<button type="button" class="metric${key === 'vital' ? ' metric-vital' : ''}" data-metric="${key}" style="--c:${color}" aria-label="${spoken}"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${count}</strong><span>${label}</span></button>`;
+      }).join('');
       const filtered = entries.filter(({user, cancelled, flags, planned}) => {
         if (query && !normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query)) return false;
         // 今日の予定: 予定のある人に加え、予定外で来所した人・キャンセルした人も表示する
@@ -4245,10 +4319,16 @@
       app.todayVisibleIds = filtered.filter((entry) => !entry.cancelled).map((entry) => entry.user.userId);
       document.getElementById('todayResultCount').textContent = `${filtered.length}名を表示 / 全${entries.length}名` +
         (app.todayFilter === 'unrecorded' ? '（今日の予定があり、来所が未記録の方）' : '');
-      list.innerHTML = filtered.map(({user, record, cancelled, flags, plan}) => {
+      list.innerHTML = filtered.map(({user, record, cancelled, flags, plan, vital}) => {
+        // 印の並び: 来所・バイタル・入浴・昼食・おやつ・送り(バイタルは読取履歴ではなくケア記録の値で判定)
+        const flagKeys = ['arrival', 'vital'].concat(Object.keys(SERVICE_META).filter((key) => key !== 'arrival'));
         const chips = cancelled
           ? '<span class="status-chip cancel">キャンセル</span>'
-          : `<span class="flags">${Object.keys(SERVICE_META).map((key) => `<span class="flag ${flags[key] ? 'on' : ''}" data-service="${key}" style="--c:${SERVICE_META[key].color}" aria-label="${SERVICE_META[key].label}${flags[key] ? '記録済み' : '未記録'}">${SERVICE_META[key].label}</span>`).join('')}</span>`;
+          : `<span class="flags">${flagKeys.map((key) => {
+            const on = key === 'vital' ? vital : Boolean(flags[key]);
+            const meta = key === 'vital' ? MODE_META.vital : SERVICE_META[key];
+            return `<span class="flag ${on ? 'on' : ''}" data-service="${key}" style="--c:${meta.color}" aria-label="${meta.label}${on ? (key === 'vital' ? '測定済み' : '記録済み') : (key === 'vital' ? '未測定' : '未記録')}">${meta.label}</span>`;
+          }).join('')}</span>`;
         const marks = [planBadgeHtml(plan, Boolean(flags.arrival))];
         if (!cancelled && record && record.bathStatus === 'refused') marks.push('<span class="status-chip refused">入浴拒否</span>');
         if (!cancelled && record && record.usageActual === 'half_am') marks.push('<span class="status-chip half">午前のみ</span>');
@@ -4267,6 +4347,12 @@
           else openCareForm(scannerCareHost, button.dataset.dayUser);
         });
       });
+    }
+
+    // 今日のバイタルを測ったか。体温・血圧(上)・脈拍・SpO2 のどれかが入っていれば測った(体重だけでは数えない)
+    function scannerVitalMeasured(userId) {
+      const care = careRecordFor(userId);
+      return Boolean(care) && ['temperature', 'bpHigh', 'pulse', 'spo2'].some((field) => careHas(care[field]));
     }
 
     function recordFor(userId) {
@@ -7754,6 +7840,283 @@
       if (remove) {
         if (!window.confirm('この特記事項を消しますか？')) return;
         return unRun(unUi.host.call('updateUserNote', { noteId: remove.dataset.unDelete, remove: true }), '特記事項を消しました。');
+      }
+    }
+
+    // ===== 新規の方のお知らせ(Teams の投稿から作った登録の下書き) =====
+    // 2026-11-14 原山さん。サーバーは newUserNotices / resolveNewUserNotice。
+    // だれかが登録するか「対応済み」を押すまで、全職員の画面に出し続ける(1日で消さない)。
+    // 下書きの中身を見られるのは、主任・管理者と、管理者が認めた職員だけ。登録は管理画面(主任以上)で行う。
+    const nuUi = { host: null, data: null, error: '', seq: 0, loadedAt: 0, saving: '', message: '', noteFor: '', note: '', handledOpen: false };
+    const NU_FIELD_LABELS = {
+      kana: 'ふりがな', gender: '性別', birthDate: '生年月日', careLevel: '介護度', careSupportOffice: '居宅介護支援事業所',
+      careManagerName: '担当ケアマネ', careManagerPhone: 'ケアマネの電話', serviceWeekdays: '利用曜日', weekdayUsage: '曜日別の利用時間',
+      bathSchedule: '入浴予定', mealSchedule: '食事予定', mobility: '移動方法', allergies: 'アレルギー', mealForm: '食事形態',
+      careNotes: '注意事項', effectiveFrom: '利用開始日', userCategory: '利用区分'
+    };
+    const NU_SOURCE_LABELS = { post: '投稿から', reply: '返信から', guess: '推定' };
+    const NU_CATEGORY_LABELS = { internal: 'ケアハウス入居者', external: '外部利用' };
+
+    // 日時は端末の時刻(日本時間)で出す。Teams の日時は世界標準時(…Z)で届く
+    function nuShortDate(text) {
+      const raw = String(text || '');
+      const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (!match) return '';
+      const date = new Date(raw);
+      if (/T/.test(raw) && !isNaN(date.getTime())) {
+        return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+      }
+      return `${Number(match[2])}月${Number(match[3])}日`;
+    }
+
+    // 読む。バーと、開いた一覧の両方がこの結果を使う。2分以内に読んだばかりなら読み直さない
+    function dsLoadNewUserNotices(host, force) {
+      if (!host || !host.call) return Promise.resolve(null);
+      nuUi.host = host;
+      if (!force && nuUi.data && Date.now() - nuUi.loadedAt < 120000) {
+        dsRenderNewUserBars();
+        return Promise.resolve(nuUi.data);
+      }
+      const seq = ++nuUi.seq;
+      return host.call('newUserNotices', {}).then((result) => {
+        if (seq !== nuUi.seq) return null;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        nuUi.data = result;
+        nuUi.error = '';
+        nuUi.loadedAt = Date.now();
+        dsRenderNewUserNotices();
+        return result;
+      }).catch((error) => {
+        if (seq !== nuUi.seq) return null;
+        nuUi.error = sbErrorText(error);
+        dsRenderNewUserNotices();
+        return null;
+      });
+    }
+
+    function dsRenderNewUserNotices() {
+      dsRenderNewUserBars();
+      renderNewUserNotices();
+    }
+
+    // トップに置く1行。届いていないときは何も出さない。data-new-user-bar を付けた入れ物すべてに出す
+    function dsRenderNewUserBars() {
+      const notices = (nuUi.data && nuUi.data.notices) || [];
+      document.querySelectorAll('[data-new-user-bar]').forEach((bar) => {
+        if (!notices.length) {
+          bar.innerHTML = '';
+          bar.hidden = true;
+          return;
+        }
+        bar.hidden = false;
+        const names = notices.slice(0, 3).map((item) => item.displayName).join('、') + (notices.length > 3 ? ` ほか${notices.length - 3}名` : '');
+        bar.innerHTML = `<button type="button" class="nu-bar" data-nu-open>
+          <span class="nu-bar-badge">新規</span>
+          <span class="nu-bar-text"><strong>新規の方の情報が届いています（${notices.length}名）</strong><span>${escapeHtml(names)}</span></span>
+          <span class="sb-bar-go" aria-hidden="true">›</span>
+        </button>`;
+      });
+    }
+
+    function mountNewUserBar(host, container) {
+      if (!container || !host || !host.call) return;
+      container.setAttribute('data-new-user-bar', '');
+      if (!container.dataset.nuBound) {
+        container.dataset.nuBound = '1';
+        container.addEventListener('click', (event) => {
+          if (event.target.closest('[data-nu-open]')) openNewUserNotices(host);
+        });
+      }
+      nuUi.host = host;
+      dsRenderNewUserBars();
+    }
+
+    function openNewUserNotices(host) {
+      if (!host || !host.call) return;
+      nuUi.host = host;
+      nuUi.message = '';
+      nuUi.noteFor = '';
+      nuUi.note = '';
+      const previous = document.getElementById('dsNewUsers');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsNewUsers';
+      overlay.className = 'nb-overlay ds-board';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '新規の方のお知らせ');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-nu-close>← 戻る</button>
+          <div class="nb-title"><strong>新規の方</strong><span>Teams の投稿から</span></div>
+          <button type="button" data-nu-reload>更新</button>
+        </div>
+        <div class="sb-body" id="dsNuBody"></div>`;
+      document.body.appendChild(overlay);
+      if (!GinNav.isTop('dsNewUsers')) GinNav.push('dsNewUsers', closeNewUserNotices);
+      overlay.addEventListener('click', nuClick);
+      overlay.addEventListener('input', (event) => {
+        if (event.target.matches('[data-nu-note]')) nuUi.note = event.target.value;
+      });
+      overlay.addEventListener('toggle', (event) => {
+        if (event.target.matches && event.target.matches('[data-nu-handled]')) nuUi.handledOpen = event.target.open;
+      }, true);
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          closeNewUserNotices();
+        }
+      });
+      renderNewUserNotices();
+      dsLoadNewUserNotices(host, true);
+      overlay.querySelector('[data-nu-close]').focus({ preventScroll: true });
+    }
+
+    function closeNewUserNotices() {
+      const existing = document.getElementById('dsNewUsers');
+      if (existing) existing.remove();
+      if (existing) GinNav.closed('dsNewUsers');
+    }
+
+    function nuDraftRowsHtml(draft) {
+      const fields = (draft && draft.fields) || {};
+      const sources = (draft && draft.sources) || {};
+      const uncertain = (draft && draft.uncertain) || [];
+      const keys = Object.keys(NU_FIELD_LABELS).filter((key) => fields[key]);
+      if (!keys.length) return '<p class="sb-hint">投稿から読み取れた項目はありません。</p>';
+      return `<dl class="nu-draft">${keys.map((key) => {
+        const value = key === 'userCategory' ? (NU_CATEGORY_LABELS[fields[key]] || fields[key]) : fields[key];
+        const tags = [];
+        if (sources[key]) tags.push(`<span class="nu-tag">${escapeHtml(NU_SOURCE_LABELS[sources[key]] || '')}</span>`);
+        if (uncertain.indexOf(key) !== -1) tags.push('<span class="nu-tag warn">要確認</span>');
+        return `<div><dt>${escapeHtml(NU_FIELD_LABELS[key])}</dt><dd>${escapeHtml(value)} ${tags.join('')}</dd></div>`;
+      }).join('')}</dl>`;
+    }
+
+    function nuNoticeHtml(item, data) {
+      const meta = [];
+      if (item.postedAt) meta.push(`投稿 ${nuShortDate(item.postedAt)}`);
+      if (item.postedBy) meta.push(item.postedBy);
+      if (item.sourceLabel) meta.push(item.sourceLabel);
+      const link = item.sourceUrl
+        ? `<a class="nu-link" href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noopener noreferrer">元の投稿を Teams で開く</a>`
+        : '';
+      const same = item.sameNameUser
+        ? `<p class="nu-warn">同じお名前の方が、すでに利用者にいます（登録日 ${escapeHtml(item.sameNameUser.registeredDate || '不明')}）。同じ方なら「対応済み」にしてください。</p>`
+        : '';
+      let actions = '';
+      if (data.canHandle) {
+        const register = data.canRegister && nuUi.host && typeof nuUi.host.registerFromDraft === 'function'
+          ? `<button type="button" class="primary" data-nu-register="${escapeHtml(item.noticeId)}">下書きから登録</button>`
+          : '';
+        const noteBox = nuUi.noteFor === item.noticeId
+          ? `<label class="sb-field"><span>対応のメモ（任意）</span><input type="text" data-nu-note maxlength="100" value="${escapeHtml(nuUi.note)}" placeholder="例: お試しのみで終了" autocomplete="off"></label>
+            <div class="sb-actions"><button type="button" data-nu-cancel>やめる</button><button type="button" class="primary" data-nu-resolve="${escapeHtml(item.noticeId)}" ${nuUi.saving ? 'disabled' : ''}>対応済みにする</button></div>`
+          : `<div class="sb-actions">${register}<button type="button" data-nu-handle="${escapeHtml(item.noticeId)}">対応済みにする</button></div>`;
+        const where = !register && data.canRegister ? '<p class="sb-hint">利用者の登録は、管理画面のこのお知らせから行えます。</p>' : '';
+        actions = `${nuDraftRowsHtml(item.draft)}${where}${noteBox}`;
+      } else {
+        actions = '<p class="sb-hint">主任・管理者が確かめて登録します。登録されるまで、ここに出ています。</p>';
+      }
+      return `<article class="nu-card">
+        <header><strong>${escapeHtml(item.displayName)}</strong><span class="nu-bar-badge">新規</span></header>
+        <p class="nu-meta">${escapeHtml(meta.join('・'))}</p>
+        ${link}${same}${actions}
+      </article>`;
+    }
+
+    function renderNewUserNotices() {
+      const body = document.getElementById('dsNuBody');
+      if (!body) return;
+      const data = nuUi.data;
+      const message = nuUi.message ? `<p class="sb-message" role="status">${escapeHtml(nuUi.message)}</p>` : '';
+      if (!data) {
+        body.innerHTML = nuUi.error ? `<p class="nu-error">${escapeHtml(nuUi.error)}</p>` : '<p class="sb-hint">読み込んでいます…</p>';
+        return;
+      }
+      const error = nuUi.error ? `<p class="nu-error">${escapeHtml(nuUi.error)}</p>` : '';
+      const handled = nuHandledHtml(data);
+      if (!data.notices.length) {
+        body.innerHTML = `${message}${error}<p class="sb-hint">対応待ちの新規の方はいません。</p>${handled}`;
+        return;
+      }
+      const guide = data.canHandle
+        ? '<p class="sb-hint">投稿の本文から作った下書きです。添付（サマリーなど）の中身は入っていません。元の投稿と添付を見て、確かめてから登録してください。</p>'
+        : '';
+      body.innerHTML = `${message}${error}${guide}${data.notices.map((item) => nuNoticeHtml(item, data)).join('')}${handled}`;
+    }
+
+    // 主任以上: 30日以内に「対応済み」にしたお知らせ。押し間違いはここから戻す
+    function nuHandledHtml(data) {
+      const list = (data && data.canReopen && data.recentHandled) || [];
+      if (!list.length) return '';
+      return `<details class="nu-handled"${nuUi.handledOpen ? ' open' : ''} data-nu-handled>
+        <summary>「対応済み」にしたお知らせ（30日以内・${list.length}件）</summary>
+        ${list.map((item) => `<div class="nu-handled-row">
+          <div><strong>${escapeHtml(item.displayName)}</strong>
+            <span class="nu-meta">${escapeHtml(nuShortDate(item.handledAt))} ${escapeHtml(item.handledBy)}${item.handledNote ? `「${escapeHtml(item.handledNote)}」` : ''}</span></div>
+          <button type="button" data-nu-reopen="${escapeHtml(item.noticeId)}" ${nuUi.saving ? 'disabled' : ''}>元に戻す</button>
+        </div>`).join('')}
+      </details>`;
+    }
+
+    function nuClick(event) {
+      const target = event.target.closest('button');
+      if (!target) return;
+      if (target.matches('[data-nu-close]')) return closeNewUserNotices();
+      if (target.matches('[data-nu-reload]')) {
+        nuUi.message = '';
+        return dsLoadNewUserNotices(nuUi.host, true);
+      }
+      if (target.dataset.nuHandle) {
+        nuUi.noteFor = target.dataset.nuHandle;
+        nuUi.note = '';
+        renderNewUserNotices();
+        const input = document.querySelector('#dsNuBody [data-nu-note]');
+        if (input) input.focus();
+        return;
+      }
+      if (target.matches('[data-nu-cancel]')) {
+        nuUi.noteFor = '';
+        return renderNewUserNotices();
+      }
+      if (target.dataset.nuResolve) {
+        if (nuUi.saving) return;
+        const noticeId = target.dataset.nuResolve;
+        nuUi.saving = noticeId;
+        renderNewUserNotices();
+        return nuUi.host.call('resolveNewUserNotice', { noticeId, note: nuUi.note }).then((result) => {
+          if (!result || result.ok === false) throw new Error((result && result.error) || '保存できませんでした。');
+          nuUi.message = '対応済みにしました。';
+          nuUi.noteFor = '';
+          nuUi.error = '';
+        }).catch((error) => {
+          nuUi.error = sbErrorText(error);
+        }).finally(() => {
+          nuUi.saving = '';
+          dsLoadNewUserNotices(nuUi.host, true);
+        });
+      }
+      if (target.dataset.nuReopen) {
+        if (nuUi.saving) return;
+        nuUi.saving = target.dataset.nuReopen;
+        nuUi.handledOpen = true;
+        return nuUi.host.call('reopenNewUserNotice', { noticeId: target.dataset.nuReopen }).then((result) => {
+          if (!result || result.ok === false) throw new Error((result && result.error) || '戻せませんでした。');
+          nuUi.message = '対応待ちに戻しました。';
+          nuUi.error = '';
+        }).catch((error) => {
+          nuUi.error = sbErrorText(error);
+        }).finally(() => {
+          nuUi.saving = '';
+          dsLoadNewUserNotices(nuUi.host, true);
+        });
+      }
+      if (target.dataset.nuRegister) {
+        const item = ((nuUi.data && nuUi.data.notices) || []).find((notice) => notice.noticeId === target.dataset.nuRegister);
+        if (!item) return;
+        closeNewUserNotices();
+        nuUi.host.registerFromDraft(item);
       }
     }
     /* @@DS_EXTRA_JS END@@ */
