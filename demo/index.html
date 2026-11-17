@@ -1920,6 +1920,10 @@
       .care-toilet-row.stool .care-toilet-chips:last-child { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     }
 
+    /* ===== 2026-11-17 ケア記録の自動保存(名前の下に「保存しました（10:32）」などを出す) ===== */
+    .care-auto { margin: 2px 0 0; color: #0f766e; font-size: 12px; line-height: 1.4; }
+    .care-auto.error { color: #b3261e; font-weight: 600; }
+
     /* ===== 2026-11-17 文字の大きさ(現場の要望「文字を全部大きく」。全員の端末で画面全体を1.15倍) ===== */
     /* 印刷(連絡帳・月の実績など)には効かせない。zoom で 88vh も大きくなる端末があるので、下から出る画面の高さは割り戻す(大きくならない端末では少し低くなるだけ) */
     /* 画面の高さ(vh)を使う所はすべて割り戻す: 下から出る画面・利用者の編集(管理)・表の枠(管理)・画面全体の最低の高さ */
@@ -2619,6 +2623,8 @@
       notebookGroups: [],
       todayVisibleIds: [],
       recordsRevision: 0,
+      // ケア記録を保存した回数。読み直しを始めたあとに保存があれば、その読み直しのケア記録は古いので使わない
+      careRevision: 0,
       pendingDayChanges: new Map(),
       queue: [],
       recent: [],
@@ -3262,7 +3268,7 @@
       }
     }
 
-    function applyState(state, fromCache, keepLocalRecords = false) {
+    function applyState(state, fromCache, keepLocalRecords = false, keepLocalCare = false) {
       app.users = (Array.isArray(state.users) ? state.users : [])
         .filter((user) => user && user.userId && user.displayName)
         .map((user) => Object.assign({}, user, { userId: normalizeClientUserId(user.userId) }));
@@ -3274,8 +3280,8 @@
       if (Array.isArray(state.plans)) {
         app.plans = state.businessDate === todayStr() ? state.plans : [];
       }
-      // ケア記録は保存完了を待ってから一覧へ反映するため、保存中だけ古い応答で上書きしない。
-      if (!careUi.saving && Array.isArray(state.careRecords)) {
+      // ケア記録は保存完了を待ってから一覧へ反映するため、保存中と、読み直しの間に保存があったときは古い応答で上書きしない。
+      if (!careUi.saving && !keepLocalCare && Array.isArray(state.careRecords)) {
         app.careRecords = (state.businessDate === todayStr() ? state.careRecords : [])
           .map((care) => Object.assign({}, care, { userId: normalizeClientUserId(care.userId) }));
       }
@@ -3372,12 +3378,13 @@
       button.textContent = '更新中…';
       try {
         const revision = app.recordsRevision;
+        const careRevision = app.careRevision;
         const prefetch = app.statePrefetch;
         app.statePrefetch = null;
         const state = (prefetch && await prefetch) || await api('scanState', { businessDate: todayStr() });
         // 更新開始後の入力や、保存中の表示を古い一覧応答で上書きしない。
         const keepLocalRecords = revision !== app.recordsRevision || app.pendingDayChanges.size > 0;
-        applyState(state, false, keepLocalRecords);
+        applyState(state, false, keepLocalRecords, careRevision !== app.careRevision);
         cacheCurrentState();
         syncQueue();
         if (!keepLocalRecords) document.getElementById('todayFeedback').textContent = '最新の記録に更新しました。';
@@ -4081,6 +4088,7 @@
       }
       app.syncing = true;
       app.syncPending = pending;
+      const careRevision = app.careRevision;
       let sentOk = false;
       try {
         const response = await api('syncEvents', {
@@ -4104,7 +4112,7 @@
         });
         saveQueue();
         mergeReturnedRecords(response.records || []);
-        if (response.careRecords && response.careRecords.length && !careUi.saving) mergeReturnedCareRecords(response.careRecords);
+        if (response.careRecords && response.careRecords.length && !careUi.saving && careRevision === app.careRevision) mergeReturnedCareRecords(response.careRecords);
         cacheCurrentState();
         sentOk = true;
       } catch (error) {
@@ -4125,8 +4133,9 @@
     async function refreshStateQuiet() {
       try {
         const revision = app.recordsRevision;
+        const careRevision = app.careRevision;
         const state = await api('scanState', { businessDate: todayStr() });
-        applyState(state, false, revision !== app.recordsRevision || app.pendingDayChanges.size > 0);
+        applyState(state, false, revision !== app.recordsRevision || app.pendingDayChanges.size > 0, careRevision !== app.careRevision);
         cacheCurrentState();
       } catch (error) {}
     }
@@ -4598,6 +4607,7 @@
       bathState: (userId) => scannerBathState(userId),
       save: (payload) => api('saveCareRecord', payload),
       applySaved: (userId, result) => {
+        app.careRevision++;
         if (result.careRecord) {
           const care = Object.assign({}, result.careRecord, { userId: normalizeClientUserId(result.careRecord.userId) });
           app.careRecords = app.careRecords.filter((item) => normalizeClientUserId(item.userId) !== care.userId);
@@ -4844,7 +4854,67 @@
     // バイタルの項目と単位(画面・連絡帳・一覧で同じ表示にする)
     const CARE_VITAL_FIELDS = ['temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2', 'weight'];
     const CARE_VITAL_UNITS = { temperature: '℃', bpHigh: 'mmHg', bpLow: 'mmHg', pulse: '回/分', spo2: '%', weight: 'kg' };
-    const careUi = { host: null, userId: '', initial: null, saving: false };
+    // timer: 自動保存を待っている間の印。chain: 保存を1件ずつ順に送る。token: 開いたケア記録ごとに変わる(前の方の保存の結果で今の画面を書き換えない)
+    const careUi = { host: null, userId: '', businessDate: '', initial: null, saving: false, timer: 0, chain: Promise.resolve(true), token: 0, problem: null, savedCount: 0 };
+    // 自動保存までの待ち時間(ミリ秒)。押して選ぶ: 押し直しを待つ / 欄から離れた: すぐ。
+    // 数字・時刻・連絡事項は、打っている途中(「36」→「36.8」など)を保存しない。欄から離れたとき(バイタルを入れ終えて次の欄へ移ったときも)だけ保存する。
+    // 途中の値を送ると、シートの修正履歴に「直した」と残ってしまうため
+    const CARE_SAVE_DELAY = { tap: 600, change: 250 };
+    // バイタルを入れ終えたら次の欄へ移る順(体重は小数のけたが決まらないので、最後に置き、入れ終えても移らない)
+    const CARE_VITAL_ORDER = ['temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2', 'weight'];
+
+    // バイタルの欄を入れ終えたか: 範囲内で、もう1けた打つと上限を超える(=これ以上打たない)とき。
+    // 体温は小数1けたまで打ったとき(「365」→36.5 も含む。「37」はまだ37.2などがあり得るので移らない)
+    function careVitalComplete(field, value) {
+      const rule = CARE_NUMBER_RULES[field];
+      if (!rule || field === 'weight') return false;
+      const text = careAutoPoint(field, careNumberText(value));
+      if (!/^\d+(\.\d)?$/.test(text)) return false;
+      const number = Number(text);
+      if (number < rule.min || number > rule.max) return false;
+      if (field === 'temperature') return /\.\d$/.test(text);
+      return text.indexOf('.') === -1 && number * 10 > rule.max;
+    }
+
+    // 同じ方の次のバイタルの欄へ移る(無い欄は飛ばす)。次が無ければ false
+    function careFocusNextVital(container, attr, field) {
+      const start = CARE_VITAL_ORDER.indexOf(field);
+      if (!container || start === -1) return false;
+      for (let i = start + 1; i < CARE_VITAL_ORDER.length; i++) {
+        const next = container.querySelector(`input[${attr}="${CARE_VITAL_ORDER[i]}"]`);
+        if (next && !next.disabled) {
+          next.focus();
+          try { next.select(); } catch (error) { /* 選べない欄は無視 */ }
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // バイタルの欄で、入れ終えたら次へ・Enterでも次へ(最後の欄ではキーボードを閉じる)。attr は欄の data- の名前
+    function careBindVitalAdvance(root, attr, scopeSelector) {
+      const fieldOf = (target) => {
+        const input = target && target.closest && target.closest(`input[${attr}]`);
+        if (!input) return null;
+        const field = input.getAttribute(attr);
+        return CARE_VITAL_ORDER.includes(field) ? { input, field } : null;
+      };
+      const scope = (input) => (scopeSelector ? input.closest(scopeSelector) : null) || root;
+      root.addEventListener('input', (event) => {
+        if (event.isComposing) return;
+        const hit = fieldOf(event.target);
+        if (!hit || !careVitalComplete(hit.field, hit.input.value)) return;
+        if (!careFocusNextVital(scope(hit.input), attr, hit.field)) hit.input.blur();
+      });
+      root.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        const hit = fieldOf(event.target);
+        if (!hit) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (!careFocusNextVital(scope(hit.input), attr, hit.field)) hit.input.blur();
+      });
+    }
 
     // 体重の欄を出す方: 利用者の「体重測定」がありの方と、その日すでに体重が入っている方
     function careWeightNeeded(user, care) {
@@ -4909,6 +4979,12 @@
       try { input.setSelectionRange(next.length, next.length); } catch (error) { /* 選べない欄は無視 */ }
     }
     if (typeof document !== 'undefined') {
+      // ケア記録を開いたまま、ほかのアプリへ切り替える・画面を消すときは、打っている欄も含めて待っている保存を送る
+      const careFlushOnLeave = () => {
+        if (document.getElementById('careSheet') && (careUi.timer || careIsDirty())) careFlush();
+      };
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') careFlushOnLeave(); });
+      window.addEventListener('pagehide', careFlushOnLeave);
       // 先に直してから、下書き・保存の処理に渡す(capture で一番先に動かす)
       document.addEventListener('input', careAutoPointInput, true);
       document.addEventListener('compositionend', careAutoPointInput, true);
@@ -5077,9 +5153,15 @@
       if (!user) return;
       const previousCare = document.getElementById('careSheet');
       if (previousCare) previousCare.remove(); // 次の方へ進むときは、戻る履歴を積み直さない
+      clearTimeout(careUi.timer);
+      careUi.timer = 0;
+      careUi.token += 1;
       careUi.host = host;
       careUi.userId = user.userId;
+      careUi.businessDate = host.businessDate();
       careUi.saving = false;
+      careUi.problem = null;
+      careUi.savedCount = 0;
       careUi.initial = careValuesFrom(host.care(user.userId), host.bathState(user.userId));
       const v = careUi.initial;
       const backdrop = document.createElement('div');
@@ -5089,11 +5171,11 @@
       backdrop.innerHTML = `
         <form class="sheet care-sheet" novalidate role="dialog" aria-modal="true" aria-labelledby="careTitle">
           <div class="care-head">
-            <div><h3 id="careTitle" tabindex="-1">${escapeHtml(user.displayName)} 様${dsCareHouseMark(user)}</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}のケア記録</p></div>
+            <div><h3 id="careTitle" tabindex="-1">${escapeHtml(user.displayName)} 様${dsCareHouseMark(user)}</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}のケア記録</p><p class="care-auto">入れた項目は、その都度自動で保存します。</p></div>
             <button type="button" class="care-close" data-care-close aria-label="閉じる">×</button>
           </div>
           <fieldset class="care-group"><legend>送迎</legend>
-            <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押して保存すると、来所・送りの記録になります。</p>
+            <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押すと、そのまま来所・送りの記録になります。</p>
             <div class="care-grid two">
               ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
               ${careTimeField('departureTime', '送り出発', v.departureTime)}
@@ -5157,7 +5239,7 @@
           </fieldset>
           <label class="care-field care-note"><span>連絡帳への連絡事項（任意）</span><textarea data-care="notebookNote" rows="3" maxlength="500" placeholder="例: 歌の時間をとても楽しまれていました。">${escapeHtml(v.notebookNote)}</textarea></label>
           <p class="care-status" role="status" aria-live="polite"></p>
-          <div class="care-confirm hidden" role="alert">保存していない入力があります。
+          <div class="care-confirm hidden" role="alert">保存できていない入力があります。
             <div><button type="button" data-care-keep>入力に戻る</button><button type="button" data-care-discard>保存せずに閉じる</button></div>
           </div>
           <div class="care-links">
@@ -5183,6 +5265,28 @@
       form.addEventListener('submit', (event) => {
         event.preventDefault();
         saveCareForm(false);
+      });
+      // バイタルは入れ終えたら次の欄へ(体温→血圧の上→下→脈拍→SpO2→体重)
+      careBindVitalAdvance(form, 'data-care', null);
+      // ほかの欄で Enter を押しても閉じない(欄から離れて、その項目を保存する)
+      form.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        const input = event.target.closest('input');
+        if (!input) return;
+        event.preventDefault();
+        input.blur();
+      });
+      // 1項目ずつその都度保存する: 押して選ぶ・欄から離れると、変わった項目だけを送る
+      form.addEventListener('click', (event) => {
+        if (event.target.closest('[data-choice-value], [data-care-now], [data-care-add], [data-toilet-add], [data-toilet-del], [data-toilet-set]')) careScheduleSave(CARE_SAVE_DELAY.tap);
+      });
+      form.addEventListener('change', (event) => {
+        if (event.target.closest('[data-care], [data-toilet-time]')) careScheduleSave(CARE_SAVE_DELAY.change);
+      });
+      // バイタルを入れ終えて次の欄へ移ったとき(打った欄から離れた)は、待たずに送る。打っている途中は送らない
+      form.addEventListener('input', (event) => {
+        if (!event.target.closest('input[data-care], textarea[data-care]')) return;
+        if (document.activeElement !== event.target) careScheduleSave(CARE_SAVE_DELAY.change);
       });
       backdrop.addEventListener('click', (event) => {
         if (event.target === backdrop) requestCloseCareForm();
@@ -5236,42 +5340,30 @@
       });
       bindCareToilet(form);
       const notebookButton = form.querySelector('[data-care-notebook]');
-      notebookButton.addEventListener('click', () => {
-        if (careIsDirty()) {
-          showCareStatus('先に「保存」を押してから連絡帳を表示してください。', true);
-          return;
-        }
+      notebookButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
         const userId = careUi.userId;
         closeCareForm(true);
         openCareNotebook(host, [userId]);
-      });
+      }));
       const notesButton = form.querySelector('[data-care-notes]');
       if (notesButton) notesButton.addEventListener('click', () => openUserNotes(careUi.host, careUi.userId));
       const monthButton = form.querySelector('[data-care-month]');
       if (monthButton) monthButton.addEventListener('click', () => openUserMonth(careUi.host, careUi.userId, careUi.host.businessDate()));
       const feeButton = form.querySelector('[data-care-fee]');
-      if (feeButton) feeButton.addEventListener('click', () => {
-        if (careIsDirty()) {
-          showCareStatus('先に「保存」を押してから実費を記録してください。', true);
-          return;
-        }
+      if (feeButton) feeButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
         const userId = careUi.userId;
         closeCareForm(true);
         openFeeSheet(host, userId);
-      });
+      }));
       const dayButton = form.querySelector('[data-care-day]');
-      if (dayButton) dayButton.addEventListener('click', () => {
-        if (careIsDirty()) {
-          showCareStatus('先に「保存」を押してください。', true);
-          return;
-        }
+      if (dayButton) dayButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
         const userId = careUi.userId;
         closeCareForm(true);
         host.openDayMenu(userId);
-      });
+      }));
     }
 
     // ---- 排泄の入力(1日に何回でも) ----
@@ -5399,11 +5491,12 @@
       return null;
     }
 
+    // 下の欄と、上(名前の下・いつも見える所)の両方に出す
     function showCareStatus(message, isError) {
-      const status = document.querySelector('#careSheet .care-status');
-      if (!status) return;
-      status.textContent = message;
-      status.classList.toggle('error', Boolean(isError));
+      document.querySelectorAll('#careSheet .care-status, #careSheet .care-auto').forEach((status) => {
+        status.textContent = message;
+        status.classList.toggle('error', Boolean(isError));
+      });
     }
 
     function setCareSaving(saving) {
@@ -5415,44 +5508,135 @@
       if (save) save.textContent = saving ? '保存中…' : '保存';
     }
 
+    // ---- 自動保存 ----
+    // 自動の保存では、いま打っている欄は送らない(欄から離れたときに送る)
+    function careScheduleSave(delay) {
+      if (!document.getElementById('careSheet')) return;
+      clearTimeout(careUi.timer);
+      careUi.timer = setTimeout(() => {
+        careUi.timer = 0;
+        careQueueSave(true);
+      }, delay);
+    }
+
+    // 保存は1件ずつ順に送る(前の保存が終わってから、その時の画面と最後に保存した値の違いを送る)。保存できたら true
+    function careQueueSave(skipTyping) {
+      const token = careUi.token;
+      careUi.chain = careUi.chain.catch(() => false).then(() => careSaveNow(token, Boolean(skipTyping)));
+      return careUi.chain;
+    }
+
+    // 待っている自動保存を今すぐ送り、終わるまで待つ(打っている欄も送る)
+    function careFlush() {
+      clearTimeout(careUi.timer);
+      careUi.timer = 0;
+      return careQueueSave(false);
+    }
+
+    // 打ち間違い(範囲外の数字など)の項目は送らずに知らせ、ほかの項目は保存する。
+    // skipTyping: 自動の保存。いま打っている欄(数字・時刻・連絡事項)は途中の値なので送らず、打ち間違いもまだ知らせない
+    async function careSaveNow(token, skipTyping) {
+      if (token !== careUi.token || !document.getElementById('careSheet')) return true;
+      const host = careUi.host;
+      const userId = careUi.userId;
+      const values = careCurrentValues();
+      const send = careChangedFields(values);
+      const active = document.activeElement;
+      const typing = skipTyping && active && active.closest && active.closest('#careSheet') && /^(INPUT|TEXTAREA)$/.test(active.tagName) && active.type !== 'hidden'
+        ? (active.dataset.care || '') : '';
+      if (typing) delete send[typing];
+      let problem = null;
+      for (let invalid = careValidate(send, values); invalid; invalid = careValidate(send, values)) {
+        if (!problem) problem = invalid;
+        delete send[invalid.key];
+        if (invalid.key === 'bathTime') delete send.bathStatus;
+      }
+      careUi.problem = problem;
+      if (!Object.keys(send).length) {
+        if (careUi.problem) showCareStatus(problem.message, true);
+        return !problem;
+      }
+      showCareStatus('保存しています…', false);
+      try {
+        // 排泄は最後に保存した記録も送る(別の端末で同じ方の排泄を足していても消さない)
+        const base = 'excretionLog' in send ? { excretionLogBase: (careUi.initial && careUi.initial.excretionLog) || '' } : {};
+        const result = await host.save(Object.assign({ businessDate: careUi.businessDate || host.businessDate(), userId }, send, base));
+        host.applySaved(userId, result || {});
+        dsRefreshRecordList();
+        if (token !== careUi.token || !document.getElementById('careSheet')) return !problem;
+        // 送った値を「最後に保存した値」にする(次は、ここから変えた項目だけを送る)
+        Object.keys(send).forEach((key) => { careUi.initial[key] = values[key]; });
+        careUi.savedCount += 1;
+        if ('excretionLog' in send) careTakeMergedExcretion(result, values.excretionLog);
+        const now = new Date();
+        const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+        if (careUi.problem) showCareStatus(`${problem.message}（ほかの項目は ${time} に保存しました）`, true);
+        else showCareStatus(`保存しました（${time}）`, false);
+        return !problem;
+      } catch (error) {
+        if (token === careUi.token) showCareStatus(`保存できませんでした。${friendlyError(error)} 入力は残っています。もう一度「保存」を押すと送り直します。`, true);
+        return false;
+      }
+    }
+
+    // 別の端末で同じ方の排泄が足されていたら、まとめた記録(シートの値)を画面にも出す。
+    // 保存のあいだに排泄の欄を触っていたら、触った方を残す(次の自動保存で合わせて送る)
+    function careTakeMergedExcretion(result, sent) {
+      const saved = result && result.careRecord ? String(result.careRecord.excretionLog || '') : null;
+      if (saved === null) return;
+      const form = document.querySelector('#careSheet form');
+      const hidden = form && form.querySelector('[data-care="excretionLog"]');
+      if (!hidden || hidden.value !== sent) return;
+      const merged = careExcretionText(careExcretionEntries(saved));
+      if (merged === careExcretionText(careExcretionEntries(sent))) return;
+      careToiletRows = careExcretionEntries(merged);
+      renderCareToilet(form);
+      syncCareToilet(form);
+      careUi.initial.excretionLog = hidden.value;
+    }
+
+    // 連絡帳・実費などへ移る前に、待っている保存を送り終える
+    async function careAfterSave(next) {
+      if (careUi.saving || !document.getElementById('careSheet')) return;
+      const token = careUi.token;
+      setCareSaving(true);
+      const ok = await careFlush();
+      setCareSaving(false);
+      if (token !== careUi.token || !document.getElementById('careSheet')) return;
+      if (!ok || careIsDirty()) {
+        careFocusProblem();
+        return;
+      }
+      next();
+    }
+
+    function careFocusProblem() {
+      if (!careUi.problem) return;
+      const field = document.querySelector(`#careSheet [data-care="${careUi.problem.key}"]`);
+      if (field && field.type !== 'hidden') field.focus();
+    }
+
+    // 「保存」「保存して次の人へ」: 待っている保存を送り終えてから閉じる・次の方へ
     async function saveCareForm(goNext) {
       if (!document.getElementById('careSheet') || careUi.saving) return;
       const host = careUi.host;
       const userId = careUi.userId;
-      const values = careCurrentValues();
-      const changed = careChangedFields(values);
-      const invalid = careValidate(changed, values);
-      if (invalid) {
-        showCareStatus(invalid.message, true);
-        const field = document.querySelector(`#careSheet [data-care="${invalid.key}"]`);
-        if (field) field.focus();
-        return;
-      }
-      if (!Object.keys(changed).length) {
-        if (goNext) openNextCareForm(host, userId, '');
-        else closeCareForm(true);
-        return;
-      }
+      const token = careUi.token;
       setCareSaving(true);
-      showCareStatus('保存しています…', false);
-      try {
-        // 排泄は開いたときの記録も送る(別の端末で同じ方の排泄を足していても消さない)
-        const base = 'excretionLog' in changed ? { excretionLogBase: (careUi.initial && careUi.initial.excretionLog) || '' } : {};
-        const result = await host.save(Object.assign({ businessDate: host.businessDate(), userId }, changed, base));
-        host.applySaved(userId, result || {});
-        dsRefreshRecordList();
-        const name = (host.findUser(userId) || {}).displayName || '';
-        setCareSaving(false);
-        if (goNext) {
-          openNextCareForm(host, userId, `${name}様の記録を保存しました。`);
-        } else {
-          closeCareForm(true);
-          host.feedback(`${name}様のケア記録を保存しました。`);
-        }
-      } catch (error) {
-        setCareSaving(false);
-        // 入力は消さずに残し、もう一度保存できるようにする
-        showCareStatus(`保存できませんでした。${friendlyError(error)}`, true);
+      const ok = await careFlush();
+      setCareSaving(false);
+      if (token !== careUi.token || !document.getElementById('careSheet')) return;
+      if (!ok || careIsDirty()) {
+        careFocusProblem();
+        return;
+      }
+      const name = (host.findUser(userId) || {}).displayName || '';
+      const saved = careUi.savedCount > 0;
+      if (goNext) {
+        openNextCareForm(host, userId, saved ? `${name}様の記録を保存しました。` : '');
+      } else {
+        closeCareForm(true);
+        if (saved) host.feedback(`${name}様のケア記録を保存しました。`);
       }
     }
 
@@ -5469,15 +5653,23 @@
       if (message) showCareStatus(message, false);
     }
 
-    function requestCloseCareForm() {
-      if (careUi.saving) return;
-      if (careIsDirty()) {
-        const confirm = document.querySelector('#careSheet .care-confirm');
-        if (confirm) {
-          confirm.classList.remove('hidden');
-          confirm.scrollIntoView({ block: 'nearest' });
+    // ×・背景・戻る: 待っている保存を送ってから閉じる。保存できない入力(打ち間違い・電波なし)が残るときは確認を出す
+    async function requestCloseCareForm() {
+      if (careUi.saving || !document.getElementById('careSheet')) return;
+      if (careIsDirty() || careUi.timer) {
+        const token = careUi.token;
+        setCareSaving(true);
+        const ok = await careFlush();
+        setCareSaving(false);
+        if (token !== careUi.token || !document.getElementById('careSheet')) return;
+        if (!ok || careIsDirty()) {
+          const confirm = document.querySelector('#careSheet .care-confirm');
+          if (confirm) {
+            confirm.classList.remove('hidden');
+            confirm.scrollIntoView({ block: 'nearest' });
+          }
+          return;
         }
-        return;
       }
       closeCareForm(true);
     }
@@ -5486,6 +5678,8 @@
       const existing = document.getElementById('careSheet');
       if (!existing) return;
       if (!force && careIsDirty()) return;
+      clearTimeout(careUi.timer);
+      careUi.timer = 0;
       existing.remove();
       careUi.saving = false;
       GinNav.closed('careSheet');
@@ -5494,7 +5688,7 @@
     // スマホ・ブラウザの「戻る」でケア記録を閉じる。未保存の入力があれば閉じずに確認を出す
     function careSheetBack() {
       if (!document.getElementById('careSheet')) return;
-      if (careUi.saving || careIsDirty()) {
+      if (careUi.saving || careUi.timer || careIsDirty()) {
         GinNav.push('careSheet', careSheetBack);
         requestCloseCareForm();
         return;
@@ -5681,6 +5875,8 @@
 
     // 一覧の中の操作(名前を押す・量や送迎を変える・まとめて入れる・保存)は、書き直しても効くよう親でまとめて受ける
     function bindRecordListBody(overlay) {
+      // バイタルの欄は、入れ終えたら同じ方の次の欄へ・Enterでも次へ
+      careBindVitalAdvance(overlay, 'data-ds-vital', '.ds-vitals');
       overlay.addEventListener('click', (event) => {
         const host = dsListUi.host;
         if (!host) return;
@@ -6130,7 +6326,7 @@
       const weight = careWeightNeeded(user, care);
       const last = weight ? careLastWeightText(user) : '';
       return `<div class="ds-quick-vitals">
-        <p class="ds-quick-label">バイタル<small>測ったら入れて「バイタルを保存」。体温・体重は小数点なしで打てます（365→36.5）。あとで記録一覧の「バイタル」からも直せます。</small></p>
+        <p class="ds-quick-label">バイタル<small>入れ終えると次の欄へ移り、その都度保存します。体温・体重は小数点なしで打てます（365→36.5）。あとで記録一覧の「バイタル」からも直せます。</small></p>
         <div class="ds-vitals">
           <label><span>体温</span>${input('temperature', '体温', 'decimal')}</label>
           <label class="bp"><span>血圧</span><span class="ds-bp">${input('bpHigh', '上', 'numeric')}<i>/</i>${input('bpLow', '下', 'numeric')}</span></label>
@@ -6194,7 +6390,8 @@
       };
       // バイタル: この欄を出したとき(または前に保存したとき)から変えた欄だけを送る。
       // 別の端末・一覧で入った値を、ここで空のまま保存して消さないよう、今の記録とは比べない。範囲外(打ち間違い)は送らずに知らせる
-      const saveVitals = () => {
+      // auto: 欄から離れたときの自動保存(変わっていなければ何も出さない。打ち間違いは知らせるが、移った欄からは動かさない)
+      const saveVitals = (auto) => {
         const patch = {};
         const inputs = {};
         box.querySelectorAll('[data-quick-vital]').forEach((input) => {
@@ -6203,14 +6400,14 @@
           if (!careSameNumber(input.value, input.defaultValue)) patch[field] = input.value.trim();
         });
         if (!Object.keys(patch).length) {
-          setStatus('バイタルは変わっていません。', false);
+          if (!auto) setStatus('バイタルは変わっていません。', false);
           return;
         }
         const invalid = careValidate(patch);
         if (invalid) {
           setStatus(invalid.message, true);
           const input = box.querySelector(`[data-quick-vital="${invalid.key}"]`);
-          if (input) input.focus();
+          if (input && !auto) input.focus();
           return;
         }
         const sent = Object.assign({}, patch);
@@ -6223,15 +6420,14 @@
           });
         });
       };
-      box.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && event.target.closest('[data-quick-vital]')) {
-          event.preventDefault();
-          saveVitals();
-        }
+      // 入れ終えたら次の欄へ・Enterでも次へ。欄から離れたら、その項目をすぐ保存する(「バイタルを保存」を押さなくてよい)
+      careBindVitalAdvance(box, 'data-quick-vital', null);
+      box.addEventListener('change', (event) => {
+        if (event.target.closest('[data-quick-vital]')) saveVitals(true);
       });
       box.addEventListener('click', (event) => {
         if (event.target.closest('[data-quick-vital-save]')) {
-          saveVitals();
+          saveVitals(false);
           return;
         }
         if (event.target.closest('[data-quick-vital-history]')) {
