@@ -1823,6 +1823,73 @@
     .nu-handled-row .nu-meta { display: block; margin: 2px 0 0; }
     .nu-handled-row button { flex: none; min-height: 40px; padding: 0 14px; border: 1.5px solid #d9cfee; border-radius: 12px; background: #fff; color: #3c3550; font: inherit; font-weight: 700; cursor: pointer; }
     @media (max-width: 420px) { .nu-draft div { grid-template-columns: 1fr; gap: 0; } }
+
+    /* ケアハウスに入居している方の印(名前の横。画面だけ) */
+    .ds-ch-mark { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #e6f4ea; color: #1e6b3b; font-size: 11.5px; font-weight: 700; line-height: 1.6; vertical-align: 2px; white-space: nowrap; }
+    h3 .ds-ch-mark { font-size: 12px; }
+    /* 原山さんの決定(11/17)「画面だけ」: 記録一覧・バイタルの振り返りなどを印刷しても紙には出さない */
+    @media print { .ds-ch-mark { display: none !important; } }
+
+    /* 利用者ごとの月の実績(1人分・1か月) */
+    #dsUserMonth { z-index: 95; }
+    .um-body { max-width: 760px; margin: 0 auto; padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); }
+    .um-months { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; max-width: 420px; margin: 4px auto 12px; }
+    .um-months strong { font-size: 18px; text-align: center; white-space: nowrap; }
+    .um-months button { min-height: 44px; border: 1px solid #d5dbe4; border-radius: 10px; background: #fff; color: #334155; font: inherit; font-weight: 700; cursor: pointer; }
+    .um-months button:disabled { opacity: .4; cursor: default; }
+    .um-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+    .um-tile { display: grid; gap: 2px; padding: 10px 8px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; text-align: center; min-width: 0; }
+    .um-tile span { color: #475569; font-size: 13px; font-weight: 700; }
+    .um-tile strong { font-size: 22px; color: #1f2937; }
+    .um-tile strong small { font-size: 12px; font-weight: 600; margin-left: 2px; }
+    .um-tile > small { color: #64748b; font-size: 11.5px; }
+    .um-tile.used { background: #f1f7ff; }
+    .um-tile.bath { background: #fff8ec; }
+    .um-tile.meal { background: #f6f1fd; }
+    .um-tile.cancelled { background: #fff4ef; }
+    .um-tile.fee { background: #f2fbf6; }
+    .um-days { list-style: none; margin: 0; padding: 0; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; overflow: hidden; }
+    .um-day { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; padding: 10px 12px; border-top: 1px solid #edf1f6; break-inside: avoid; }
+    .um-day:first-child { border-top: 0; }
+    .um-day.muted { background: #fafbfc; }
+    .um-date { font-weight: 700; color: #1f2937; padding-top: 2px; }
+    .um-main { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-width: 0; }
+    .um-tags { display: contents; }
+    .um-status { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+    .um-status.full { background: #1a56b8; color: #fff; }
+    .um-status.half { background: #fde68a; color: #6b4a00; }
+    .um-status.cancelled { background: #ffe4d6; color: #a33a0b; white-space: normal; }
+    .um-status.off { background: #eceff3; color: #4b5563; white-space: normal; }
+    .um-status.none { background: #f1f5f9; color: #64748b; }
+    .um-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.6; background: #eef2f8; color: #3d4f6b; }
+    .um-tag.time { background: #e3f2fd; color: #0b5c99; }
+    .um-tag.vital { background: #fde8ec; color: #a1203d; }
+    .um-tag.meal { background: #f1e9ff; color: #6232b8; }
+    .um-tag.snack { background: #fde7f1; color: #a3195b; }
+    .um-tag.fluid { background: #e0f5f7; color: #0d6b75; }
+    .um-tag.bath { background: #fff1db; color: #995300; }
+    .um-tag.refused { background: #ffe4d6; color: #a33a0b; }
+    .um-tag.family { background: #fff4e5; color: #9a4d00; }
+    .um-tag.fee { background: #e6f4ea; color: #1e6b3b; }
+    .um-tag.none { background: #f1f5f9; color: #64748b; }
+    .um-print-title { display: none; }
+    .um-print-help { display: grid; gap: 10px; margin: 0 0 12px; padding: 12px 14px; border-radius: 12px; background: #fff4e5; color: #7a3e00; font-size: 14px; line-height: 1.6; }
+    .um-print-help.hidden { display: none; }
+    .um-print-help button { min-height: 50px; border: 0; border-radius: 12px; background: #1a56b8; color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .ds-umonth-open { min-height: 40px; margin-top: 8px; padding: 0 12px; border: 1px solid #c9dcf5; border-radius: 10px; background: #f1f7ff; color: #1a4f8f; font: inherit; font-weight: 700; cursor: pointer; }
+    @media (max-width: 600px) {
+      .um-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .um-day { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+    }
+    @media print {
+      body.dsumonth-open { background: #fff !important; }
+      body.dsumonth-open > *:not(#dsUserMonth) { display: none !important; }
+      body.dsumonth-open #dsUserMonth { display: block !important; position: static; overflow: visible; background: #fff; }
+      #dsUserMonth .nb-toolbar, #dsUserMonth .um-months, #dsUserMonth .um-print-help { display: none !important; }
+      #dsUserMonth .um-print-title { display: block; margin: 0 0 8px; font-size: 16px; font-weight: 700; }
+      .um-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .um-day { grid-template-columns: 92px minmax(0, 1fr); }
+    }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -3652,6 +3719,8 @@
           panel.querySelector('[data-info-vhist]').addEventListener('click', () => openVitalHistory(scannerCareHost, user.userId, todayStr()));
           panel.insertAdjacentHTML('beforeend', '<button type="button" class="ds-notes-open" data-info-notes>特記事項を見る・書く</button>');
           panel.querySelector('[data-info-notes]').addEventListener('click', () => openUserNotes(scannerDsHost, user.userId));
+          panel.insertAdjacentHTML('beforeend', '<button type="button" class="ds-umonth-open" data-info-month>月の実績を見る</button>');
+          panel.querySelector('[data-info-month]').addEventListener('click', () => openUserMonth(scannerCareHost, user.userId, todayStr()));
         }
         addRecent({ label: user.displayName, status: '確認', serviceType: 'info' });
         return;
@@ -4094,6 +4163,9 @@
       if (user.kana) {
         rows.push(`<div class="kv"><span class="k">ふりがな</span><span class="v">${escapeHtml(user.kana)}</span></div>`);
       }
+      if (dsIsCareHouse(user)) {
+        rows.push(`<div class="kv"><span class="k">利用区分</span><span class="v">${dsCareHouseMark(user)}</span></div>`);
+      }
       rows.push(`<div class="kv"><span class="k">注意レベル</span><span class="v">${alertBadgeHtml(user.alertLevel)}</span></div>`);
       if (pattern.weekdays) {
         rows.push(`<div class="kv"><span class="k">利用曜日</span><span class="v">${escapeHtml(pattern.weekdays)}</span></div>`);
@@ -4337,7 +4409,7 @@
         const saving = app.pendingDayChanges.has(user.userId);
         const careLine = cancelled ? '' : careSummaryHtml(careRecordWithPendingScans(user.userId), scannerBathState(user.userId));
         const isOff = Boolean(plan && plan.source === 'off' && !flags.arrival);
-        return `<button class="row day-row${cancelled ? ' is-cancelled' : ''}${isOff ? ' is-off' : ''}" data-day-user="${escapeHtml(user.userId)}" ${saving ? 'disabled aria-busy="true"' : ''} style="width:100%;text-align:left;font-weight:400">${avatarHtml(user)}<span class="day-person"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}${reason}</small>${marks.join('')}${careLine}${saving ? '<small>保存中…</small>' : ''}</span>${chips}</button>`;
+        return `<button class="row day-row${cancelled ? ' is-cancelled' : ''}${isOff ? ' is-off' : ''}" data-day-user="${escapeHtml(user.userId)}" ${saving ? 'disabled aria-busy="true"' : ''} style="width:100%;text-align:left;font-weight:400">${avatarHtml(user)}<span class="day-person"><strong>${escapeHtml(user.displayName)}${dsCareHouseMark(user)}</strong><small>${escapeHtml(user.kana || '')}${reason}</small>${marks.join('')}${careLine}${saving ? '<small>保存中…</small>' : ''}</span>${chips}</button>`;
       }).join('') || `<div class="empty-state"><strong>${entries.length ? '該当する利用者はいません' : '利用者情報を取得できません'}</strong>${entries.length ? '検索文字や絞り込み条件を変えてください。' : '通信を確認して、上の「更新」を押してください。'}</div>`;
       list.querySelectorAll('[data-day-user]').forEach((button) => {
         // キャンセルの方は取消メニュー、それ以外はケア記録の入力を開く
@@ -4899,7 +4971,7 @@
       backdrop.innerHTML = `
         <form class="sheet care-sheet" novalidate role="dialog" aria-modal="true" aria-labelledby="careTitle">
           <div class="care-head">
-            <div><h3 id="careTitle" tabindex="-1">${escapeHtml(user.displayName)} 様</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}のケア記録</p></div>
+            <div><h3 id="careTitle" tabindex="-1">${escapeHtml(user.displayName)} 様${dsCareHouseMark(user)}</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}のケア記録</p></div>
             <button type="button" class="care-close" data-care-close aria-label="閉じる">×</button>
           </div>
           <fieldset class="care-group"><legend>送迎</legend>
@@ -4958,6 +5030,7 @@
           <div class="care-links">
             <button type="button" data-care-notebook>この方の連絡帳を見る</button>
             ${host.call ? '<button type="button" data-care-notes>特記事項を見る・書く</button>' : ''}
+            ${host.call ? '<button type="button" data-care-month>この方の月の実績</button>' : ''}
             ${host.call ? '<button type="button" data-care-fee>実費（おむつ・マスクなど）</button>' : ''}
             ${host.openDayMenu ? '<button type="button" data-care-day>キャンセル・午前終了など</button>' : ''}
           </div>
@@ -5041,6 +5114,8 @@
       });
       const notesButton = form.querySelector('[data-care-notes]');
       if (notesButton) notesButton.addEventListener('click', () => openUserNotes(careUi.host, careUi.userId));
+      const monthButton = form.querySelector('[data-care-month]');
+      if (monthButton) monthButton.addEventListener('click', () => openUserMonth(careUi.host, careUi.userId, careUi.host.businessDate()));
       const feeButton = form.querySelector('[data-care-fee]');
       if (feeButton) feeButton.addEventListener('click', () => {
         if (careIsDirty()) {
@@ -5737,10 +5812,10 @@
         // 食事量が1項目になる前の記録(主食・副食)は、空欄に見えないよう以前の入力を添える
         const legacy = key === 'lunch' && careHasLegacyMeal(entry.care) ? `以前の入力：${careMealTexts(entry.care, true).join(' ')}` : '';
         const small = (fields.length ? [legacy, how] : [service.detail, how]).filter(Boolean).map(escapeHtml).join(' ・ ');
-        const inner = `<span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${small}</small></span>`;
+        const inner = `<span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>${small}</small></span>`;
         return `<div class="ds-row${fields.length ? ' ds-edit-row' : ''}" style="--c:${DS_SERVICE_COLORS[key]}">${open(entry, inner)}${fields.length ? `<div class="ds-edit">${fields.map(([field, label]) => dsEditControl(entry, field, label)).join('')}</div>` : ''}</div>`;
       };
-      const mutedRow = (entry, text) => `<div class="ds-row muted">${open(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${text}</small></span>`)}</div>`;
+      const mutedRow = (entry, text) => `<div class="ds-row muted">${open(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>${text}</small></span>`)}</div>`;
       const isTransport = fields.some(([field]) => DS_TRANSPORT_FIELDS.includes(field));
       const blanks = done.some((entry) => fields.some(([field]) => dsFieldBlank(entry, field)));
       const tools = fields.length && done.length ? `<div class="ds-edit-tools"><p>${isTransport ? '家族送迎の方は「家族送迎」を押してください。' : '食べた量を選んでください。'}変えたら下の「変更を保存」を押します。</p>${blanks
@@ -5776,7 +5851,7 @@
       const row = (entry) => {
         const weight = careWeightNeeded(entry.user, entry.care) || dsIsDraft(entry.userId, 'weight');
         const last = weight ? careLastWeightText(entry.user) : '';
-        const inner = `<span class="ds-time">${escapeHtml(entry.services.arrival.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>${escapeHtml(careVitalTexts(entry.care).join(' ・ ') || '未入力')}</small></span>`;
+        const inner = `<span class="ds-time">${escapeHtml(entry.services.arrival.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>${escapeHtml(careVitalTexts(entry.care).join(' ・ ') || '未入力')}</small></span>`;
         return `<div class="ds-row ds-edit-row ds-vital-row" style="--c:${DS_VITAL_COLOR}">${nameButton(entry, inner)}<div class="ds-vitals">
           <label><span>体温</span>${dsVitalInput(entry, 'temperature', '体温', 'decimal')}</label>
           <label class="bp"><span>血圧</span><span class="ds-bp">${dsVitalInput(entry, 'bpHigh', '上', 'numeric')}<i>/</i>${dsVitalInput(entry, 'bpLow', '下', 'numeric')}</span></label>
@@ -5786,7 +5861,7 @@
           ${host.call ? `<button type="button" class="ds-vhist-open" data-ds-vhist="${escapeHtml(entry.userId)}">過去2週間 ›</button>` : ''}
         </div></div>`;
       };
-      const mutedRow = (entry) => `<div class="ds-row muted">${nameButton(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}</strong><small>まだ来所の記録がありません</small></span>`)}</div>`;
+      const mutedRow = (entry) => `<div class="ds-row muted">${nameButton(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>まだ来所の記録がありません</small></span>`)}</div>`;
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_VITAL_COLOR}"><span><b>${measured}</b>名 測定済み</span>${arrived.length - measured ? `<span class="wait"><b>${arrived.length - measured}</b>名 まだ</span>` : ''}</div>
         ${note}
@@ -7289,6 +7364,375 @@
         <p class="ds-legend">新しい日が上です。スキャンの「バイタル」・記録一覧・ケア記録で入れた値を表示しています（測っていない日は出ません）。</p>`;
     }
 
+    // ===== ケアハウスに入居している方の印(2026-11-17 現場の要望「名前の横にケアハウスなど」) =====
+    // 利用者の「利用区分」がケアハウス入居者の方だけ、画面の名前の横に小さく出す。名札・連絡帳など紙には出さない。
+    function dsIsCareHouse(user) {
+      const value = String((user && user.userCategory) || '');
+      return value === 'internal' || value.indexOf('ケアハウス') !== -1 || value.indexOf('入居') !== -1;
+    }
+
+    function dsCareHouseMark(user) {
+      return dsIsCareHouse(user) ? '<span class="ds-ch-mark" aria-label="ケアハウス入居者">ケアハウス</span>' : '';
+    }
+
+    // ===== 利用者ごとの月の実績(2026-11-17 現場の要望「利用者個人の実績を月ごと一覧で」) =====
+    // サーバーは userMonth(getUserMonth)。読むだけで、ここから記録は直さない(直すのは今日のケア記録・管理画面)。
+    const dsUmUi = { seq: 0, host: null, userId: '', month: '', data: null, error: '' };
+
+    function dsUmMonthOf(dateText) {
+      const match = String(dateText || '').match(/^(\d{4})-(\d{2})/);
+      return match ? `${match[1]}-${match[2]}` : '';
+    }
+
+    function dsUmShiftMonth(month, delta) {
+      const [y, m] = String(month).split('-').map(Number);
+      const date = new Date(y, m - 1 + delta, 1);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function dsUmMonthTitle(month) {
+      const [y, m] = String(month).split('-').map(Number);
+      return y && m ? `${y}年${m}月` : String(month || '');
+    }
+
+    function openUserMonth(host, userId, dateText) {
+      if (!host || !host.call) return;
+      dsUmUi.host = host;
+      dsUmUi.userId = normalizeClientUserId(userId);
+      dsUmUi.month = dsUmMonthOf(dateText || host.businessDate()) || dsUmMonthOf(host.businessDate());
+      const user = host.findUser(dsUmUi.userId) || {};
+      const previous = document.getElementById('dsUserMonth');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsUserMonth';
+      overlay.className = 'nb-overlay ds-umonth';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '月の実績');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-um-close>← 戻る</button>
+          <div class="nb-title"><strong>月の実績</strong><span>${escapeHtml(user.displayName || '')} 様${dsIsCareHouse(user) ? '（ケアハウス）' : ''}</span></div>
+          <button type="button" class="primary" data-um-print>印刷</button>
+        </div>
+        <div class="um-body" id="dsUmBody"></div>`;
+      document.body.appendChild(overlay);
+      document.body.classList.add('dsumonth-open');
+      if (!GinNav.isTop('dsUserMonth')) GinNav.push('dsUserMonth', closeUserMonth);
+      overlay.querySelector('[data-um-close]').addEventListener('click', closeUserMonth);
+      overlay.querySelector('[data-um-print]').addEventListener('click', dsPrintUserMonth);
+      overlay.addEventListener('click', (event) => {
+        const shift = event.target.closest('[data-um-shift]');
+        if (shift && !shift.disabled) {
+          dsUmUi.month = dsUmShiftMonth(dsUmUi.month, Number(shift.dataset.umShift));
+          loadUserMonth();
+        }
+        if (event.target.closest('[data-um-retry]')) loadUserMonth();
+        if (event.target.closest('[data-um-pdf]')) dsShareUserMonthPdf();
+      });
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          closeUserMonth();
+        }
+      });
+      loadUserMonth();
+      overlay.querySelector('[data-um-close]').focus({ preventScroll: true });
+    }
+
+    function closeUserMonth() {
+      const existing = document.getElementById('dsUserMonth');
+      if (existing) existing.remove();
+      document.body.classList.remove('dsumonth-open');
+      dsUmUi.seq++;
+      if (existing) GinNav.closed('dsUserMonth');
+    }
+
+    function loadUserMonth() {
+      const seq = ++dsUmUi.seq;
+      dsUmUi.data = null;
+      dsUmUi.error = '';
+      renderUserMonth();
+      dsUmUi.host.call('userMonth', { userId: dsUmUi.userId, month: dsUmUi.month }).then((result) => {
+        if (seq !== dsUmUi.seq) return;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        dsUmUi.data = result;
+        renderUserMonth();
+      }).catch((error) => {
+        if (seq !== dsUmUi.seq) return;
+        dsUmUi.error = typeof friendlyError === 'function' ? friendlyError(error) : String((error && error.message) || error);
+        renderUserMonth();
+      });
+    }
+
+    // 1日分の「利用」の欄: 1日 / 午前 / キャンセル(理由) / お休み。画面とPDFで同じ文にする
+    function dsUmStatus(day) {
+      if (day.status === 'cancelled') return ['cancelled', `キャンセル${day.cancelReason ? `（${day.cancelReason}）` : ''}`];
+      if (day.status === 'off') return ['off', `お休み${day.offNote ? `（${day.offNote}）` : ''}`];
+      if (day.status === 'used') return day.usage === 'half_am' ? ['half', '午前'] : ['full', '1日'];
+      return ['none', '利用の記録なし'];
+    }
+
+    // 1日分の小さな印。「入浴なし」「昼食なし」は、その日に入浴・昼食の予定があって、済んだ日だけ(今日はまだ記録の途中のことがある)
+    function dsUmDayTags(day, today) {
+      const tags = [];
+      const done = !today || day.businessDate < today;
+      if (day.bath === 'refused') tags.push(['refused', '入浴拒否']);
+      else if (day.status === 'used' && day.bath !== 'done' && day.plannedBath && done) tags.push(['none', '入浴なし']);
+      if (day.status === 'used' && !day.lunch && day.plannedLunch && done) tags.push(['none', '昼食なし']);
+      // ケア記録の要約は、今日の一覧と同じ書き方(到着・送り・バイタル・食事量・おやつ・水分・入浴・レク)
+      careSummaryParts(day.care, day.bath === 'done' ? 'done' : '').forEach((part) => tags.push(part));
+      if (day.bath === 'done' && !tags.some(([kind]) => kind === 'bath')) tags.push(['bath', '入浴']);
+      if (day.lunch && !careMealTexts(day.care).length && !careHas((day.care || {}).lunchTime)) tags.push(['meal', '昼食']);
+      (day.fees || []).forEach((fee) => tags.push(['fee', `${fee.itemName}${Number(fee.quantity) > 1 ? ` ×${fee.quantity}` : ''} ${dsYen(fee.amount)}`]));
+      return tags;
+    }
+
+    function dsUmDayHtml(day, today) {
+      const [statusKind, statusText] = dsUmStatus(day);
+      const tagHtml = dsUmDayTags(day, today).map(([kind, text]) => `<span class="um-tag ${kind}">${escapeHtml(text)}</span>`).join('');
+      return `<li class="um-day${day.status === 'cancelled' || day.status === 'off' ? ' muted' : ''}">
+        <span class="um-date">${escapeHtml(dsVhShortDate(day.businessDate))}</span>
+        <span class="um-main"><span class="um-status ${statusKind}">${escapeHtml(statusText)}</span>${tagHtml ? `<span class="um-tags">${tagHtml}</span>` : ''}</span>
+      </li>`;
+    }
+
+    function dsUmToday() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function dsUmTotals(total) {
+      const t = total || {};
+      return [
+        ['used', '利用', `${t.used || 0}日`, `1日 ${t.full || 0}・午前 ${t.half || 0}`],
+        ['bath', '入浴', `${t.bath || 0}回`, t.bathRefused ? `入浴拒否 ${t.bathRefused}` : ''],
+        ['meal', '昼食', `${t.lunch || 0}回`, ''],
+        ['cancelled', 'キャンセル', `${t.cancelled || 0}回`, t.off ? `お休み ${t.off}` : ''],
+        ['fee', '実費', dsYen(t.feeAmount || 0), '']
+      ];
+    }
+
+    // ---- 月の実績の印刷 ----
+    // 連絡帳と同じ工夫: iPad・iPhone をホーム画面から開いたアプリでは window.print() が何もしないので、PDFにして共有メニューを出す。
+    // それ以外は印刷画面を開き、開かなかったときだけ「PDFにして印刷」の案内を出す。
+    function dsPrintUserMonth() {
+      if (!dsUmUi.data) return;
+      if (dsIsAppleTouch() && dsIsStandalone()) {
+        dsShareUserMonthPdf();
+        return;
+      }
+      let opened = false;
+      const markOpened = () => { opened = true; };
+      window.addEventListener('beforeprint', markOpened, { once: true });
+      try {
+        window.print();
+      } catch (error) {
+        opened = false;
+      }
+      setTimeout(() => {
+        window.removeEventListener('beforeprint', markOpened);
+        if (!opened) dsShowUserMonthHelp('印刷画面が開きませんでした。');
+      }, 1500);
+    }
+
+    function dsShowUserMonthHelp(lead, plain) {
+      const help = document.getElementById('umPrintHelp');
+      if (!help) return;
+      help.classList.remove('hidden');
+      if (plain) {
+        help.textContent = lead;
+        return;
+      }
+      help.innerHTML = `<span>${escapeHtml(lead)}下のボタンで月の実績をPDFにして、出てきたメニューの「<strong>プリント</strong>」を押してください。</span><button type="button" class="primary" data-um-pdf>PDFにして印刷</button>`;
+      help.scrollIntoView({ block: 'nearest' });
+    }
+
+    let dsUmPdfCache = null;
+
+    function dsShareUserMonthPdf() {
+      const data = dsUmUi.data;
+      if (!data) return;
+      const today = dsUmToday();
+      const key = JSON.stringify([today, data]);
+      let bytes;
+      try {
+        bytes = dsUmPdfCache && dsUmPdfCache.key === key ? dsUmPdfCache.bytes : dsUserMonthPdf(data, today);
+      } catch (error) {
+        dsShowUserMonthHelp(`PDFを作れませんでした。${typeof friendlyError === 'function' ? friendlyError(error) : String((error && error.message) || error)}`, true);
+        return;
+      }
+      const failures = dsUmPdfCache && dsUmPdfCache.key === key ? dsUmPdfCache.failures : 0;
+      dsUmPdfCache = { key, bytes, failures };
+      const fileName = `月の実績_${data.month}.pdf`;
+      let file = null;
+      try {
+        file = new File([bytes], fileName, { type: 'application/pdf' });
+      } catch (error) {
+        file = null;
+      }
+      // 共有メニューは押した直後でないと開けない。2回続けて共有できなかったときはPDFを開く
+      if (file && failures < 2 && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: fileName }).catch((error) => {
+          if (error && error.name === 'AbortError') return;
+          dsUmPdfCache.failures = failures + 1;
+          dsShowUserMonthHelp('PDFができました。');
+        });
+        return;
+      }
+      const blob = file || new Blob([bytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const opened = window.open(url, '_blank');
+      if (!opened) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+      setTimeout(() => URL.revokeObjectURL(url), 120000);
+    }
+
+    // 月の実績のPDF(A4縦。日が多いときは2ページ目へ続ける)。ケアハウスの印は紙には出さない
+    const DS_UM_PDF_SANS = '"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif';
+
+    function dsUserMonthPdf(data, today) {
+      const page = DS_PDF_PAGE;
+      const canvas = document.createElement('canvas');
+      canvas.width = page.width;
+      canvas.height = page.height;
+      const ctx = canvas.getContext('2d');
+      const images = [];
+      const left = page.margin;
+      const right = page.width - page.margin;
+      const bottom = page.height - page.margin - 40;
+      const ink = '#1f2933';
+      const dateWidth = 190;
+      const lineHeight = 34;
+      let top = 0;
+      let pageNo = 0;
+      const startPage = () => {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        pageNo += 1;
+        top = page.margin;
+        ctx.fillStyle = ink;
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.font = `700 34px ${DS_UM_PDF_SANS}`;
+        ctx.fillText(`${data.displayName || ''} 様　${dsUmMonthTitle(data.month)}の実績${pageNo > 1 ? '（続き）' : ''}`, left, top + 34);
+        top += 52;
+        ctx.fillRect(left, top, right - left, 3);
+        top += 20;
+      };
+      const finishPage = () => {
+        ctx.fillStyle = ink;
+        ctx.font = `400 20px ${DS_UM_PDF_SANS}`;
+        ctx.textAlign = 'right';
+        ctx.fillText(`${CARE_FACILITY_NAME}　${pageNo}ページ`, right, page.height - page.margin);
+        ctx.textAlign = 'left';
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const binary = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        images.push({ bytes, width: page.width, height: page.height });
+      };
+      startPage();
+      // 合計の欄
+      const totals = dsUmTotals(data.total);
+      const boxWidth = (right - left - 4 * 12) / totals.length;
+      totals.forEach(([, label, value, sub], index) => {
+        const x = left + index * (boxWidth + 12);
+        ctx.strokeStyle = '#9aa5b1';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x, top, boxWidth, 112);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#475569';
+        ctx.font = `600 22px ${DS_UM_PDF_SANS}`;
+        ctx.fillText(label, x + boxWidth / 2, top + 32);
+        ctx.fillStyle = ink;
+        ctx.font = `700 32px ${DS_UM_PDF_SANS}`;
+        ctx.fillText(value, x + boxWidth / 2, top + 72);
+        if (sub) {
+          ctx.fillStyle = '#475569';
+          ctx.font = `400 19px ${DS_UM_PDF_SANS}`;
+          ctx.fillText(sub, x + boxWidth / 2, top + 100);
+        }
+      });
+      ctx.textAlign = 'left';
+      top += 136;
+      const days = data.days || [];
+      if (!days.length) {
+        ctx.fillStyle = ink;
+        ctx.font = `400 24px ${DS_UM_PDF_SANS}`;
+        ctx.fillText('この月の記録はありません。', left, top + 30);
+      }
+      days.forEach((day) => {
+        const [, statusText] = dsUmStatus(day);
+        const text = [statusText].concat(dsUmDayTags(day, today).map(([, tag]) => tag)).join('・');
+        ctx.font = `400 23px ${DS_UM_PDF_SANS}`;
+        const lines = dsWrapText(ctx, text, right - left - dateWidth - 24);
+        const height = Math.max(56, lines.length * lineHeight + 22);
+        if (top + height > bottom) {
+          finishPage();
+          startPage();
+        }
+        ctx.strokeStyle = '#c3cbd5';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(left, top);
+        ctx.lineTo(right, top);
+        ctx.stroke();
+        ctx.fillStyle = ink;
+        ctx.font = `700 23px ${DS_UM_PDF_SANS}`;
+        ctx.fillText(dsVhShortDate(day.businessDate), left + 4, top + 36);
+        ctx.font = `400 23px ${DS_UM_PDF_SANS}`;
+        lines.forEach((line, index) => ctx.fillText(line, left + dateWidth, top + 36 + index * lineHeight));
+        top += height;
+      });
+      finishPage();
+      canvas.width = 0;
+      canvas.height = 0;
+      return dsBuildPdf(images);
+    }
+
+    function renderUserMonth() {
+      const body = document.getElementById('dsUmBody');
+      if (!body) return;
+      const today = dsUmToday();
+      const thisMonth = dsUmMonthOf(today);
+      const nextDisabled = thisMonth && dsUmUi.month >= thisMonth;
+      const switcher = `<div class="um-months" role="group" aria-label="月を選ぶ">
+        <button type="button" data-um-shift="-1" aria-label="前の月">‹ 前の月</button>
+        <strong>${escapeHtml(dsUmMonthTitle(dsUmUi.month))}</strong>
+        <button type="button" data-um-shift="1" aria-label="次の月" ${nextDisabled ? 'disabled' : ''}>次の月 ›</button>
+      </div>`;
+      if (dsUmUi.error) {
+        body.innerHTML = `${switcher}<div class="empty-state"><strong>読み込めませんでした</strong>${escapeHtml(dsUmUi.error)}<br><button type="button" data-um-retry>もう一度読む</button></div>`;
+        return;
+      }
+      const data = dsUmUi.data;
+      if (!data) {
+        body.innerHTML = `${switcher}<p class="ds-note">読み込んでいます…</p>`;
+        return;
+      }
+      const tiles = dsUmTotals(data.total).map(([kind, label, value, sub]) => {
+        const shown = /^(\d+)(日|回)$/.test(value) ? value.replace(/^(\d+)(日|回)$/, '$1<small>$2</small>') : escapeHtml(value);
+        return `<div class="um-tile ${kind}"><span>${label}</span><strong>${shown}</strong>${sub ? `<small>${escapeHtml(sub)}</small>` : ''}</div>`;
+      }).join('');
+      const help = '<div class="um-print-help hidden" id="umPrintHelp" role="status"></div>';
+      const printTitle = `<p class="um-print-title">${escapeHtml(data.displayName || '')} 様　${escapeHtml(dsUmMonthTitle(data.month))}の実績</p>`;
+      if (!(data.days || []).length) {
+        body.innerHTML = `${switcher}${help}${printTitle}<div class="um-tiles">${tiles}</div><div class="empty-state"><strong>この月の記録はありません</strong>来所・ケア記録・お休み・実費を入れると、ここに日ごとに出ます。</div>`;
+        return;
+      }
+      body.innerHTML = `${switcher}${help}${printTitle}<div class="um-tiles">${tiles}</div>
+        <ol class="um-days">${data.days.map((day) => dsUmDayHtml(day, today)).join('')}</ol>
+        <p class="ds-legend">記録のある日だけを日付の順に出しています。数え方は月次表と同じです（来所・入浴・昼食のどれかを記録した日を「利用」）。記録を直すときは、その日のケア記録や「キャンセル・午前終了など」から直します。</p>`;
+    }
+
     // ===== 職員向けの今日の予定表(お休み・キャンセル料・連絡・献立)と、利用者ごとの特記事項 =====
     // 2026-11-13 原山さん。サーバーは staffBoard / saveDayNotice / deleteDayNotice / setCancelFee / userNotes / addUserNote / updateUserNote。
     // キャンセル料は決まりどおりの見込みを出し、職員が変えられる(請求はしない)。特記事項は連絡帳に出さない。
@@ -8419,6 +8863,7 @@
           <div class="user-card-detail">
             ${photoSlotHtml(user, 'detail-photo')}
             <button type="button" class="ds-notes-open" data-user-notes="${escapeHtml(user.userId)}">特記事項を見る・書く</button>
+            <button type="button" class="ds-umonth-open" data-user-month="${escapeHtml(user.userId)}">月の実績を見る</button>
             ${detailSection('基本情報', [
               detailRow('性別', user.gender),
               detailRow('生年月日', user.birthDate),
@@ -8453,7 +8898,7 @@
               phoneDetailRow('CM連絡先', user.careManagerPhone)
             ])}
           </div>` : '';
-        return `<div class="user-card${open ? ' open' : ''}"><button class="user-card-head" data-user="${escapeHtml(user.userId)}" aria-expanded="${open}"><span class="head-left">${photoSlotHtml(user, 'list-photo')}<span class="name"><strong>${escapeHtml(user.displayName)}</strong><small>${escapeHtml(user.kana || '')}</small></span></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
+        return `<div class="user-card${open ? ' open' : ''}"><button class="user-card-head" data-user="${escapeHtml(user.userId)}" aria-expanded="${open}"><span class="head-left">${photoSlotHtml(user, 'list-photo')}<span class="name"><strong>${escapeHtml(user.displayName)}${dsCareHouseMark(user)}</strong><small>${escapeHtml(user.kana || '')}</small></span></span>${alertBadgeHtml(user.alertLevel)}</button>${detail}</div>`;
       }).join('');
       if (query) {
         list.innerHTML = renderCards(users);
@@ -8478,6 +8923,9 @@
       });
       list.querySelectorAll('[data-user-notes]').forEach((button) => {
         button.addEventListener('click', () => openUserNotes(scannerDsHost, button.dataset.userNotes));
+      });
+      list.querySelectorAll('[data-user-month]').forEach((button) => {
+        button.addEventListener('click', () => openUserMonth(scannerCareHost, button.dataset.userMonth, todayStr()));
       });
       list.querySelectorAll('.user-card-head').forEach((head) => {
         head.addEventListener('click', () => {
