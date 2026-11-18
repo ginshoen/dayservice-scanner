@@ -1890,6 +1890,67 @@
       .um-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); }
       .um-day { grid-template-columns: 92px minmax(0, 1fr); }
     }
+
+    /* ===== 2026-11-17 服薬・排泄 ===== */
+    .care-tag.med, .um-tag.med { background: #e6f4ea; color: #1e6b3a; }
+    .care-tag.med.missed, .um-tag.med.missed { background: #fdecea; color: #a12c1d; }
+    .care-tag.toilet, .um-tag.toilet { background: #fdf6e3; color: #7a5a00; }
+    .care-toilet-list { display: grid; gap: 8px; clear: both; }
+    .care-group.care-med { --g: #0f766e; }
+    .care-group.care-toilet { --g: #b7791f; }
+    .care-group.care-rec { --g: #16a34a; }
+    .care-group.care-training { --g: #4f46e5; }
+    .care-tag.training, .um-tag.training { background: #eef0ff; color: #3730a3; }
+    .care-tag.training.skipped, .um-tag.training.skipped { background: #f1f3f6; color: #4b5563; }
+    .care-toilet-empty { margin: 0 0 4px; color: var(--muted, #5f6368); font-size: 13px; }
+    .care-toilet-row { padding: 10px 12px; border: 1px solid var(--line, #e0e3e7); border-radius: 12px; background: #fffdf6; }
+    .care-toilet-row.stool { background: #fbf7f2; }
+    .care-toilet-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+    .care-toilet-kind { font-weight: 700; font-size: 15px; color: #3d4f6b; }
+    .care-toilet-top input[type="time"] { min-height: 44px; min-width: 0; width: 100%; padding: 4px 8px; border: 1px solid var(--line, #e0e3e7); border-radius: 10px; font: inherit; font-size: 16px; background: #fff; }
+    .care-toilet-del { min-height: 44px; padding: 4px 12px; border: 1px solid #f1c9c4; border-radius: 10px; background: #fff; color: #a12c1d; font: inherit; font-size: 14px; }
+    .care-toilet-chips { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; margin-top: 4px !important; }
+    .care-toilet-row.stool .care-toilet-chips:last-child { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+    .care-toilet-chips button { min-height: 44px; font-size: 14px; padding: 4px 2px; }
+    .care-toilet-add { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0 6px; }
+    .care-toilet-add button { min-height: 48px; border: 1px dashed #c9a227; border-radius: 12px; background: #fffaf0; color: #7a5a00; font: inherit; font-size: 15px; font-weight: 700; }
+    .care-toilet-add button:disabled { opacity: .45; }
+    /* 文字を大きくしたスマホの幅では、便の形の4つを2列に(「普通便」が折り返さないように) */
+    @media (max-width: 480px) {
+      .care-toilet-row.stool .care-toilet-chips:last-child { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    }
+
+    /* ===== 2026-11-17 ケア記録の自動保存(名前の下に「保存しました（10:32）」などを出す) ===== */
+    .care-auto { margin: 2px 0 0; color: #0f766e; font-size: 12px; line-height: 1.4; }
+    .care-auto.error { color: #b3261e; font-weight: 600; }
+
+    /* ===== 2026-11-17 文字の大きさ(現場の要望「文字を全部大きく」。全員の端末で画面全体を1.15倍) ===== */
+    /* 印刷(連絡帳・月の実績など)には効かせない。zoom で 88vh も大きくなる端末があるので、下から出る画面の高さは割り戻す(大きくならない端末では少し低くなるだけ) */
+    /* 画面の高さ(vh)を使う所はすべて割り戻す: 下から出る画面・利用者の編集(管理)・表の枠(管理)・画面全体の最低の高さ */
+    @media screen {
+      body { zoom: 1.15; }
+      .sheet { max-height: calc(88vh / 1.15); }
+      .editor-dialog { max-height: calc((100dvh - 40px) / 1.15); }
+      .table-wrap { max-height: calc(70vh / 1.15); }
+      .app { min-height: calc(100vh / 1.15); }
+    }
+    /* スマホの幅では、ケア記録の2列の欄を1列にして数字が切れないようにする */
+    @media screen and (max-width: 480px) {
+      .care-grid.two { grid-template-columns: minmax(0, 1fr) !important; }
+    }
+
+    /* ===== 2026-11-17 連絡帳の紙: お薬・排泄・機能訓練の行が増えても連絡事項を切らない ===== */
+    /* 枠の高さを決め打ちにせず中身に合わせて伸ばす(最低は今までと同じ 132mm)。2人分が1枚に入らないときは、次の方は次のページへ(1人1枚) */
+    @media print {
+      .nb-card { height: auto; min-height: 132mm; }
+      .nb-card:nth-child(2n) { break-after: auto; page-break-after: auto; }
+      .nb-card { padding-top: 16px; padding-bottom: 12px; }
+      .nb-table { font-size: 14px; }
+      .nb-table th, .nb-table td { padding: 4px 8px; }
+      .nb-table td { line-height: 1.4; }
+      .nb-table tr.nb-note td { height: 4.2em; }
+      .nb-card footer { margin-top: 6px; }
+    }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2562,6 +2623,8 @@
       notebookGroups: [],
       todayVisibleIds: [],
       recordsRevision: 0,
+      // ケア記録を保存した回数。読み直しを始めたあとに保存があれば、その読み直しのケア記録は古いので使わない
+      careRevision: 0,
       pendingDayChanges: new Map(),
       queue: [],
       recent: [],
@@ -3205,7 +3268,7 @@
       }
     }
 
-    function applyState(state, fromCache, keepLocalRecords = false) {
+    function applyState(state, fromCache, keepLocalRecords = false, keepLocalCare = false) {
       app.users = (Array.isArray(state.users) ? state.users : [])
         .filter((user) => user && user.userId && user.displayName)
         .map((user) => Object.assign({}, user, { userId: normalizeClientUserId(user.userId) }));
@@ -3217,8 +3280,8 @@
       if (Array.isArray(state.plans)) {
         app.plans = state.businessDate === todayStr() ? state.plans : [];
       }
-      // ケア記録は保存完了を待ってから一覧へ反映するため、保存中だけ古い応答で上書きしない。
-      if (!careUi.saving && Array.isArray(state.careRecords)) {
+      // ケア記録は保存完了を待ってから一覧へ反映するため、保存中と、読み直しの間に保存があったときは古い応答で上書きしない。
+      if (!careUi.saving && !keepLocalCare && Array.isArray(state.careRecords)) {
         app.careRecords = (state.businessDate === todayStr() ? state.careRecords : [])
           .map((care) => Object.assign({}, care, { userId: normalizeClientUserId(care.userId) }));
       }
@@ -3315,12 +3378,13 @@
       button.textContent = '更新中…';
       try {
         const revision = app.recordsRevision;
+        const careRevision = app.careRevision;
         const prefetch = app.statePrefetch;
         app.statePrefetch = null;
         const state = (prefetch && await prefetch) || await api('scanState', { businessDate: todayStr() });
         // 更新開始後の入力や、保存中の表示を古い一覧応答で上書きしない。
         const keepLocalRecords = revision !== app.recordsRevision || app.pendingDayChanges.size > 0;
-        applyState(state, false, keepLocalRecords);
+        applyState(state, false, keepLocalRecords, careRevision !== app.careRevision);
         cacheCurrentState();
         syncQueue();
         if (!keepLocalRecords) document.getElementById('todayFeedback').textContent = '最新の記録に更新しました。';
@@ -4024,6 +4088,7 @@
       }
       app.syncing = true;
       app.syncPending = pending;
+      const careRevision = app.careRevision;
       let sentOk = false;
       try {
         const response = await api('syncEvents', {
@@ -4047,7 +4112,7 @@
         });
         saveQueue();
         mergeReturnedRecords(response.records || []);
-        if (response.careRecords && response.careRecords.length && !careUi.saving) mergeReturnedCareRecords(response.careRecords);
+        if (response.careRecords && response.careRecords.length && !careUi.saving && careRevision === app.careRevision) mergeReturnedCareRecords(response.careRecords);
         cacheCurrentState();
         sentOk = true;
       } catch (error) {
@@ -4068,8 +4133,9 @@
     async function refreshStateQuiet() {
       try {
         const revision = app.recordsRevision;
+        const careRevision = app.careRevision;
         const state = await api('scanState', { businessDate: todayStr() });
-        applyState(state, false, revision !== app.recordsRevision || app.pendingDayChanges.size > 0);
+        applyState(state, false, revision !== app.recordsRevision || app.pendingDayChanges.size > 0, careRevision !== app.careRevision);
         cacheCurrentState();
       } catch (error) {}
     }
@@ -4541,6 +4607,7 @@
       bathState: (userId) => scannerBathState(userId),
       save: (payload) => api('saveCareRecord', payload),
       applySaved: (userId, result) => {
+        app.careRevision++;
         if (result.careRecord) {
           const care = Object.assign({}, result.careRecord, { userId: normalizeClientUserId(result.careRecord.userId) });
           app.careRecords = app.careRecords.filter((item) => normalizeClientUserId(item.userId) !== care.userId);
@@ -4757,8 +4824,16 @@
     const CARE_FIELD_KEYS = [
       'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
       'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote',
-      'arrivalTransport', 'departureTransport', 'weight', 'mealAmount'
+      'arrivalTransport', 'departureTransport', 'weight', 'mealAmount', 'medication', 'excretionLog', 'training'
     ];
+    // 服薬(2026-11-17 現場の要望「入浴と同じ形で、飲んだ・飲まないだけ」)
+    const CARE_MEDICATION_CHOICES = [['taken', '飲んだ'], ['missed', '飲まなかった']];
+    // 機能訓練(2026-11-17 原山さん「やったかやってないかだけでいい」)
+    const CARE_TRAINING_CHOICES = [['done', 'やった'], ['skipped', 'やっていない']];
+    // 排泄(2026-11-17 現場の要望)。サーバー(Code.gs の EXCRETION_*)と同じ言葉。1回ずつ「時刻 尿/便 量 便の形」
+    const CARE_EXCRETION_AMOUNTS = ['少量', '普通', '多量'];
+    const CARE_EXCRETION_FORMS = ['硬便', '普通便', '軟便', '水様便'];
+    const CARE_EXCRETION_MAX = 12;
     // 来所・送りの送迎。家族送迎(事業所が送迎しない片道)は送迎減算の確認に使う
     const CARE_TRANSPORT_CHOICES = [['facility', '施設送迎'], ['family', '家族送迎']];
     const CARE_TRANSPORT_LABELS = { facility: '施設送迎', family: '家族送迎' };
@@ -4779,7 +4854,67 @@
     // バイタルの項目と単位(画面・連絡帳・一覧で同じ表示にする)
     const CARE_VITAL_FIELDS = ['temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2', 'weight'];
     const CARE_VITAL_UNITS = { temperature: '℃', bpHigh: 'mmHg', bpLow: 'mmHg', pulse: '回/分', spo2: '%', weight: 'kg' };
-    const careUi = { host: null, userId: '', initial: null, saving: false };
+    // timer: 自動保存を待っている間の印。chain: 保存を1件ずつ順に送る。token: 開いたケア記録ごとに変わる(前の方の保存の結果で今の画面を書き換えない)
+    const careUi = { host: null, userId: '', businessDate: '', initial: null, saving: false, timer: 0, chain: Promise.resolve(true), token: 0, problem: null, savedCount: 0 };
+    // 自動保存までの待ち時間(ミリ秒)。押して選ぶ: 押し直しを待つ / 欄から離れた: すぐ。
+    // 数字・時刻・連絡事項は、打っている途中(「36」→「36.8」など)を保存しない。欄から離れたとき(バイタルを入れ終えて次の欄へ移ったときも)だけ保存する。
+    // 途中の値を送ると、シートの修正履歴に「直した」と残ってしまうため
+    const CARE_SAVE_DELAY = { tap: 600, change: 250 };
+    // バイタルを入れ終えたら次の欄へ移る順(体重は小数のけたが決まらないので、最後に置き、入れ終えても移らない)
+    const CARE_VITAL_ORDER = ['temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2', 'weight'];
+
+    // バイタルの欄を入れ終えたか: 範囲内で、もう1けた打つと上限を超える(=これ以上打たない)とき。
+    // 体温は小数1けたまで打ったとき(「365」→36.5 も含む。「37」はまだ37.2などがあり得るので移らない)
+    function careVitalComplete(field, value) {
+      const rule = CARE_NUMBER_RULES[field];
+      if (!rule || field === 'weight') return false;
+      const text = careAutoPoint(field, careNumberText(value));
+      if (!/^\d+(\.\d)?$/.test(text)) return false;
+      const number = Number(text);
+      if (number < rule.min || number > rule.max) return false;
+      if (field === 'temperature') return /\.\d$/.test(text);
+      return text.indexOf('.') === -1 && number * 10 > rule.max;
+    }
+
+    // 同じ方の次のバイタルの欄へ移る(無い欄は飛ばす)。次が無ければ false
+    function careFocusNextVital(container, attr, field) {
+      const start = CARE_VITAL_ORDER.indexOf(field);
+      if (!container || start === -1) return false;
+      for (let i = start + 1; i < CARE_VITAL_ORDER.length; i++) {
+        const next = container.querySelector(`input[${attr}="${CARE_VITAL_ORDER[i]}"]`);
+        if (next && !next.disabled) {
+          next.focus();
+          try { next.select(); } catch (error) { /* 選べない欄は無視 */ }
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // バイタルの欄で、入れ終えたら次へ・Enterでも次へ(最後の欄ではキーボードを閉じる)。attr は欄の data- の名前
+    function careBindVitalAdvance(root, attr, scopeSelector) {
+      const fieldOf = (target) => {
+        const input = target && target.closest && target.closest(`input[${attr}]`);
+        if (!input) return null;
+        const field = input.getAttribute(attr);
+        return CARE_VITAL_ORDER.includes(field) ? { input, field } : null;
+      };
+      const scope = (input) => (scopeSelector ? input.closest(scopeSelector) : null) || root;
+      root.addEventListener('input', (event) => {
+        if (event.isComposing) return;
+        const hit = fieldOf(event.target);
+        if (!hit || !careVitalComplete(hit.field, hit.input.value)) return;
+        if (!careFocusNextVital(scope(hit.input), attr, hit.field)) hit.input.blur();
+      });
+      root.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        const hit = fieldOf(event.target);
+        if (!hit) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (!careFocusNextVital(scope(hit.input), attr, hit.field)) hit.input.blur();
+      });
+    }
 
     // 体重の欄を出す方: 利用者の「体重測定」がありの方と、その日すでに体重が入っている方
     function careWeightNeeded(user, care) {
@@ -4844,6 +4979,12 @@
       try { input.setSelectionRange(next.length, next.length); } catch (error) { /* 選べない欄は無視 */ }
     }
     if (typeof document !== 'undefined') {
+      // ケア記録を開いたまま、ほかのアプリへ切り替える・画面を消すときは、打っている欄も含めて待っている保存を送る
+      const careFlushOnLeave = () => {
+        if (document.getElementById('careSheet') && (careUi.timer || careIsDirty())) careFlush();
+      };
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') careFlushOnLeave(); });
+      window.addEventListener('pagehide', careFlushOnLeave);
       // 先に直してから、下書き・保存の処理に渡す(capture で一番先に動かす)
       document.addEventListener('input', careAutoPointInput, true);
       document.addEventListener('compositionend', careAutoPointInput, true);
@@ -4905,6 +5046,55 @@
       return values;
     }
 
+    // 排泄の記録「10:30 尿 普通／13:15 便 多量 軟便」を1回ずつに分ける(読めない部分は飛ばす。検査はサーバー)
+    function careExcretionEntries(text) {
+      return String(text == null ? '' : text).split(/[／/\n]+/).map((piece) => piece.trim()).filter(Boolean).map((piece) => {
+        const words = piece.split(/\s+/);
+        const entry = { time: careTimeText(words.shift() || ''), kind: '', amount: '', form: '' };
+        words.forEach((word) => {
+          if ((word === '尿' || word === '便') && !entry.kind) entry.kind = word;
+          else if (CARE_EXCRETION_AMOUNTS.includes(word)) entry.amount = word;
+          else if (CARE_EXCRETION_FORMS.includes(word)) entry.form = word;
+        });
+        return entry;
+      }).filter((entry) => entry.kind);
+    }
+
+    function careExcretionText(entries) {
+      return entries.slice().sort((a, b) => (a.time === b.time ? (a.kind === b.kind ? 0 : (a.kind === '尿' ? -1 : 1)) : (a.time < b.time ? -1 : 1)))
+        .map((entry) => [entry.time, entry.kind, entry.amount, entry.form].filter(Boolean).join(' ')).join('／');
+    }
+
+    // 「排尿 2回」「排便 1回（軟便）」。便の形は記録した形を並べる
+    function careExcretionSummary(care) {
+      const entries = careExcretionEntries((care || {}).excretionLog);
+      const urine = entries.filter((entry) => entry.kind === '尿');
+      const stool = entries.filter((entry) => entry.kind === '便');
+      const texts = [];
+      if (urine.length) texts.push(`排尿 ${urine.length}回`);
+      if (stool.length) {
+        const forms = [...new Set(stool.map((entry) => entry.form).filter(Boolean))];
+        texts.push(`排便 ${stool.length}回${forms.length ? `（${forms.join('・')}）` : ''}`);
+      }
+      return texts;
+    }
+
+    // 連絡帳の排泄の欄(紙に収まるよう短く): 「排尿 10:30・14:00　排便 13:15（多量・軟便）」
+    // 排尿は時刻だけを並べ、排便は1回ずつ量・形を添える
+    function careExcretionNotebookText(care) {
+      const entries = careExcretionEntries((care || {}).excretionLog);
+      const urine = entries.filter((entry) => entry.kind === '尿').map((entry) => entry.time);
+      const stool = entries.filter((entry) => entry.kind === '便').map((entry) => {
+        const detail = [entry.amount, entry.form].filter(Boolean).join('・');
+        return `${entry.time}${detail ? `（${detail}）` : ''}`;
+      });
+      return [urine.length ? `排尿 ${urine.join('・')}` : '', stool.length ? `排便 ${stool.join('・')}` : ''].filter(Boolean).join('　');
+    }
+
+    function careMedicationText(value) {
+      return value === 'taken' ? '服薬 飲んだ' : (value === 'missed' ? '服薬 飲まなかった' : '');
+    }
+
     // 今日の一覧に出す短い要約(色付きの小さなタグで表示する)
     function careSummaryParts(care, bathStatus) {
       const c = care || {};
@@ -4919,6 +5109,10 @@
       if (careHas(c.snackAmount)) parts.push(['snack', `おやつ ${careAmountText(c.snackAmount)}`]);
       if (careHas(c.fluidMl)) parts.push(['fluid', `水分 ${c.fluidMl}ml`]);
       if (bathStatus === 'done') parts.push(['bath', (c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : '入浴')) + (careHas(c.bathTime) ? ` ${careTimeText(c.bathTime)}` : '')]);
+      if (careMedicationText(c.medication)) parts.push([c.medication === 'missed' ? 'med missed' : 'med', careMedicationText(c.medication)]);
+      careExcretionSummary(c).forEach((text) => parts.push(['toilet', text]));
+      if (c.training === 'done') parts.push(['training', '機能訓練 やった']);
+      if (c.training === 'skipped') parts.push(['training skipped', '機能訓練 やっていない']);
       if (c.recreation === 'joined') parts.push(['rec', 'レク参加']);
       if (c.recreation === 'absent') parts.push(['rec', 'レク不参加']);
       return parts;
@@ -4959,9 +5153,15 @@
       if (!user) return;
       const previousCare = document.getElementById('careSheet');
       if (previousCare) previousCare.remove(); // 次の方へ進むときは、戻る履歴を積み直さない
+      clearTimeout(careUi.timer);
+      careUi.timer = 0;
+      careUi.token += 1;
       careUi.host = host;
       careUi.userId = user.userId;
+      careUi.businessDate = host.businessDate();
       careUi.saving = false;
+      careUi.problem = null;
+      careUi.savedCount = 0;
       careUi.initial = careValuesFrom(host.care(user.userId), host.bathState(user.userId));
       const v = careUi.initial;
       const backdrop = document.createElement('div');
@@ -4971,11 +5171,11 @@
       backdrop.innerHTML = `
         <form class="sheet care-sheet" novalidate role="dialog" aria-modal="true" aria-labelledby="careTitle">
           <div class="care-head">
-            <div><h3 id="careTitle" tabindex="-1">${escapeHtml(user.displayName)} 様${dsCareHouseMark(user)}</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}のケア記録</p></div>
+            <div><h3 id="careTitle" tabindex="-1">${escapeHtml(user.displayName)} 様${dsCareHouseMark(user)}</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))}のケア記録</p><p class="care-auto">入れた項目は、その都度自動で保存します。</p></div>
             <button type="button" class="care-close" data-care-close aria-label="閉じる">×</button>
           </div>
           <fieldset class="care-group"><legend>送迎</legend>
-            <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押して保存すると、来所・送りの記録になります。</p>
+            <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押すと、そのまま来所・送りの記録になります。</p>
             <div class="care-grid two">
               ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
               ${careTimeField('departureTime', '送り出発', v.departureTime)}
@@ -5019,12 +5219,27 @@
             ${careChoice('bathStatus', '入ったかどうか', [['done', '入浴した'], ['refused', '入浴しなかった']], v.bathStatus)}
             ${careChoice('bathType', '入浴方法', [['general', '一般浴'], ['special', '特浴']], v.bathType)}
           </fieldset>
-          <fieldset class="care-group"><legend>レクリエーション</legend>
+          <fieldset class="care-group care-med"><legend>服薬</legend>
+            ${careChoice('medication', '薬を飲んだか', CARE_MEDICATION_CHOICES, v.medication)}
+          </fieldset>
+          <fieldset class="care-group care-toilet"><legend>排泄</legend>
+            <div class="care-toilet-list" data-toilet-list></div>
+            <input type="hidden" data-care="excretionLog" value="${escapeHtml(v.excretionLog)}">
+            <div class="care-toilet-add" role="group" aria-label="排泄を足す">
+              <button type="button" data-toilet-add="尿">＋ 排尿</button>
+              <button type="button" data-toilet-add="便">＋ 排便</button>
+            </div>
+            <p class="care-hint">押すと今の時刻で1回分が増えます。時刻は直せます。</p>
+          </fieldset>
+          <fieldset class="care-group care-training"><legend>機能訓練</legend>
+            ${careChoice('training', 'やったかどうか', CARE_TRAINING_CHOICES, v.training)}
+          </fieldset>
+          <fieldset class="care-group care-rec"><legend>レクリエーション</legend>
             ${careChoice('recreation', '参加の有無', [['joined', '参加'], ['absent', '不参加']], v.recreation)}
           </fieldset>
           <label class="care-field care-note"><span>連絡帳への連絡事項（任意）</span><textarea data-care="notebookNote" rows="3" maxlength="500" placeholder="例: 歌の時間をとても楽しまれていました。">${escapeHtml(v.notebookNote)}</textarea></label>
           <p class="care-status" role="status" aria-live="polite"></p>
-          <div class="care-confirm hidden" role="alert">保存していない入力があります。
+          <div class="care-confirm hidden" role="alert">保存できていない入力があります。
             <div><button type="button" data-care-keep>入力に戻る</button><button type="button" data-care-discard>保存せずに閉じる</button></div>
           </div>
           <div class="care-links">
@@ -5050,6 +5265,28 @@
       form.addEventListener('submit', (event) => {
         event.preventDefault();
         saveCareForm(false);
+      });
+      // バイタルは入れ終えたら次の欄へ(体温→血圧の上→下→脈拍→SpO2→体重)
+      careBindVitalAdvance(form, 'data-care', null);
+      // ほかの欄で Enter を押しても閉じない(欄から離れて、その項目を保存する)
+      form.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.isComposing) return;
+        const input = event.target.closest('input');
+        if (!input) return;
+        event.preventDefault();
+        input.blur();
+      });
+      // 1項目ずつその都度保存する: 押して選ぶ・欄から離れると、変わった項目だけを送る
+      form.addEventListener('click', (event) => {
+        if (event.target.closest('[data-choice-value], [data-care-now], [data-care-add], [data-toilet-add], [data-toilet-del], [data-toilet-set]')) careScheduleSave(CARE_SAVE_DELAY.tap);
+      });
+      form.addEventListener('change', (event) => {
+        if (event.target.closest('[data-care], [data-toilet-time]')) careScheduleSave(CARE_SAVE_DELAY.change);
+      });
+      // バイタルを入れ終えて次の欄へ移ったとき(打った欄から離れた)は、待たずに送る。打っている途中は送らない
+      form.addEventListener('input', (event) => {
+        if (!event.target.closest('input[data-care], textarea[data-care]')) return;
+        if (document.activeElement !== event.target) careScheduleSave(CARE_SAVE_DELAY.change);
       });
       backdrop.addEventListener('click', (event) => {
         if (event.target === backdrop) requestCloseCareForm();
@@ -5101,42 +5338,110 @@
           }
         }));
       });
+      bindCareToilet(form);
       const notebookButton = form.querySelector('[data-care-notebook]');
-      notebookButton.addEventListener('click', () => {
-        if (careIsDirty()) {
-          showCareStatus('先に「保存」を押してから連絡帳を表示してください。', true);
-          return;
-        }
+      notebookButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
         const userId = careUi.userId;
         closeCareForm(true);
         openCareNotebook(host, [userId]);
-      });
+      }));
       const notesButton = form.querySelector('[data-care-notes]');
       if (notesButton) notesButton.addEventListener('click', () => openUserNotes(careUi.host, careUi.userId));
       const monthButton = form.querySelector('[data-care-month]');
       if (monthButton) monthButton.addEventListener('click', () => openUserMonth(careUi.host, careUi.userId, careUi.host.businessDate()));
       const feeButton = form.querySelector('[data-care-fee]');
-      if (feeButton) feeButton.addEventListener('click', () => {
-        if (careIsDirty()) {
-          showCareStatus('先に「保存」を押してから実費を記録してください。', true);
-          return;
-        }
+      if (feeButton) feeButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
         const userId = careUi.userId;
         closeCareForm(true);
         openFeeSheet(host, userId);
-      });
+      }));
       const dayButton = form.querySelector('[data-care-day]');
-      if (dayButton) dayButton.addEventListener('click', () => {
-        if (careIsDirty()) {
-          showCareStatus('先に「保存」を押してください。', true);
-          return;
-        }
+      if (dayButton) dayButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
         const userId = careUi.userId;
         closeCareForm(true);
         host.openDayMenu(userId);
+      }));
+    }
+
+    // ---- 排泄の入力(1日に何回でも) ----
+    // 画面の行は careToiletRows に持ち、変わるたびに隠し欄 data-care="excretionLog" へ文にして入れる(保存・未保存の確認はほかの欄と同じ)
+    let careToiletRows = [];
+
+    function careToiletRowHtml(entry, index) {
+      const name = entry.kind === '便' ? '排便' : '排尿';
+      const chips = (key, choices) => `<div class="care-choice care-toilet-chips" role="group" aria-label="${name}の${key === 'amount' ? '量' : '便の形'}">${choices.map((choice) =>
+        `<button type="button" data-toilet-set="${key}" data-toilet-value="${choice}" data-toilet-index="${index}" aria-pressed="${String(entry[key] === choice)}">${choice}</button>`).join('')}</div>`;
+      return `<div class="care-toilet-row ${entry.kind === '便' ? 'stool' : 'urine'}">
+        <div class="care-toilet-top">
+          <span class="care-toilet-kind">${name}</span>
+          <input type="time" data-toilet-time="${index}" value="${escapeHtml(entry.time)}" aria-label="${name}の時刻">
+          <button type="button" class="care-toilet-del" data-toilet-del="${index}" aria-label="この${name}の記録を消す">消す</button>
+        </div>
+        <p class="care-choice-label">量</p>${chips('amount', CARE_EXCRETION_AMOUNTS)}
+        ${entry.kind === '便' ? `<p class="care-choice-label">便の形</p>${chips('form', CARE_EXCRETION_FORMS)}` : ''}
+      </div>`;
+    }
+
+    function renderCareToilet(form) {
+      const list = form.querySelector('[data-toilet-list]');
+      if (!list) return;
+      list.innerHTML = careToiletRows.length
+        ? careToiletRows.map(careToiletRowHtml).join('')
+        : '<p class="care-toilet-empty">まだ記録はありません。</p>';
+      form.querySelectorAll('[data-toilet-add]').forEach((button) => { button.disabled = careToiletRows.length >= CARE_EXCRETION_MAX; });
+    }
+
+    function syncCareToilet(form) {
+      const hidden = form.querySelector('[data-care="excretionLog"]');
+      if (hidden) hidden.value = careExcretionText(careToiletRows);
+    }
+
+    function bindCareToilet(form) {
+      const box = form.querySelector('.care-toilet');
+      if (!box) return;
+      careToiletRows = careExcretionEntries(form.querySelector('[data-care="excretionLog"]').value);
+      renderCareToilet(form);
+      box.addEventListener('click', (event) => {
+        const add = event.target.closest('[data-toilet-add]');
+        if (add) {
+          if (careToiletRows.length >= CARE_EXCRETION_MAX) return;
+          const now = new Date();
+          careToiletRows.push({ time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`, kind: add.dataset.toiletAdd, amount: '', form: '' });
+          renderCareToilet(form);
+          syncCareToilet(form);
+          const rows = box.querySelectorAll('.care-toilet-row');
+          if (rows.length) rows[rows.length - 1].scrollIntoView({ block: 'nearest' });
+          return;
+        }
+        const del = event.target.closest('[data-toilet-del]');
+        if (del) {
+          careToiletRows.splice(Number(del.dataset.toiletDel), 1);
+          renderCareToilet(form);
+          syncCareToilet(form);
+          return;
+        }
+        const set = event.target.closest('[data-toilet-set]');
+        if (set) {
+          const entry = careToiletRows[Number(set.dataset.toiletIndex)];
+          if (!entry) return;
+          const key = set.dataset.toiletSet;
+          // 選んでいるものをもう一度押すと外せる(押し間違いの訂正)
+          entry[key] = entry[key] === set.dataset.toiletValue ? '' : set.dataset.toiletValue;
+          set.parentElement.querySelectorAll('[data-toilet-set]').forEach((button) => {
+            button.setAttribute('aria-pressed', String(entry[key] === button.dataset.toiletValue));
+          });
+          syncCareToilet(form);
+        }
+      });
+      box.addEventListener('change', (event) => {
+        const time = event.target.closest('[data-toilet-time]');
+        if (!time) return;
+        const entry = careToiletRows[Number(time.dataset.toiletTime)];
+        if (entry) entry.time = careTimeText(time.value);
+        syncCareToilet(form);
       });
     }
 
@@ -5177,17 +5482,21 @@
           return { key, message: '時刻は「9:30」の形で入力してください。' };
         }
       }
+      if ('excretionLog' in changed && careToiletRows.some((entry) => !entry.time)) {
+        return { key: 'excretionLog', message: '排泄の時刻を入れてください（時刻が空の行があります）。' };
+      }
       if (values && ('bathTime' in changed || 'bathStatus' in changed) && values.bathTime && values.bathStatus !== 'done') {
         return { key: 'bathTime', message: '入浴しなかったときは、入浴時刻を空にしてください。' };
       }
       return null;
     }
 
+    // 下の欄と、上(名前の下・いつも見える所)の両方に出す
     function showCareStatus(message, isError) {
-      const status = document.querySelector('#careSheet .care-status');
-      if (!status) return;
-      status.textContent = message;
-      status.classList.toggle('error', Boolean(isError));
+      document.querySelectorAll('#careSheet .care-status, #careSheet .care-auto').forEach((status) => {
+        status.textContent = message;
+        status.classList.toggle('error', Boolean(isError));
+      });
     }
 
     function setCareSaving(saving) {
@@ -5199,42 +5508,135 @@
       if (save) save.textContent = saving ? '保存中…' : '保存';
     }
 
+    // ---- 自動保存 ----
+    // 自動の保存では、いま打っている欄は送らない(欄から離れたときに送る)
+    function careScheduleSave(delay) {
+      if (!document.getElementById('careSheet')) return;
+      clearTimeout(careUi.timer);
+      careUi.timer = setTimeout(() => {
+        careUi.timer = 0;
+        careQueueSave(true);
+      }, delay);
+    }
+
+    // 保存は1件ずつ順に送る(前の保存が終わってから、その時の画面と最後に保存した値の違いを送る)。保存できたら true
+    function careQueueSave(skipTyping) {
+      const token = careUi.token;
+      careUi.chain = careUi.chain.catch(() => false).then(() => careSaveNow(token, Boolean(skipTyping)));
+      return careUi.chain;
+    }
+
+    // 待っている自動保存を今すぐ送り、終わるまで待つ(打っている欄も送る)
+    function careFlush() {
+      clearTimeout(careUi.timer);
+      careUi.timer = 0;
+      return careQueueSave(false);
+    }
+
+    // 打ち間違い(範囲外の数字など)の項目は送らずに知らせ、ほかの項目は保存する。
+    // skipTyping: 自動の保存。いま打っている欄(数字・時刻・連絡事項)は途中の値なので送らず、打ち間違いもまだ知らせない
+    async function careSaveNow(token, skipTyping) {
+      if (token !== careUi.token || !document.getElementById('careSheet')) return true;
+      const host = careUi.host;
+      const userId = careUi.userId;
+      const values = careCurrentValues();
+      const send = careChangedFields(values);
+      const active = document.activeElement;
+      const typing = skipTyping && active && active.closest && active.closest('#careSheet') && /^(INPUT|TEXTAREA)$/.test(active.tagName) && active.type !== 'hidden'
+        ? (active.dataset.care || '') : '';
+      if (typing) delete send[typing];
+      let problem = null;
+      for (let invalid = careValidate(send, values); invalid; invalid = careValidate(send, values)) {
+        if (!problem) problem = invalid;
+        delete send[invalid.key];
+        if (invalid.key === 'bathTime') delete send.bathStatus;
+      }
+      careUi.problem = problem;
+      if (!Object.keys(send).length) {
+        if (careUi.problem) showCareStatus(problem.message, true);
+        return !problem;
+      }
+      showCareStatus('保存しています…', false);
+      try {
+        // 排泄は最後に保存した記録も送る(別の端末で同じ方の排泄を足していても消さない)
+        const base = 'excretionLog' in send ? { excretionLogBase: (careUi.initial && careUi.initial.excretionLog) || '' } : {};
+        const result = await host.save(Object.assign({ businessDate: careUi.businessDate || host.businessDate(), userId }, send, base));
+        host.applySaved(userId, result || {});
+        dsRefreshRecordList();
+        if (token !== careUi.token || !document.getElementById('careSheet')) return !problem;
+        // 送った値を「最後に保存した値」にする(次は、ここから変えた項目だけを送る)
+        Object.keys(send).forEach((key) => { careUi.initial[key] = values[key]; });
+        careUi.savedCount += 1;
+        if ('excretionLog' in send) careTakeMergedExcretion(result, values.excretionLog);
+        const now = new Date();
+        const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+        if (careUi.problem) showCareStatus(`${problem.message}（ほかの項目は ${time} に保存しました）`, true);
+        else showCareStatus(`保存しました（${time}）`, false);
+        return !problem;
+      } catch (error) {
+        if (token === careUi.token) showCareStatus(`保存できませんでした。${friendlyError(error)} 入力は残っています。もう一度「保存」を押すと送り直します。`, true);
+        return false;
+      }
+    }
+
+    // 別の端末で同じ方の排泄が足されていたら、まとめた記録(シートの値)を画面にも出す。
+    // 保存のあいだに排泄の欄を触っていたら、触った方を残す(次の自動保存で合わせて送る)
+    function careTakeMergedExcretion(result, sent) {
+      const saved = result && result.careRecord ? String(result.careRecord.excretionLog || '') : null;
+      if (saved === null) return;
+      const form = document.querySelector('#careSheet form');
+      const hidden = form && form.querySelector('[data-care="excretionLog"]');
+      if (!hidden || hidden.value !== sent) return;
+      const merged = careExcretionText(careExcretionEntries(saved));
+      if (merged === careExcretionText(careExcretionEntries(sent))) return;
+      careToiletRows = careExcretionEntries(merged);
+      renderCareToilet(form);
+      syncCareToilet(form);
+      careUi.initial.excretionLog = hidden.value;
+    }
+
+    // 連絡帳・実費などへ移る前に、待っている保存を送り終える
+    async function careAfterSave(next) {
+      if (careUi.saving || !document.getElementById('careSheet')) return;
+      const token = careUi.token;
+      setCareSaving(true);
+      const ok = await careFlush();
+      setCareSaving(false);
+      if (token !== careUi.token || !document.getElementById('careSheet')) return;
+      if (!ok || careIsDirty()) {
+        careFocusProblem();
+        return;
+      }
+      next();
+    }
+
+    function careFocusProblem() {
+      if (!careUi.problem) return;
+      const field = document.querySelector(`#careSheet [data-care="${careUi.problem.key}"]`);
+      if (field && field.type !== 'hidden') field.focus();
+    }
+
+    // 「保存」「保存して次の人へ」: 待っている保存を送り終えてから閉じる・次の方へ
     async function saveCareForm(goNext) {
       if (!document.getElementById('careSheet') || careUi.saving) return;
       const host = careUi.host;
       const userId = careUi.userId;
-      const values = careCurrentValues();
-      const changed = careChangedFields(values);
-      const invalid = careValidate(changed, values);
-      if (invalid) {
-        showCareStatus(invalid.message, true);
-        const field = document.querySelector(`#careSheet [data-care="${invalid.key}"]`);
-        if (field) field.focus();
-        return;
-      }
-      if (!Object.keys(changed).length) {
-        if (goNext) openNextCareForm(host, userId, '');
-        else closeCareForm(true);
-        return;
-      }
+      const token = careUi.token;
       setCareSaving(true);
-      showCareStatus('保存しています…', false);
-      try {
-        const result = await host.save(Object.assign({ businessDate: host.businessDate(), userId }, changed));
-        host.applySaved(userId, result || {});
-        dsRefreshRecordList();
-        const name = (host.findUser(userId) || {}).displayName || '';
-        setCareSaving(false);
-        if (goNext) {
-          openNextCareForm(host, userId, `${name}様の記録を保存しました。`);
-        } else {
-          closeCareForm(true);
-          host.feedback(`${name}様のケア記録を保存しました。`);
-        }
-      } catch (error) {
-        setCareSaving(false);
-        // 入力は消さずに残し、もう一度保存できるようにする
-        showCareStatus(`保存できませんでした。${friendlyError(error)}`, true);
+      const ok = await careFlush();
+      setCareSaving(false);
+      if (token !== careUi.token || !document.getElementById('careSheet')) return;
+      if (!ok || careIsDirty()) {
+        careFocusProblem();
+        return;
+      }
+      const name = (host.findUser(userId) || {}).displayName || '';
+      const saved = careUi.savedCount > 0;
+      if (goNext) {
+        openNextCareForm(host, userId, saved ? `${name}様の記録を保存しました。` : '');
+      } else {
+        closeCareForm(true);
+        if (saved) host.feedback(`${name}様のケア記録を保存しました。`);
       }
     }
 
@@ -5251,15 +5653,23 @@
       if (message) showCareStatus(message, false);
     }
 
-    function requestCloseCareForm() {
-      if (careUi.saving) return;
-      if (careIsDirty()) {
-        const confirm = document.querySelector('#careSheet .care-confirm');
-        if (confirm) {
-          confirm.classList.remove('hidden');
-          confirm.scrollIntoView({ block: 'nearest' });
+    // ×・背景・戻る: 待っている保存を送ってから閉じる。保存できない入力(打ち間違い・電波なし)が残るときは確認を出す
+    async function requestCloseCareForm() {
+      if (careUi.saving || !document.getElementById('careSheet')) return;
+      if (careIsDirty() || careUi.timer) {
+        const token = careUi.token;
+        setCareSaving(true);
+        const ok = await careFlush();
+        setCareSaving(false);
+        if (token !== careUi.token || !document.getElementById('careSheet')) return;
+        if (!ok || careIsDirty()) {
+          const confirm = document.querySelector('#careSheet .care-confirm');
+          if (confirm) {
+            confirm.classList.remove('hidden');
+            confirm.scrollIntoView({ block: 'nearest' });
+          }
+          return;
         }
-        return;
       }
       closeCareForm(true);
     }
@@ -5268,6 +5678,8 @@
       const existing = document.getElementById('careSheet');
       if (!existing) return;
       if (!force && careIsDirty()) return;
+      clearTimeout(careUi.timer);
+      careUi.timer = 0;
       existing.remove();
       careUi.saving = false;
       GinNav.closed('careSheet');
@@ -5276,7 +5688,7 @@
     // スマホ・ブラウザの「戻る」でケア記録を閉じる。未保存の入力があれば閉じずに確認を出す
     function careSheetBack() {
       if (!document.getElementById('careSheet')) return;
-      if (careUi.saving || careIsDirty()) {
+      if (careUi.saving || careUi.timer || careIsDirty()) {
         GinNav.push('careSheet', careSheetBack);
         requestCloseCareForm();
         return;
@@ -5463,6 +5875,8 @@
 
     // 一覧の中の操作(名前を押す・量や送迎を変える・まとめて入れる・保存)は、書き直しても効くよう親でまとめて受ける
     function bindRecordListBody(overlay) {
+      // バイタルの欄は、入れ終えたら同じ方の次の欄へ・Enterでも次へ
+      careBindVitalAdvance(overlay, 'data-ds-vital', '.ds-vitals');
       overlay.addEventListener('click', (event) => {
         const host = dsListUi.host;
         if (!host) return;
@@ -5912,7 +6326,7 @@
       const weight = careWeightNeeded(user, care);
       const last = weight ? careLastWeightText(user) : '';
       return `<div class="ds-quick-vitals">
-        <p class="ds-quick-label">バイタル<small>測ったら入れて「バイタルを保存」。体温・体重は小数点なしで打てます（365→36.5）。あとで記録一覧の「バイタル」からも直せます。</small></p>
+        <p class="ds-quick-label">バイタル<small>入れ終えると次の欄へ移り、その都度保存します。体温・体重は小数点なしで打てます（365→36.5）。あとで記録一覧の「バイタル」からも直せます。</small></p>
         <div class="ds-vitals">
           <label><span>体温</span>${input('temperature', '体温', 'decimal')}</label>
           <label class="bp"><span>血圧</span><span class="ds-bp">${input('bpHigh', '上', 'numeric')}<i>/</i>${input('bpLow', '下', 'numeric')}</span></label>
@@ -5976,7 +6390,8 @@
       };
       // バイタル: この欄を出したとき(または前に保存したとき)から変えた欄だけを送る。
       // 別の端末・一覧で入った値を、ここで空のまま保存して消さないよう、今の記録とは比べない。範囲外(打ち間違い)は送らずに知らせる
-      const saveVitals = () => {
+      // auto: 欄から離れたときの自動保存(変わっていなければ何も出さない。打ち間違いは知らせるが、移った欄からは動かさない)
+      const saveVitals = (auto) => {
         const patch = {};
         const inputs = {};
         box.querySelectorAll('[data-quick-vital]').forEach((input) => {
@@ -5985,14 +6400,14 @@
           if (!careSameNumber(input.value, input.defaultValue)) patch[field] = input.value.trim();
         });
         if (!Object.keys(patch).length) {
-          setStatus('バイタルは変わっていません。', false);
+          if (!auto) setStatus('バイタルは変わっていません。', false);
           return;
         }
         const invalid = careValidate(patch);
         if (invalid) {
           setStatus(invalid.message, true);
           const input = box.querySelector(`[data-quick-vital="${invalid.key}"]`);
-          if (input) input.focus();
+          if (input && !auto) input.focus();
           return;
         }
         const sent = Object.assign({}, patch);
@@ -6005,15 +6420,14 @@
           });
         });
       };
-      box.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && event.target.closest('[data-quick-vital]')) {
-          event.preventDefault();
-          saveVitals();
-        }
+      // 入れ終えたら次の欄へ・Enterでも次へ。欄から離れたら、その項目をすぐ保存する(「バイタルを保存」を押さなくてよい)
+      careBindVitalAdvance(box, 'data-quick-vital', null);
+      box.addEventListener('change', (event) => {
+        if (event.target.closest('[data-quick-vital]')) saveVitals(true);
       });
       box.addEventListener('click', (event) => {
         if (event.target.closest('[data-quick-vital-save]')) {
-          saveVitals();
+          saveVitals(false);
           return;
         }
         if (event.target.closest('[data-quick-vital-history]')) {
@@ -6429,9 +6843,15 @@
         { label: 'おやつ', value: careHas(c.snackAmount) ? careAmountText(c.snackAmount) : '' },
         { label: '水分', value: careHas(c.fluidMl) ? `${c.fluidMl} ml` : '' },
         { label: '入浴', value: bath },
+        // 服薬・排泄は記録した日だけ載せる(薬のない方・記録のない日に「未記録」を出さない)
+        c.medication === 'taken' || c.medication === 'missed'
+          ? { label: 'お薬', value: c.medication === 'taken' ? '飲まれました' : '本日は飲まれませんでした' } : null,
+        careExcretionNotebookText(c) ? { label: '排泄', value: careExcretionNotebookText(c) } : null,
+        c.training === 'done' || c.training === 'skipped'
+          ? { label: '機能訓練', value: c.training === 'done' ? '行いました' : '本日は行いませんでした' } : null,
         { label: 'レクリエーション', value: recreation },
         { label: '連絡事項', value: [careHas(c.notebookNote) ? String(c.notebookNote) : '', eventText || ''].filter(Boolean).join('\n'), note: true }
-      ];
+      ].filter(Boolean);
     }
 
     function careNotebookCardHtml(entry, dateText) {
@@ -6693,15 +7113,16 @@
       canvas.width = DS_PDF_PAGE.width;
       canvas.height = DS_PDF_PAGE.height;
       const ctx = canvas.getContext('2d');
-      for (let index = 0; index < entries.length; index += 2) {
+      const cardWidth = DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2;
+      // 1枚に2人分(各780)。中身が780に入らない方は、その方だけ1枚(最大で用紙いっぱい)にして連絡事項を切らない
+      const pages = dsNotebookPdfPages(entries.map((entry) => dsNotebookCardNeed(ctx, entry, dateText, cardWidth)));
+      for (const page of pages) {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const cardHeight = 780;
-        dsDrawNotebookCard(ctx, entries[index], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin, DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2, cardHeight);
-        if (entries[index + 1]) {
-          dsDrawNotebookCard(ctx, entries[index + 1], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin + cardHeight + 35, DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2, cardHeight);
-        }
+        page.forEach((card) => {
+          dsDrawNotebookCard(ctx, entries[card.index], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin + card.top, cardWidth, card.height);
+        });
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         const binary = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
         const bytes = new Uint8Array(binary.length);
@@ -6711,6 +7132,52 @@
       canvas.width = 0;
       canvas.height = 0;
       return dsBuildPdf(images);
+    }
+
+    const DS_PDF_CARD = { height: 800, gap: 35 }; // 2人分で用紙いっぱい((1636 - 35) / 2)
+    // 表の1行の高さ・文字の行の高さ・上下の余白・連絡事項の最低の高さ(お薬・排泄・機能訓練の行が増えたので少し詰めた)
+    const DS_PDF_ROW = { height: 54, line: 32, pad: 20, note: 110 };
+
+    // 連絡帳1人分を切らずに描くのに要る高さ(dsDrawNotebookCard と同じ寸法で数える)
+    function dsNotebookCardNeed(ctx, entry, dateText, width) {
+      const pad = 36;
+      const labelWidth = 230;
+      const valueWidth = width - pad * 2 - labelWidth - 32;
+      ctx.font = `400 23px ${DS_PDF_SERIF}`;
+      let height = pad + 44 + 22 + 52; // 見出し・日付・お名前
+      careNotebookRows(entry.care, entry.bathStatus, entry.eventText).forEach((row) => {
+        const lines = dsWrapText(ctx, row.value || (row.note ? '' : '—'), valueWidth);
+        if (row.note) height += Math.max(DS_PDF_ROW.note, lines.length * DS_PDF_ROW.line + DS_PDF_ROW.pad);
+        else height += lines.length > 1 ? lines.length * DS_PDF_ROW.line + DS_PDF_ROW.pad : DS_PDF_ROW.height;
+      });
+      return height + 50 + pad; // 施設名・下の余白
+    }
+
+    // 何人目をどのページのどこに描くか。[[{ index, top, height }], ...]
+    function dsNotebookPdfPages(needs) {
+      const full = DS_PDF_PAGE.height - DS_PDF_PAGE.margin * 2;
+      const pages = [];
+      let index = 0;
+      while (index < needs.length) {
+        const fits = (n) => n <= DS_PDF_CARD.height;
+        const next = index + 1 < needs.length ? needs[index + 1] : null;
+        if (fits(needs[index]) && next !== null && fits(next)) {
+          pages.push([{ index, top: 0, height: DS_PDF_CARD.height }, { index: index + 1, top: DS_PDF_CARD.height + DS_PDF_CARD.gap, height: DS_PDF_CARD.height }]);
+          index += 2;
+        } else if (next !== null && needs[index] + DS_PDF_CARD.gap + next <= full) {
+          // どちらかが少し長くても、2人分の合計が1枚に入るなら1枚に(長い方に高さを回す)
+          const height = Math.max(needs[index], full - DS_PDF_CARD.gap - Math.max(next, DS_PDF_CARD.height));
+          pages.push([{ index, top: 0, height }, { index: index + 1, top: height + DS_PDF_CARD.gap, height: full - DS_PDF_CARD.gap - height }]);
+          index += 2;
+        } else if (fits(needs[index])) {
+          pages.push([{ index, top: 0, height: DS_PDF_CARD.height }]);
+          index += 1;
+        } else {
+          pages.push([{ index, top: 0, height: Math.min(full, needs[index]) }]);
+          index += 1;
+        }
+      }
+      return pages;
     }
 
     function dsWrapText(ctx, text, width) {
@@ -6756,8 +7223,8 @@
       top += 52;
       const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
       const labelWidth = 230;
-      const rowHeight = 62;
-      const lineHeight = 36;
+      const rowHeight = DS_PDF_ROW.height;
+      const lineHeight = DS_PDF_ROW.line;
       const footerSpace = 50;
       ctx.font = `400 23px ${DS_PDF_SERIF}`;
       const valueWidth = right - left - labelWidth - 32;
@@ -6767,14 +7234,14 @@
         let cellHeight = rowHeight;
         if (row.note) {
           const room = y + height - pad - footerSpace - top;
-          const maxLines = Math.max(1, Math.floor((room - 24) / lineHeight));
+          const maxLines = Math.max(1, Math.floor((room - DS_PDF_ROW.pad) / lineHeight));
           if (lines.length > maxLines) {
             lines = lines.slice(0, maxLines);
             lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
           }
-          cellHeight = Math.max(rowHeight, Math.min(room, Math.max(126, lines.length * lineHeight + 24)));
+          cellHeight = Math.max(rowHeight, Math.min(room, Math.max(DS_PDF_ROW.note, lines.length * lineHeight + DS_PDF_ROW.pad)));
         } else if (lines.length > 1) {
-          cellHeight = lines.length * lineHeight + 24;
+          cellHeight = lines.length * lineHeight + DS_PDF_ROW.pad;
         }
         ctx.fillStyle = '#f3f5f8';
         ctx.fillRect(left, top, labelWidth, cellHeight);
@@ -6784,11 +7251,11 @@
         ctx.strokeRect(left + labelWidth, top, right - left - labelWidth, cellHeight);
         ctx.fillStyle = ink;
         ctx.font = `600 23px ${DS_PDF_SERIF}`;
-        ctx.fillText(row.label, left + 16, top + 39);
+        ctx.fillText(row.label, left + 16, top + 35);
         ctx.font = `400 23px ${DS_PDF_SERIF}`;
         ctx.fillStyle = row.value ? ink : '#9aa5b1';
         lines.forEach((line, lineIndex) => {
-          ctx.fillText(line, left + labelWidth + 16, top + 39 + lineIndex * lineHeight);
+          ctx.fillText(line, left + labelWidth + 16, top + 35 + lineIndex * lineHeight);
         });
         top += cellHeight;
       });
