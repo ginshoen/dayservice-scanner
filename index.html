@@ -1311,6 +1311,7 @@
     .login-hero strong { display: block; font-size: 22px; color: var(--ink); }
     .login-hero p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
     #loginScreen .panel { border-radius: 22px; }
+    .login-scope-note { margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: #e8f0fe; color: #1a4d8f; font-size: 14px; line-height: 1.6; }
     .login-row { display: flex !important; justify-content: flex-start !important; gap: 12px !important; border-radius: 16px !important; }
 
     /* ケア記録の入力: 区分ごとの色 */
@@ -1951,6 +1952,20 @@
       .nb-table tr.nb-note td { height: 4.2em; }
       .nb-card footer { margin-top: 6px; }
     }
+
+    /* ===== 2026-11-18 現場のメモ(体重・処置・特記事項の記入済み・ケアハウスの方の送迎・レク) ===== */
+    .status-chip.noted { background: #ecfdf3; color: #166534; }
+    .care-group.care-treat { --g: #0e7490; }
+    .care-tag.treat, .um-tag.treat { background: #e0f2fe; color: #075985; }
+    .care-tag.treat.none, .um-tag.treat.none { background: #f1f3f6; color: #4b5563; }
+    .care-treat-note { margin-top: 8px; }
+    .care-treat-note input { width: 100%; min-height: 44px; padding: 6px 10px; border: 1px solid var(--line, #e0e3e7); border-radius: 10px; font: inherit; font-size: 16px; background: #fff; box-sizing: border-box; }
+    .care-weight-slot { display: flex; align-items: end; }
+    .care-weight-add, .ds-weight-add { min-height: 44px; padding: 0 14px; border: 1px dashed #5eead4; border-radius: 10px; background: #f0fdfa; color: #0f766e; font: inherit; font-size: 14px; font-weight: 700; }
+    .care-weight-add { width: 100%; }
+    .ds-vitals .ds-weight-add { align-self: end; }
+    .care-ch-transport { margin: 6px 0 0; color: #5b6472; }
+    .ds-ch-note { margin: 0; padding: 8px 10px; border-radius: 10px; background: #f6f7f9; color: #5b6472; font-size: 13px; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2314,6 +2329,7 @@
       </div>
       <div class="panel">
         <h2>職員を選ぶ</h2>
+        <p id="loginScopeNote" class="login-scope-note">現場職員用のログインです。主任・管理者は、管理用の画面（事務所のパソコンなど）から入ってください。</p>
         <div class="list" id="loginStaffList"></div>
         <div id="loginPinArea" class="hidden" style="margin-top:14px">
           <label>PIN<input id="loginPin" type="password" inputmode="numeric" autocomplete="off" placeholder="4桁以上の数字"></label>
@@ -2578,7 +2594,9 @@
     };
 
     const API_URL = 'https://script.google.com/macros/s/AKfycbwGN4qNNqwPj6XwXDqH3zWXFh-DYLdzDxLFOeCBX6sqY-1vUbka8KvTcHA-7rkSv4kj-w/exec';
+    // 管理用の画面の URL。2026-11-19 から現場用の画面からは開かない(主任・管理者は管理用の URL から直接入る)。デモ版を作るスクリプトが置き換えるので残す
     const MANAGER_APP_URL = 'https://script.google.com/macros/s/AKfycbwlYMPpDFBto10KXQ99anjiNcFyGu2nSztVdxwni9di-bCj5o4g2csDuyAZODlUJ4kVQA/exec';
+    const STAFF_ENTRY_ONLY_MESSAGE = 'この画面は現場職員用です。主任・管理者は、管理用の画面から入ってください。';
     // デモ版(GitHub公開用/demo/)を作るときだけ true になる(scripts/build-demo-scanner.js)。
     // 画面の「デモ」表示はこれだけで決める。送信のたびにサーバーへ伝え、本番とデモの取り違えを断ってもらう。
     const IS_DEMO = false;
@@ -2621,6 +2639,8 @@
       feeItems: [],
       feeRecords: [],
       notebookGroups: [],
+      // その日に特記事項を書いた方(今日の一覧の「特記事項 記入済み」)
+      notedUserIds: new Set(),
       todayVisibleIds: [],
       recordsRevision: 0,
       // ケア記録を保存した回数。読み直しを始めたあとに保存があれば、その読み直しのケア記録は古いので使わない
@@ -2645,6 +2665,7 @@
       staffName: localStorage.getItem('ds_scanner_staff_name') || '',
       staffRole: localStorage.getItem('ds_scanner_staff_role') || 'staff',
       loginStaff: [],
+      loginStaffOnly: false,
       loginStaffId: '',
       photoCache: {},
       photoIds: {},
@@ -3013,6 +3034,15 @@
       }
       if (!data || data.ok === false) {
         const message = (data && data.error) || 'サーバーでエラーが発生しました。';
+        // 現場用の画面は現場職員だけ(2026-11-19)。主任・管理者のログインが残っていたら消して、ログイン画面でわけを出す
+        if (data && data.errorCode === 'STAFF_ENTRY_ONLY') {
+          const notice = data.message || message;
+          clearSession();
+          showLogin(notice);
+          const refused = new Error(notice);
+          refused.staffEntryOnly = true; // 呼んだ側が「有効期限切れ」で上書きしないための印
+          throw refused;
+        }
         // ログイン不要の操作(職員一覧など)では再ログイン処理を走らせない。
         // ここを緩めると「ログイン画面を出す→通信→また期限切れ」で無限ループになる。
         if (message.indexOf('SESSION_EXPIRED') !== -1 && LOGIN_FREE_ACTIONS.indexOf(action) === -1) {
@@ -3021,7 +3051,7 @@
         }
         // 施設の端末でないと断られたら、ログイン画面に戻してわけを出す(未送信の記録は端末に残る)
         if (data && data.errorCode === 'DEVICE_NOT_ALLOWED' && LOGIN_FREE_ACTIONS.indexOf(action) === -1) {
-          handleDeviceRefused(message);
+          handleDeviceRefused(message, Boolean(data.staffOnly));
           throw new Error(message);
         }
         throw new Error(message);
@@ -3102,8 +3132,10 @@
       try {
         const result = await api('staffList', {});
         app.loginStaff = result.staff || [];
+        app.loginStaffOnly = Boolean(result.staffOnly);
       } catch (error) {
         app.loginStaff = [];
+        app.loginStaffOnly = false;
         const message = friendlyError(error);
         document.getElementById('loginMessage').textContent = message.indexOf('SESSION_EXPIRED') !== -1
           ? '職員一覧を取得できませんでした。「職員一覧を再取得」を押してください。'
@@ -3164,16 +3196,11 @@
     }
 
     async function restoreSession() {
-      // 主任・管理者はログイン確認を待たずに管理画面への引き継ぎを始める(引き継ぎ自体がログインを確かめる)。
-      // 以前は「ログイン確認」→「引き継ぎ」を順に呼び、開くたびに往復1回分待っていた。
+      // 現場用の画面は現場職員だけ(2026-11-19)。反映前に主任・管理者で入ったままの端末は、ログインを消して現場職員のログイン画面にする
       if (app.staffRole === 'leader' || app.staffRole === 'admin') {
-        try {
-          await openManagerApp();
-          return;
-        } catch (error) {
-          if (!app.token) return; // ログイン切れはログイン画面を出し済み
-          // 権限が変わった場合などは、従来どおりログイン確認から進める
-        }
+        clearSession();
+        showLogin(STAFF_ENTRY_ONLY_MESSAGE);
+        return;
       }
       // 職員は、ログイン確認と今日の一覧の取得を同時に始める(順番に待たない)
       app.statePrefetch = api('scanState', { businessDate: todayStr() }).catch(() => null);
@@ -3182,6 +3209,7 @@
         const result = await api('sessionInfo', {});
         actor = result.actor || {};
       } catch (error) {
+        if (error && error.staffEntryOnly) return; // わけを出したログイン画面のままにする
         if (app.token) clearSession();
         showLogin('ログインの有効期限が切れました。もう一度ログインしてください。');
         return;
@@ -3200,7 +3228,9 @@
       localStorage.setItem(STORAGE.staffName, app.staffName);
       localStorage.setItem(STORAGE.staffRole, app.staffRole);
       if (app.staffRole === 'leader' || app.staffRole === 'admin') {
-        await openManagerApp();
+        // サーバーが断るので通常は来ない(念のため)
+        clearSession();
+        showLogin(STAFF_ENTRY_ONLY_MESSAGE);
         return;
       }
       document.getElementById('loginMessage').textContent = '';
@@ -3211,15 +3241,6 @@
       refreshState();
     }
 
-    async function openManagerApp() {
-      stopCamera();
-      document.getElementById('loginScreen').classList.remove('hidden');
-      document.getElementById('loginMessage').style.color = 'var(--muted)';
-      document.getElementById('loginMessage').textContent = '管理画面を開いています…';
-      const handoff = await api('managerHandoff', {});
-      if (!handoff.code) throw new Error('管理画面を開けませんでした。もう一度ログインしてください。');
-      window.location.replace(`${MANAGER_APP_URL}?handoff=${encodeURIComponent(handoff.code)}`);
-    }
 
     function clearSession() {
       GinNav.reset();
@@ -3248,12 +3269,13 @@
         });
     }
 
-    function handleDeviceRefused(message) {
+    // staffOnly: 一般職員用の端末で主任・管理者が断られたとき(未送信の記録の話は出さない)
+    function handleDeviceRefused(message, staffOnly) {
       if (app.handlingSessionExpiry) return;
       app.handlingSessionExpiry = true;
       stopCamera();
       clearSession();
-      showLogin(message + ' 未送信の記録は残っています。')
+      showLogin(staffOnly ? message : message + ' 未送信の記録は残っています。')
         .finally(() => {
           app.handlingSessionExpiry = false;
         });
@@ -3291,6 +3313,9 @@
           .map((record) => Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
       }
       if (Array.isArray(state.notebookGroups)) app.notebookGroups = state.notebookGroups;
+      if (Array.isArray(state.notedUserIds)) {
+        app.notedUserIds = new Set(state.businessDate === todayStr() ? state.notedUserIds.map(normalizeClientUserId) : []);
+      }
       app.usersByHash = indexUsersByQrHashes(app.users);
       const suffix = fromCache ? '(前回取得分)' : '';
       setStatusLine(`利用者 ${app.users.length}名 / ${state.businessDate || todayStr()}${suffix}`);
@@ -3323,6 +3348,7 @@
         feeItems: state.feeItems || [],
         feeRecords: state.feeRecords || [],
         notebookGroups: state.notebookGroups || [],
+        notedUserIds: Array.isArray(state.notedUserIds) ? state.notedUserIds : [],
         businessDate: state.businessDate || todayStr()
       }));
     }
@@ -3828,7 +3854,8 @@
         localStatus: 'pending'
       };
       // 来所・送りは施設送迎として記録し、家族送迎のときは結果の欄で押し直す(押す回数を増やさない)
-      if (app.mode === 'arrival' || app.mode === 'departure') {
+      // ケアハウスの方は送迎の項目なし(2026-11-18)
+      if ((app.mode === 'arrival' || app.mode === 'departure') && !dsIsCareHouse(user)) {
         const saved = (careRecordFor(user.userId) || {})[DS_TRANSPORT_BY_SERVICE[app.mode]];
         event.transport = saved === 'family' ? 'family' : 'facility';
       }
@@ -4022,11 +4049,13 @@
         localKey,
         localStatus: 'pending'
       };
+      // 昼食・おやつは、食べた量をひとまず全量で入れる(連絡帳に出るように。あとでケア記録・記録一覧で直せる。2026-11-18 現場の要望)
+      if (service === 'lunch' || service === 'snack') event.amount = 10;
       app.queue.push(event);
       saveQueue();
       beep('success');
       addRecent({ label: user.displayName, status: '手入力', serviceType: service });
-      manualUi.message = `${user.displayName}様の${label}を ${time} で記録しました。`;
+      manualUi.message = `${user.displayName}様の${label}を ${time} で記録しました。${event.amount === 10 ? '食べた量は「全量」で入れました（違うときはケア記録か記録一覧で直してください）。' : ''}`;
       manualUi.error = false;
       manualUi.last = { eventId: event.eventId, userId: user.userId, service, name: user.displayName };
       renderManualRecord();
@@ -4165,7 +4194,7 @@
     function cacheCurrentState() {
       // 保存前の仮表示を、次回起動時の確定データとして残さない。
       if (app.pendingDayChanges.size > 0) return;
-      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, notebookGroups: app.notebookGroups, businessDate: todayStr() });
+      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, notebookGroups: app.notebookGroups, notedUserIds: Array.from(app.notedUserIds), businessDate: todayStr() });
     }
 
     function nextEventId() {
@@ -4471,6 +4500,7 @@
         if (!cancelled && record && record.bathStatus === 'refused') marks.push('<span class="status-chip refused">入浴拒否</span>');
         if (!cancelled && record && record.usageActual === 'half_am') marks.push('<span class="status-chip half">午前のみ</span>');
         marks.push(feeBadgeHtml(scannerDsHost, user.userId));
+        marks.push(dsNotedTagHtml(scannerDsHost, user.userId));
         const reason = cancelled && record.cancelReason ? ` / ${escapeHtml(record.cancelReason)}` : '';
         const saving = app.pendingDayChanges.has(user.userId);
         const careLine = cancelled ? '' : careSummaryHtml(careRecordWithPendingScans(user.userId), scannerBathState(user.userId));
@@ -4514,6 +4544,8 @@
         if (event.businessDate !== businessDate || normalizeClientUserId(event.userId) !== normalizedUserId) return;
         const transportField = DS_TRANSPORT_BY_SERVICE[event.serviceType];
         if (event.transport && transportField && !careHas(care[transportField])) care[transportField] = event.transport;
+        const amountField = event.source === 'manual' ? DS_MANUAL_AMOUNT_FIELDS[event.serviceType] : '';
+        if (amountField && event.amount !== undefined && !careHas(care[amountField]) && !(amountField === 'mealAmount' && careHasLegacyMeal(care))) care[amountField] = String(event.amount);
         if (careHas(care[field])) return;
         const at = new Date(event.occurredAtClient);
         if (!Number.isNaN(at.getTime())) care[field] = `${String(at.getHours()).padStart(2, '0')}:${String(at.getMinutes()).padStart(2, '0')}`;
@@ -4581,6 +4613,15 @@
       feeItems: () => app.feeItems,
       feeRecords: () => app.feeRecords,
       call: (name, payload) => api(name, payload),
+      noted: (userId) => app.notedUserIds.has(normalizeClientUserId(userId)),
+      setNoted: (userId, noted) => {
+        const id = normalizeClientUserId(userId);
+        if (app.notedUserIds.has(id) === Boolean(noted)) return;
+        if (noted) app.notedUserIds.add(id);
+        else app.notedUserIds.delete(id);
+        cacheCurrentState();
+        renderToday();
+      },
       addFeeRecordLocally: (record) => {
         if (record) app.feeRecords.push(Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
       },
@@ -4824,8 +4865,13 @@
     const CARE_FIELD_KEYS = [
       'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
       'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote',
-      'arrivalTransport', 'departureTransport', 'weight', 'mealAmount', 'medication', 'excretionLog', 'training'
+      'arrivalTransport', 'departureTransport', 'weight', 'mealAmount', 'medication', 'excretionLog', 'training',
+      'treatment', 'treatmentNote'
     ];
+    // 処置(2026-11-18 現場の要望「内服・処置の記録ができない」)。行った/なし と、その内容(任意)
+    const CARE_TREATMENT_CHOICES = [['done', '行った'], ['none', 'なし']];
+    const CARE_TREATMENT_NOTE_MAX = 200;
+    const CARE_RECREATION_CHOICES = [['joined', '参加'], ['absent', '不参加']];
     // 服薬(2026-11-17 現場の要望「入浴と同じ形で、飲んだ・飲まないだけ」)
     const CARE_MEDICATION_CHOICES = [['taken', '飲んだ'], ['missed', '飲まなかった']];
     // 機能訓練(2026-11-17 原山さん「やったかやってないかだけでいい」)
@@ -5113,6 +5159,8 @@
       careExcretionSummary(c).forEach((text) => parts.push(['toilet', text]));
       if (c.training === 'done') parts.push(['training', '機能訓練 やった']);
       if (c.training === 'skipped') parts.push(['training skipped', '機能訓練 やっていない']);
+      if (c.treatment === 'done') parts.push(['treat', careHas(c.treatmentNote) ? `処置 ${String(c.treatmentNote).split('\n')[0].slice(0, 20)}` : '処置 行った']);
+      if (c.treatment === 'none') parts.push(['treat none', '処置 なし']);
       if (c.recreation === 'joined') parts.push(['rec', 'レク参加']);
       if (c.recreation === 'absent') parts.push(['rec', 'レク不参加']);
       return parts;
@@ -5148,6 +5196,38 @@
         `<button type="button" data-choice-value="${choiceValue}" aria-pressed="${String(value === choiceValue)}">${text}</button>`).join('')}</div>`;
     }
 
+    // 体重の欄(「体重測定：測る」の方、その日すでに入っている方、「＋ 体重を入れる」を押したとき)
+    function careWeightFieldHtml(user, value) {
+      return `<div>${careNumberField('weight', '体重', 'kg', value, 'decimal', '')}${careLastWeightText(user) ? `<p class="care-hint care-last">${escapeHtml(careLastWeightText(user))}</p>` : ''}</div>`;
+    }
+
+    // 送迎の選択。ケアハウス入居者は送迎の項目なし(2026-11-18 現場の要望「ケアハウスの方の施設送迎を外す作業が手間」)。
+    // すでに送迎が入っている日だけ、外せるように出す
+    function careTransportHtml(user, v) {
+      const careHouse = dsIsCareHouse(user);
+      const show = (key) => !careHouse || careHas(v[key]);
+      if (careHouse && !show('arrivalTransport') && !show('departureTransport')) {
+        return '<p class="care-hint care-ch-transport">ケアハウスの方は、送迎の記録はいりません。</p>';
+      }
+      const cell = (key, label) => show(key) ? `<div>${careChoice(key, label, CARE_TRANSPORT_CHOICES, v[key])}</div>` : '<div></div>';
+      return `<div class="care-grid two care-transport">
+              ${cell('arrivalTransport', '来所の送迎')}
+              ${cell('departureTransport', '送りの送迎')}
+            </div>${careHouse ? '<p class="care-hint care-ch-transport">ケアハウスの方は、送迎の記録はいりません。入っている送迎は、押すと外せます。</p>' : ''}`;
+    }
+
+    // 特記事項のボタンの文字。その日に書いたかどうかを添える(2026-11-18 現場の要望)
+    function careNotesButtonText(host, userId) {
+      if (!host || typeof host.noted !== 'function') return '特記事項を見る・書く';
+      return host.noted(userId) ? '特記事項を見る・書く（今日 記入済み ✓）' : '特記事項を見る・書く（今日はまだ）';
+    }
+
+    // 今日の一覧の名前の下に出す「特記事項 記入済み」
+    function dsNotedTagHtml(host, userId) {
+      return host && typeof host.noted === 'function' && host.noted(userId)
+        ? '<span class="status-chip noted" aria-label="この日の特記事項は記入済み">特記事項 済</span>' : '';
+    }
+
     function openCareForm(host, userId) {
       const user = host.findUser(userId);
       if (!user) return;
@@ -5180,10 +5260,7 @@
               ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
               ${careTimeField('departureTime', '送り出発', v.departureTime)}
             </div>
-            <div class="care-grid two care-transport">
-              <div>${careChoice('arrivalTransport', '来所の送迎', CARE_TRANSPORT_CHOICES, v.arrivalTransport)}</div>
-              <div>${careChoice('departureTransport', '送りの送迎', CARE_TRANSPORT_CHOICES, v.departureTransport)}</div>
-            </div>
+            ${careTransportHtml(user, v)}
           </fieldset>
           <fieldset class="care-group"><legend>バイタル</legend>
             <div class="care-grid two">
@@ -5191,7 +5268,7 @@
               <label class="care-field"><span>血圧</span><span class="care-bp"><input data-care="bpHigh" inputmode="numeric" autocomplete="off" placeholder="上" value="${escapeHtml(v.bpHigh)}" aria-label="血圧の上（mmHg）"><i>/</i><input data-care="bpLow" inputmode="numeric" autocomplete="off" placeholder="下" value="${escapeHtml(v.bpLow)}" aria-label="血圧の下（mmHg）"><em>mmHg</em></span></label>
               ${careNumberField('pulse', '脈拍', '回/分', v.pulse, 'numeric', '')}
               ${careNumberField('spo2', 'SpO2', '%', v.spo2, 'numeric', '')}
-              ${careWeightNeeded(user, host.care(user.userId)) ? `<div>${careNumberField('weight', '体重', 'kg', v.weight, 'decimal', '')}${careLastWeightText(user) ? `<p class="care-hint care-last">${escapeHtml(careLastWeightText(user))}</p>` : ''}</div>` : ''}
+              ${careWeightNeeded(user, host.care(user.userId)) ? careWeightFieldHtml(user, v.weight) : '<div class="care-weight-slot"><button type="button" class="care-weight-add" data-care-weight-add>＋ 体重を入れる</button></div>'}
             </div>
             ${host.call ? '<button type="button" class="ds-vhist-open" data-care-vhist>過去2週間の記録を見る</button>' : ''}
           </fieldset>
@@ -5231,11 +5308,15 @@
             </div>
             <p class="care-hint">押すと今の時刻で1回分が増えます。時刻は直せます。</p>
           </fieldset>
+          <fieldset class="care-group care-treat"><legend>処置</legend>
+            ${careChoice('treatment', '処置をしたか', CARE_TREATMENT_CHOICES, v.treatment)}
+            <label class="care-field care-treat-note"><span>処置の内容（任意）</span><input data-care="treatmentNote" maxlength="${CARE_TREATMENT_NOTE_MAX}" autocomplete="off" placeholder="例: 軟膏、湿布、点眼" value="${escapeHtml(v.treatmentNote)}"></label>
+          </fieldset>
           <fieldset class="care-group care-training"><legend>機能訓練</legend>
             ${careChoice('training', 'やったかどうか', CARE_TRAINING_CHOICES, v.training)}
           </fieldset>
           <fieldset class="care-group care-rec"><legend>レクリエーション</legend>
-            ${careChoice('recreation', '参加の有無', [['joined', '参加'], ['absent', '不参加']], v.recreation)}
+            ${careChoice('recreation', '参加の有無', CARE_RECREATION_CHOICES, v.recreation)}
           </fieldset>
           <label class="care-field care-note"><span>連絡帳への連絡事項（任意）</span><textarea data-care="notebookNote" rows="3" maxlength="500" placeholder="例: 歌の時間をとても楽しまれていました。">${escapeHtml(v.notebookNote)}</textarea></label>
           <p class="care-status" role="status" aria-live="polite"></p>
@@ -5244,7 +5325,7 @@
           </div>
           <div class="care-links">
             <button type="button" data-care-notebook>この方の連絡帳を見る</button>
-            ${host.call ? '<button type="button" data-care-notes>特記事項を見る・書く</button>' : ''}
+            ${host.call ? `<button type="button" data-care-notes>${careNotesButtonText(host, user.userId)}</button>` : ''}
             ${host.call ? '<button type="button" data-care-month>この方の月の実績</button>' : ''}
             ${host.call ? '<button type="button" data-care-fee>実費（おむつ・マスクなど）</button>' : ''}
             ${host.openDayMenu ? '<button type="button" data-care-day>キャンセル・午前終了など</button>' : ''}
@@ -5339,6 +5420,15 @@
         }));
       });
       bindCareToilet(form);
+      // 「＋ 体重を入れる」: 体重測定が「測る」でない方も、測った日は体重を入れられる
+      const weightAdd = form.querySelector('[data-care-weight-add]');
+      if (weightAdd) weightAdd.addEventListener('click', () => {
+        const slot = weightAdd.closest('.care-weight-slot');
+        const user = careUi.host && careUi.host.findUser(careUi.userId);
+        slot.outerHTML = careWeightFieldHtml(user, '');
+        const input = form.querySelector('[data-care="weight"]');
+        if (input) input.focus();
+      });
       const notebookButton = form.querySelector('[data-care-notebook]');
       notebookButton.addEventListener('click', () => careAfterSave(() => {
         const host = careUi.host;
@@ -5716,7 +5806,12 @@
     // 記録一覧の「バイタル」タブ(来所した方のバイタルをまとめて入力・修正する)
     const DS_VITAL_TAB = 'vital';
     const DS_VITAL_COLOR = '#be123c';
+    // 記録一覧の「レク」タブ(来所した方のレクの参加・不参加をまとめて入れる。2026-11-18 現場の要望「レクも項目に入れたい」)
+    const DS_REC_TAB = 'rec';
+    const DS_REC_COLOR = '#4d7c0f';
     const DS_TRANSPORT_BY_SERVICE = { arrival: 'arrivalTransport', departure: 'departureTransport' };
+    // 名前から記録した昼食・おやつに入れる量の欄(サーバーの MANUAL_AMOUNT_FIELDS と同じ)
+    const DS_MANUAL_AMOUNT_FIELDS = { lunch: 'mealAmount', snack: 'snackAmount' };
     const DS_AMOUNTS = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0];
     const DS_FEE_CATEGORY_LABELS = {
       diaper: 'おむつ代',
@@ -5726,7 +5821,7 @@
       other: 'その他'
     };
     // drafts: 一覧で変えて、まだ保存していない値 { 利用者ID: { 項目: 値 } }
-    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, filled: {}, saving: false, status: '', statusError: false, confirmClose: false };
+    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, filled: {}, weightOpen: {}, saving: false, status: '', statusError: false, confirmClose: false };
     const dsFeeUi = { host: null, userId: '', itemId: '', quantity: 1, saving: false, monthTotal: null, monthSeq: 0, confirmCancel: '' };
 
     function dsYen(value) {
@@ -5810,7 +5905,8 @@
     // tab: 'summary'(まとめ) または記録の種類(arrival など)。今日の画面の「来所 ○名」から開くときは種類を渡す
     function openRecordList(host, tab) {
       dsListUi.host = host;
-      dsListUi.tab = DS_SERVICES.includes(tab) || tab === DS_VITAL_TAB ? tab : 'summary';
+      dsListUi.tab = DS_SERVICES.includes(tab) || tab === DS_VITAL_TAB || tab === DS_REC_TAB ? tab : 'summary';
+      dsListUi.weightOpen = {};
       dsListUi.events = null;
       dsListUi.eventsError = false;
       dsListUi.drafts = {};
@@ -5835,8 +5931,8 @@
           <button type="button" class="primary" data-ds-print>印刷</button>
         </div>
         <div class="ds-tabs" role="tablist" aria-label="一覧の種類">
-          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]]), [[DS_VITAL_TAB, 'バイタル']]).map(([key, label]) =>
-            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${key === DS_VITAL_TAB ? DS_VITAL_COLOR : (DS_SERVICE_COLORS[key] || '#2f5bd3')}">${label}</button>`).join('')}
+          ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]]), [[DS_VITAL_TAB, 'バイタル'], [DS_REC_TAB, 'レク']]).map(([key, label]) =>
+            `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${key === DS_VITAL_TAB ? DS_VITAL_COLOR : (key === DS_REC_TAB ? DS_REC_COLOR : (DS_SERVICE_COLORS[key] || '#2f5bd3'))}">${label}</button>`).join('')}
         </div>
         <div class="ds-list-body" id="dsListBody"></div>
         <div class="ds-list-footer" id="dsListFooter" aria-live="polite"></div>`;
@@ -5893,9 +5989,12 @@
         const seg = event.target.closest('[data-ds-seg-value]');
         if (seg) {
           const group = seg.closest('[data-ds-edit]');
-          dsSetDraft(group.dataset.dsUser, group.dataset.dsEdit, seg.dataset.dsSegValue);
+          // レクと、ケアハウスの方の送迎は、選んでいるものをもう一度押すと外せる
+          const next = group.hasAttribute('data-ds-seg-clear') && dsCurrentValue(group.dataset.dsUser, group.dataset.dsEdit) === seg.dataset.dsSegValue
+            ? '' : seg.dataset.dsSegValue;
+          dsSetDraft(group.dataset.dsUser, group.dataset.dsEdit, next);
           group.querySelectorAll('[data-ds-seg-value]').forEach((button) => {
-            button.setAttribute('aria-pressed', String(button.dataset.dsSegValue === seg.dataset.dsSegValue));
+            button.setAttribute('aria-pressed', String(button.dataset.dsSegValue === next));
           });
           group.classList.toggle('changed', dsIsDraft(group.dataset.dsUser, group.dataset.dsEdit));
           renderRecordListFooter();
@@ -5913,6 +6012,15 @@
         if (fill) {
           dsFillBlanks(fill.dataset.dsFill);
           renderRecordList();
+          return;
+        }
+        const weightAdd = event.target.closest('[data-ds-weight-add]');
+        if (weightAdd) {
+          const userId = weightAdd.dataset.dsWeightAdd;
+          dsListUi.weightOpen[userId] = true;
+          renderRecordList();
+          const input = document.querySelector(`#dsRecordList input[data-ds-vital="weight"][data-ds-user="${CSS.escape(String(userId))}"]`);
+          if (input) input.focus();
           return;
         }
         if (event.target.closest('[data-ds-save]')) {
@@ -5984,13 +6092,24 @@
       return !(field === 'mealAmount' && careHasLegacyMeal(entry.care));
     }
 
+    // まとめて入れてよい欄か: 空で、ケアハウスの方の送迎でない(ケアハウスの方は送迎の項目なし)
+    function dsFillable(entry, field) {
+      return dsFieldBlank(entry, field) && !(DS_TRANSPORT_FIELDS.includes(field) && dsIsCareHouse(entry.user));
+    }
+
     function dsFillBlanks(value) {
       const host = dsListUi.host;
       const key = dsListUi.tab;
+      if (key === DS_REC_TAB) {
+        dsListEntries(host).filter((entry) => !entry.cancelled && entry.arrived).forEach((entry) => {
+          if (dsFieldBlank(entry, 'recreation')) dsSetDraft(entry.userId, 'recreation', value, true);
+        });
+        return;
+      }
       const fields = (DS_EDIT_FIELDS[key] || []).map(([field]) => field);
       dsListEntries(host).filter((entry) => !entry.cancelled && entry.services[key] && entry.services[key].done).forEach((entry) => {
         fields.forEach((field) => {
-          if (dsFieldBlank(entry, field)) dsSetDraft(entry.userId, field, value, true);
+          if (dsFillable(entry, field)) dsSetDraft(entry.userId, field, value, true);
         });
       });
     }
@@ -6000,7 +6119,14 @@
       const changed = dsIsDraft(entry.userId, field) ? ' changed' : '';
       const userId = escapeHtml(entry.userId);
       if (DS_TRANSPORT_FIELDS.includes(field)) {
-        return `<div class="ds-seg${changed}" role="group" aria-label="${escapeHtml(entry.user.displayName)}様の${label}" data-ds-edit="${field}" data-ds-user="${userId}">${CARE_TRANSPORT_CHOICES.map(([choice, text]) =>
+        const careHouse = dsIsCareHouse(entry.user);
+        // ケアハウスの方は送迎の項目なし。入っている送迎(古い画面で入ったものなど)だけ、押して外せるように出す
+        if (careHouse && !value && !dsSavedValue(entry.userId, field)) return '<p class="ds-ch-note">ケアハウス（送迎なし）</p>';
+        return `<div class="ds-seg${changed}" role="group" aria-label="${escapeHtml(entry.user.displayName)}様の${label}" data-ds-edit="${field}" data-ds-user="${userId}"${careHouse ? ' data-ds-seg-clear' : ''}>${CARE_TRANSPORT_CHOICES.map(([choice, text]) =>
+          `<button type="button" data-ds-seg-value="${choice}" aria-pressed="${String(value === choice)}">${text}</button>`).join('')}</div>`;
+      }
+      if (field === 'recreation') {
+        return `<div class="ds-seg${changed}" role="group" aria-label="${escapeHtml(entry.user.displayName)}様の${label}" data-ds-edit="${field}" data-ds-user="${userId}" data-ds-seg-clear>${CARE_RECREATION_CHOICES.map(([choice, text]) =>
           `<button type="button" data-ds-seg-value="${choice}" aria-pressed="${String(value === choice)}">${text}</button>`).join('')}</div>`;
       }
       const options = ['<option value="">—</option>'].concat(DS_AMOUNTS.map((amount) =>
@@ -6209,6 +6335,10 @@
         renderVitalList(host, body, entries, note, canOpen);
         return;
       }
+      if (dsListUi.tab === DS_REC_TAB) {
+        renderRecList(host, body, entries, note, canOpen);
+        return;
+      }
       const key = dsListUi.tab;
       const fields = DS_EDIT_FIELDS[key] || [];
       const active = entries.filter((entry) => !entry.cancelled);
@@ -6231,7 +6361,7 @@
       };
       const mutedRow = (entry, text) => `<div class="ds-row muted">${open(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>${text}</small></span>`)}</div>`;
       const isTransport = fields.some(([field]) => DS_TRANSPORT_FIELDS.includes(field));
-      const blanks = done.some((entry) => fields.some(([field]) => dsFieldBlank(entry, field)));
+      const blanks = done.some((entry) => fields.some(([field]) => dsFillable(entry, field)));
       const tools = fields.length && done.length ? `<div class="ds-edit-tools"><p>${isTransport ? '家族送迎の方は「家族送迎」を押してください。' : '食べた量を選んでください。'}変えたら下の「変更を保存」を押します。</p>${blanks
         ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を全量にする'}</button>` : ''}${key === 'arrival'
         ? `<button type="button" data-ds-tab-go="${DS_VITAL_TAB}">バイタルをまとめて入力 ›</button>` : ''}</div>` : '';
@@ -6263,7 +6393,7 @@
         ? `<button type="button" class="ds-row-open" data-ds-open="${escapeHtml(entry.userId)}" aria-label="${escapeHtml(entry.user.displayName)}様のケア記録を開く">${inner}<span class="ds-chevron" aria-hidden="true">›</span></button>`
         : `<div class="ds-row-open">${inner}</div>`;
       const row = (entry) => {
-        const weight = careWeightNeeded(entry.user, entry.care) || dsIsDraft(entry.userId, 'weight');
+        const weight = careWeightNeeded(entry.user, entry.care) || dsIsDraft(entry.userId, 'weight') || Boolean(dsListUi.weightOpen[entry.userId]);
         const last = weight ? careLastWeightText(entry.user) : '';
         const inner = `<span class="ds-time">${escapeHtml(entry.services.arrival.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>${escapeHtml(careVitalTexts(entry.care).join(' ・ ') || '未入力')}</small></span>`;
         return `<div class="ds-row ds-edit-row ds-vital-row" style="--c:${DS_VITAL_COLOR}">${nameButton(entry, inner)}<div class="ds-vitals">
@@ -6271,7 +6401,7 @@
           <label class="bp"><span>血圧</span><span class="ds-bp">${dsVitalInput(entry, 'bpHigh', '上', 'numeric')}<i>/</i>${dsVitalInput(entry, 'bpLow', '下', 'numeric')}</span></label>
           <label><span>脈拍</span>${dsVitalInput(entry, 'pulse', '脈拍', 'numeric')}</label>
           <label><span>SpO2</span>${dsVitalInput(entry, 'spo2', 'SpO2', 'numeric')}</label>
-          ${weight ? `<label class="weight"><span>体重</span>${dsVitalInput(entry, 'weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+          ${weight ? `<label class="weight"><span>体重</span>${dsVitalInput(entry, 'weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : `<button type="button" class="ds-weight-add" data-ds-weight-add="${escapeHtml(entry.userId)}">＋ 体重</button>`}
           ${host.call ? `<button type="button" class="ds-vhist-open" data-ds-vhist="${escapeHtml(entry.userId)}">過去2週間 ›</button>` : ''}
         </div></div>`;
       };
@@ -6279,7 +6409,35 @@
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_VITAL_COLOR}"><span><b>${measured}</b>名 測定済み</span>${arrived.length - measured ? `<span class="wait"><b>${arrived.length - measured}</b>名 まだ</span>` : ''}</div>
         ${note}
-        <div class="ds-edit-tools"><p>来所した方のバイタルを入力して、下の「変更を保存」を押します。単位：体温 ℃、血圧 mmHg、脈拍 回/分、SpO2 %、体重 kg（体重は「体重測定」がありの方だけ）。体温・体重は小数点なしで打てます（365→36.5、523→52.3）。</p></div>
+        <div class="ds-edit-tools"><p>来所した方のバイタルを入力して、下の「変更を保存」を押します。単位：体温 ℃、血圧 mmHg、脈拍 回/分、SpO2 %、体重 kg（体重の欄は「体重測定」がありの方に出ます。ほかの方は「＋ 体重」で出せます）。体温・体重は小数点なしで打てます（365→36.5、523→52.3）。</p></div>
+        <h2 class="ds-heading">来所した方（到着の早い順）</h2>
+        <div class="list ds-rows">${arrived.map(row).join('') || '<p class="ds-empty">まだ来所の記録はありません。</p>'}</div>
+        ${waiting.length ? `<h2 class="ds-heading">まだ来所していない方（予定あり）</h2><div class="list ds-rows">${waiting.map(mutedRow).join('')}</div>` : ''}`;
+    }
+
+    // 「レク」タブ: 来所した方のレクの参加・不参加を一覧のまま選んで、まとめて保存する(ケア記録の「レクリエーション」と同じ欄)
+    function renderRecList(host, body, entries, note, canOpen) {
+      const active = entries.filter((entry) => !entry.cancelled);
+      const arrived = active.filter((entry) => entry.arrived)
+        .sort((a, b) => (a.services.arrival.time || '99:99').localeCompare(b.services.arrival.time || '99:99'));
+      const waiting = active.filter((entry) => entry.planned && !entry.arrived);
+      const count = (value) => arrived.filter((entry) => dsSavedValue(entry.userId, 'recreation') === value).length;
+      const joined = count('joined');
+      const absent = count('absent');
+      const blank = arrived.length - joined - absent;
+      const nameButton = (entry, inner) => canOpen
+        ? `<button type="button" class="ds-row-open" data-ds-open="${escapeHtml(entry.userId)}" aria-label="${escapeHtml(entry.user.displayName)}様のケア記録を開く">${inner}<span class="ds-chevron" aria-hidden="true">›</span></button>`
+        : `<div class="ds-row-open">${inner}</div>`;
+      const row = (entry) => {
+        const inner = `<span class="ds-time">${escapeHtml(entry.services.arrival.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong></span>`;
+        return `<div class="ds-row ds-edit-row" style="--c:${DS_REC_COLOR}">${nameButton(entry, inner)}<div class="ds-edit">${dsEditControl(entry, 'recreation', 'レク')}</div></div>`;
+      };
+      const mutedRow = (entry) => `<div class="ds-row muted">${nameButton(entry, `${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>まだ来所の記録がありません</small></span>`)}</div>`;
+      const blanks = arrived.some((entry) => dsFieldBlank(entry, 'recreation'));
+      body.innerHTML = `
+        <div class="ds-counts single" style="--c:${DS_REC_COLOR}"><span><b>${joined}</b>名 参加</span>${absent ? `<span class="wait"><b>${absent}</b>名 不参加</span>` : ''}${blank ? `<span class="wait"><b>${blank}</b>名 まだ</span>` : ''}</div>
+        ${note}
+        ${arrived.length ? `<div class="ds-edit-tools"><p>来所した方のレクの参加・不参加を選んで、下の「変更を保存」を押します。選んだものをもう一度押すと外せます。</p>${blanks ? '<button type="button" data-ds-fill="joined">未選択の方を参加にする</button>' : ''}</div>` : ''}
         <h2 class="ds-heading">来所した方（到着の早い順）</h2>
         <div class="list ds-rows">${arrived.map(row).join('') || '<p class="ds-empty">まだ来所の記録はありません。</p>'}</div>
         ${waiting.length ? `<h2 class="ds-heading">まだ来所していない方（予定あり）</h2><div class="list ds-rows">${waiting.map(mutedRow).join('')}</div>` : ''}`;
@@ -6301,6 +6459,8 @@
       const fields = DS_EDIT_FIELDS[service];
       if (!fields) return '';
       const care = host.care(userId) || {};
+      // ケアハウスの方は送迎の項目なし(来所・送りのQRの直後に送迎を出さない)
+      if (fields.every(([field]) => DS_TRANSPORT_FIELDS.includes(field) && !careHas(care[field])) && dsIsCareHouse(host.findUser(userId))) return '';
       const value = (field) => careHas(care[field]) ? String(care[field]) : '';
       const rows = fields.map(([field, label]) => {
         if (DS_TRANSPORT_FIELDS.includes(field)) {
@@ -6332,7 +6492,7 @@
           <label class="bp"><span>血圧</span><span class="ds-bp">${input('bpHigh', '上', 'numeric')}<i>/</i>${input('bpLow', '下', 'numeric')}</span></label>
           <label><span>脈拍</span>${input('pulse', '脈拍', 'numeric')}</label>
           <label><span>SpO2</span>${input('spo2', 'SpO2', 'numeric')}</label>
-          ${weight ? `<label class="weight"><span>体重</span>${input('weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : ''}
+          ${weight ? `<label class="weight"><span>体重</span>${input('weight', '体重', 'decimal')}${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>` : '<button type="button" class="ds-weight-add" data-quick-weight-add>＋ 体重</button>'}
         </div>
         <button type="button" class="ds-quick-vital-save" data-quick-vital-save>バイタルを保存</button>
         <button type="button" class="ds-vhist-open" data-quick-vital-history>過去2週間の記録を見る</button>
@@ -6432,6 +6592,15 @@
         }
         if (event.target.closest('[data-quick-vital-history]')) {
           openVitalHistory(host, userId, businessDate);
+          return;
+        }
+        const weightAdd = event.target.closest('[data-quick-weight-add]');
+        if (weightAdd) {
+          const user = host.findUser(userId);
+          const last = careLastWeightText(user);
+          weightAdd.outerHTML = `<label class="weight"><span>体重</span><span class="ds-vin"><input data-quick-vital="weight" inputmode="decimal" autocomplete="off" value="" placeholder="体重" aria-label="体重（kg）"><em>kg</em></span>${last ? `<small>${escapeHtml(last)}</small>` : ''}</label>`;
+          const input = box.querySelector('[data-quick-vital="weight"]');
+          if (input) input.focus();
           return;
         }
         const button = event.target.closest('[data-quick-field]');
@@ -8654,12 +8823,24 @@
         if (seq !== unUi.seq) return;
         if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
         unUi.data = result;
+        unTellNoted(result);
         renderUserNotes();
       }).catch((error) => {
         if (seq !== unUi.seq) return;
         unUi.error = sbErrorText(error);
         renderUserNotes();
       });
+    }
+
+    // 読み込んだ特記事項から「今日書いたか」を画面(今日の一覧・ケア記録のボタン)へ伝える
+    function unTellNoted(result) {
+      const host = unUi.host;
+      if (!host || typeof host.setNoted !== 'function' || !result || !result.today) return;
+      if (host.businessDate && host.businessDate() !== result.today) return;
+      const noted = (result.notes || []).some((note) => note.noteDate === result.today);
+      host.setNoted(unUi.userId, noted);
+      const button = document.querySelector('#careSheet [data-care-notes]');
+      if (button && careUi.userId === unUi.userId) button.textContent = careNotesButtonText(host, unUi.userId);
     }
 
     function renderUserNotes() {
