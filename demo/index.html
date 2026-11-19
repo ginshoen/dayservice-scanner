@@ -1311,6 +1311,7 @@
     .login-hero strong { display: block; font-size: 22px; color: var(--ink); }
     .login-hero p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
     #loginScreen .panel { border-radius: 22px; }
+    .login-scope-note { margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: #e8f0fe; color: #1a4d8f; font-size: 14px; line-height: 1.6; }
     .login-row { display: flex !important; justify-content: flex-start !important; gap: 12px !important; border-radius: 16px !important; }
 
     /* ケア記録の入力: 区分ごとの色 */
@@ -2328,6 +2329,7 @@
       </div>
       <div class="panel">
         <h2>職員を選ぶ</h2>
+        <p id="loginScopeNote" class="login-scope-note hidden">この端末は一般職員用です。主任・管理者のお名前は出ません。</p>
         <div class="list" id="loginStaffList"></div>
         <div id="loginPinArea" class="hidden" style="margin-top:14px">
           <label>PIN<input id="loginPin" type="password" inputmode="numeric" autocomplete="off" placeholder="4桁以上の数字"></label>
@@ -2661,6 +2663,7 @@
       staffName: localStorage.getItem('ds_demo_staff_name') || '',
       staffRole: localStorage.getItem('ds_demo_staff_role') || 'staff',
       loginStaff: [],
+      loginStaffOnly: false,
       loginStaffId: '',
       photoCache: {},
       photoIds: {},
@@ -3037,7 +3040,7 @@
         }
         // 施設の端末でないと断られたら、ログイン画面に戻してわけを出す(未送信の記録は端末に残る)
         if (data && data.errorCode === 'DEVICE_NOT_ALLOWED' && LOGIN_FREE_ACTIONS.indexOf(action) === -1) {
-          handleDeviceRefused(message);
+          handleDeviceRefused(message, Boolean(data.staffOnly));
           throw new Error(message);
         }
         throw new Error(message);
@@ -3118,8 +3121,10 @@
       try {
         const result = await api('staffList', {});
         app.loginStaff = result.staff || [];
+        app.loginStaffOnly = Boolean(result.staffOnly);
       } catch (error) {
         app.loginStaff = [];
+        app.loginStaffOnly = false;
         const message = friendlyError(error);
         document.getElementById('loginMessage').textContent = message.indexOf('SESSION_EXPIRED') !== -1
           ? '職員一覧を取得できませんでした。「職員一覧を再取得」を押してください。'
@@ -3131,6 +3136,7 @@
     function renderLoginStaff() {
       const list = document.getElementById('loginStaffList');
       const pinArea = document.getElementById('loginPinArea');
+      document.getElementById('loginScopeNote').classList.toggle('hidden', !app.loginStaffOnly);
       if (!app.loginStaff.length) {
         list.innerHTML = '<p class="note" style="margin:0">職員一覧を取得できていません。「職員一覧を再取得」を押してください。</p>';
         pinArea.classList.add('hidden');
@@ -3264,12 +3270,13 @@
         });
     }
 
-    function handleDeviceRefused(message) {
+    // staffOnly: 一般職員用の端末で主任・管理者が断られたとき(未送信の記録の話は出さない)
+    function handleDeviceRefused(message, staffOnly) {
       if (app.handlingSessionExpiry) return;
       app.handlingSessionExpiry = true;
       stopCamera();
       clearSession();
-      showLogin(message + ' 未送信の記録は残っています。')
+      showLogin(staffOnly ? message : message + ' 未送信の記録は残っています。')
         .finally(() => {
           app.handlingSessionExpiry = false;
         });
