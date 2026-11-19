@@ -4660,8 +4660,50 @@
       },
       feedback: (text) => { document.getElementById('todayFeedback').textContent = text; },
       orderedUserIds: () => app.todayVisibleIds.slice(),
-      openDayMenu: (userId) => openDaySheet(userId)
+      openDayMenu: (userId) => openDaySheet(userId),
+      recordMealAll: (service, userIds) => scannerRecordMealAll(service, userIds)
     });
+
+    // 記録一覧の「来所した方の昼食をまとめて記録」(2026-11-19 原山さん「昼食にも空欄の方を全量にするボタンを」)。
+    // 名前から記録と同じ送信待ちの列に、1人1件ずつ「入力元 manual・今の時刻・全量」で入れる(電波がなくても記録でき、あとで1人ずつ取り消せる)。
+    // すでに記録済み・当日キャンセルの方は入れない(サーバーも同じ日・同じ項目の2件目は重複として受け付けない)。
+    function scannerRecordMealAll(service, userIds) {
+      if (service !== 'lunch' && service !== 'snack') return 0;
+      const businessDate = todayStr();
+      const time = dsNowTime();
+      let count = 0;
+      (userIds || []).forEach((userId) => {
+        const user = app.users.find((item) => normalizeClientUserId(item.userId) === normalizeClientUserId(userId));
+        if (!user) return;
+        const record = recordFor(user.userId);
+        if (record && record.attendanceStatus === 'cancelled') return;
+        const localKey = `${businessDate}:${user.userId}:${service}`;
+        if (isLocallyRecorded(localKey)) return;
+        app.queue.push({
+          eventId: nextEventId(),
+          clientEventSeq: app.clientSeq,
+          deviceId: app.deviceId,
+          occurredAtClient: new Date(`${businessDate}T${time}:00+09:00`).toISOString(),
+          businessDate,
+          userId: user.userId,
+          qrTokenHash: user.qrTokenHash || '',
+          serviceType: service,
+          source: 'manual',
+          amount: 10,
+          localKey,
+          localStatus: 'pending'
+        });
+        count++;
+      });
+      if (!count) return 0;
+      saveQueue();
+      beep('success');
+      addRecent({ label: `${count}名まとめて`, status: '手入力', serviceType: service });
+      renderSync();
+      renderToday();
+      syncQueue();
+      return count;
+    }
 
     // ---- 当日の状況記録(キャンセル・入浴拒否・午前で終了) ----
 
@@ -5888,6 +5930,8 @@
         planned: Boolean(plan && plan.planned),
         arrived: Boolean(flags.arrival),
         halfDay: record.usageActual === 'half_am',
+        // 今日が午前のみか(実績が無ければ予定)。一括の全量記録でおやつの対象から外すのに使う
+        halfDayToday: record.usageActual ? record.usageActual === 'half_am' : Boolean(plan && plan.usage === 'half_am'),
         services
       };
     }
@@ -6008,6 +6052,12 @@
           if (list) list.scrollTop = 0;
           return;
         }
+        const mealAll = event.target.closest('[data-ds-meal-all]');
+        if (mealAll) {
+          dsRecordMealAll(mealAll.dataset.dsMealAll);
+          renderRecordList();
+          return;
+        }
         const fill = event.target.closest('[data-ds-fill]');
         if (fill) {
           dsFillBlanks(fill.dataset.dsFill);
@@ -6095,6 +6145,36 @@
     // まとめて入れてよい欄か: 空で、ケアハウスの方の送迎でない(ケアハウスの方は送迎の項目なし)
     function dsFillable(entry, field) {
       return dsFieldBlank(entry, field) && !(DS_TRANSPORT_FIELDS.includes(field) && dsIsCareHouse(entry.user));
+    }
+
+    // 利用者情報の食事予定(なし・無し・不要・無 は食事なし。空欄はいつもの利用パターンの昼食に従う。現場画面の patternOf と同じ決まり)
+    function dsMealScheduled(user) {
+      if (user && String(user.mealSchedule || '').trim()) return !['なし', '無し', '不要', '無'].includes(String(user.mealSchedule).trim());
+      let pattern = {};
+      try { pattern = JSON.parse((user && user.defaultServicePattern) || '{}') || {}; } catch (error) { pattern = {}; }
+      return pattern.lunch !== false;
+    }
+
+    // 来所済み・当日キャンセルでない・まだその項目の記録がない方。
+    // 昼食は食事予定が「なし」の方を外す(11/19 点検)。午前のみ(13:30 までに終了)の方は昼食を食べるので入れる。
+    // おやつは午後なので、午前のみの方を外す(おやつに食事予定に当たる区別は無い)
+    function dsMealAllTargets(active, key) {
+      return active.filter((entry) => entry.arrived && entry.services[key] && !entry.services[key].done
+        && (key !== 'lunch' || dsMealScheduled(entry.user))
+        && (key !== 'snack' || !entry.halfDayToday));
+    }
+
+    function dsRecordMealAll(key) {
+      const host = dsListUi.host;
+      if (!host || !host.recordMealAll) return;
+      const targets = dsMealAllTargets(dsListEntries(host).filter((entry) => !entry.cancelled), key);
+      if (!targets.length) return;
+      const label = DS_SERVICE_LABELS[key];
+      const names = targets.map((entry) => `・${entry.user.displayName}様`).join('\n');
+      if (!window.confirm(`次の${targets.length}名の${label}を、今の時刻・全量で記録します。よろしいですか？\n\n${names}\n\n間違えた方は、あとでその方のケア記録から取り消せます。`)) return;
+      const count = host.recordMealAll(key, targets.map((entry) => entry.userId));
+      dsListUi.status = count ? `${count}名の${label}を全量で記録しました。食べなかった方・量が違う方は直してください。` : `記録する方がいませんでした（ほかの端末で記録済みの可能性があります）。`;
+      dsListUi.statusError = !count;
     }
 
     function dsFillBlanks(value) {
@@ -6365,9 +6445,13 @@
       const tools = fields.length && done.length ? `<div class="ds-edit-tools"><p>${isTransport ? '家族送迎の方は「家族送迎」を押してください。' : '食べた量を選んでください。'}変えたら下の「変更を保存」を押します。</p>${blanks
         ? `<button type="button" data-ds-fill="${isTransport ? 'facility' : '10'}">${isTransport ? '未選択の方を施設送迎にする' : '空欄の方を全量にする'}</button>` : ''}${key === 'arrival'
         ? `<button type="button" data-ds-tab-go="${DS_VITAL_TAB}">バイタルをまとめて入力 ›</button>` : ''}</div>` : '';
+      // 昼食・おやつ: 来所した方のうち、まだ記録がない方を一度に「全量」で記録する(現場の画面だけ。2026-11-19 原山さん)
+      const mealAll = (key === 'lunch' || key === 'snack') && dsListUi.host && dsListUi.host.recordMealAll ? dsMealAllTargets(active, key) : [];
+      const mealAllTool = mealAll.length ? `<div class="ds-edit-tools ds-meal-all"><p>来所した方で、まだ${DS_SERVICE_LABELS[key]}の記録がない方が${mealAll.length}名います（${key === 'lunch' ? '食事予定が「なし」の方' : '午前のみの方'}は入りません）。食べなかった方・量が違う方は、あとで記録一覧かケア記録で直してください。</p><button type="button" data-ds-meal-all="${key}">来所した${mealAll.length}名の${DS_SERVICE_LABELS[key]}を全量で記録する</button></div>` : '';
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_SERVICE_COLORS[key]}"><span><b>${done.length}</b>名 記録済み</span>${waiting.length ? `<span class="wait"><b>${waiting.length}</b>名 まだ</span>` : ''}${refused.length ? `<span class="wait"><b>${refused.length}</b>名 入浴拒否</span>` : ''}</div>
         ${note}
+        ${mealAllTool}
         ${tools}
         <h2 class="ds-heading">${DS_SERVICE_LABELS[key]}を記録した方（時刻の早い順）</h2>
         <div class="list ds-rows">${done.map(row).join('') || '<p class="ds-empty">まだ記録はありません。</p>'}</div>
