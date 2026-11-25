@@ -2040,6 +2040,18 @@
     .cd-days { grid-template-columns: auto minmax(0, 1fr) auto; }
     .cd-days button { padding: 0 12px; white-space: nowrap; }
     .cd-days strong { white-space: normal; line-height: 1.3; }
+    /* 時刻の欄の下の「この記録を取り消す」と確認(2026-11-20 現場の要望) */
+    .care-time-label { display: grid; gap: 4px; min-width: 0; }
+    .care-time-undo { justify-self: start; min-height: 36px; margin-top: 4px; padding: 4px 10px; border: 1px solid #f1c4c0; border-radius: 10px; background: #fff; color: #b42318; font-size: 13px; }
+    .care-undo-ask { display: grid; gap: 6px; margin-top: 6px; padding: 10px; border-radius: 12px; background: #fdf1f0; color: #7a1d14; font-size: 13.5px; line-height: 1.5; }
+    .care-undo-ask[hidden] { display: none; }
+    .care-undo-ask small { color: #7a1d14; font-size: 12.5px; }
+    .care-undo-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+    .care-undo-buttons button { min-height: 40px; padding: 4px 14px; font-size: 14px; }
+    .care-undo-buttons button:first-child { color: #fff; background: #b42318; border-color: #b42318; }
+    /* 朝に「昼食」「おやつ」で読んだときの確かめ(現場の画面) */
+    .scan-early-ask { display: grid; gap: 8px; margin-top: 10px; }
+    .scan-early-ask button { min-height: 48px; font-size: 15px; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2701,6 +2713,9 @@
 
     const app = {
       mode: 'arrival',
+      // modeDate: 記録する内容を選んだ日(日付が変わったら「来所」に戻す)。earlyModeOk: 朝の昼食・おやつを「このまま記録する」とした日
+      modeDate: '',
+      earlyModeOk: {},
       config: {
         url: API_URL,
         key: '',
@@ -2919,6 +2934,7 @@
       if (id === 'settingsView') {
         updateSettingsLock();
       }
+      if (id === 'scanView') resetModeForNewDay();
     }
 
     function buildModeButtons() {
@@ -2943,6 +2959,7 @@
 
     function setMode(mode) {
       app.mode = mode;
+      app.modeDate = todayStr();
       const meta = MODE_META[mode];
       document.getElementById('modeTitle').textContent = mode === 'info' ? '情報を確認' : (mode === 'vital' ? 'バイタルを入力' : `${meta.label}を記録`);
       document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録は追加せず、利用者の情報を表示します'
@@ -2959,6 +2976,35 @@
         button.style.setProperty('--mode-color', buttonMeta.color);
       });
       document.getElementById('modeIcon').innerHTML = modeIconSvg(mode);
+    }
+
+    // 日付が変わったら「来所」に戻す(2026-11-19 前の日の夕方の「おやつ」のまま朝のQRを読み、来所が付かなかった件)。
+    // 戻したときは true(その読み取りは記録しない。内容を確かめてから読み直してもらう)
+    // quiet: 案内を出さずに戻すだけ(「名前から記録」を開いたとき・アプリへ戻ったとき)
+    function resetModeForNewDay(quiet) {
+      if (!app.modeDate || app.modeDate === todayStr()) return false;
+      const was = app.mode;
+      app.earlyModeOk = {};
+      setMode('arrival');
+      if (was === 'arrival' || quiet) return false;
+      showResult('warning', '記録する内容を「来所」に戻しました', `日付が変わったため、「${MODE_META[was] ? MODE_META[was].label : was}」から「来所」に戻しました。記録する内容を確かめて、もう一度QRを読んでください。`);
+      return true;
+    }
+
+    // スリープから戻ったとき、見出しが前の日の「おやつを記録」のままにならないように(案内は出さない)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') resetModeForNewDay(true);
+      });
+    }
+
+    // 朝の昼食・おやつは一度確かめる(この時刻より前。1日に1回「このまま記録する」を押せば、その日は聞かない)
+    const EARLY_MODE_HOURS = { lunch: 11, snack: 12 };
+
+    function needsEarlyModeConfirm(mode) {
+      const limit = EARLY_MODE_HOURS[mode];
+      if (!limit || new Date().getHours() >= limit) return false;
+      return app.earlyModeOk[mode] !== todayStr();
     }
 
     // ---- 設定 ----
@@ -3844,6 +3890,11 @@
         finishSetupQrScan(rawValue);
         return;
       }
+      if (resetModeForNewDay()) {
+        beep('warning');
+        freezeScanFeedback('warning', '「来所」に戻しました', '内容を確かめて読み直してください');
+        return;
+      }
       if (app.lastScan.value === rawValue && now - app.lastScan.at < REPEAT_SUPPRESS_MS) {
         return;
       }
@@ -3904,6 +3955,34 @@
         return;
       }
 
+      if (needsEarlyModeConfirm(app.mode) && !isLocallyRecorded(`${todayStr()}:${user.userId}:${app.mode}`)) {
+        showEarlyModeAsk(user, match);
+        return;
+      }
+      recordScanFor(user, match);
+    }
+
+    // 朝に「昼食」「おやつ」で読んだとき: 記録せずに確かめる。「来所」に切り替えて記録するか、このまま記録するかを選ぶ
+    function showEarlyModeAsk(user, match) {
+      const mode = app.mode;
+      const label = SERVICE_META[mode].label;
+      beep('warning');
+      freezeScanFeedback('warning', user.displayName, `まだ記録していません（${label}でよいか確かめてください）`);
+      showUserResult('warning', `「${label}」で記録しますか？`, `${user.displayName} 様。今は ${dsNowTime()} です。「${label}」のままになっていませんか。まだ記録していません。`, user);
+      const panel = document.getElementById('resultPanel');
+      panel.insertAdjacentHTML('beforeend', `<div class="scan-early-ask"><button type="button" class="primary" data-early-arrival>「来所」に切り替えて記録する</button><button type="button" data-early-keep>「${escapeHtml(label)}」で記録する</button></div>`);
+      panel.querySelector('[data-early-arrival]').addEventListener('click', () => {
+        setMode('arrival');
+        recordScanFor(user, match);
+      });
+      panel.querySelector('[data-early-keep]').addEventListener('click', () => {
+        if (app.mode !== mode) setMode(mode);
+        app.earlyModeOk[mode] = todayStr();
+        recordScanFor(user, match);
+      });
+    }
+
+    function recordScanFor(user, match) {
       const businessDate = todayStr();
       const localKey = `${businessDate}:${user.userId}:${app.mode}`;
       if (isLocallyRecorded(localKey)) {
@@ -3985,6 +4064,8 @@
     const manualUi = { service: 'arrival', time: '', query: '', message: '', error: false, last: null, undoing: false };
 
     function openManualRecord() {
+      // 日付が変わっていたら、前の日の種類(おやつなど)を初めの選択にしない
+      resetModeForNewDay(true);
       // バイタルモードでは、来所した方の一覧(バイタル)からまとめて入れる
       if (app.mode === 'vital') {
         openRecordList(scannerCareHost, DS_VITAL_TAB);
@@ -4736,6 +4817,12 @@
       feedback: (text) => { document.getElementById('todayFeedback').textContent = text; },
       orderedUserIds: () => app.todayVisibleIds.slice(),
       openDayMenu: (userId) => openDaySheet(userId),
+      // ケア記録の時刻の下の「この記録を取り消す」(2026-11-20)。キャンセル・午前終了などの「○○の記録を取り消す」と同じ処理
+      // 取り消せなかったときは理由を投げる(ケア記録の画面に出す)
+      clearService: async (userId, service) => {
+        if (await applyDayStatus({ clearService: service }, userId)) return true;
+        throw new Error(app.dayStatusError || '');
+      },
       recordMealAll: (service, userIds) => scannerRecordMealAll(service, userIds)
     });
 
@@ -4887,10 +4974,17 @@
       if (existing) GinNav.closed('daySheet');
     }
 
-    async function applyDayStatus(patch) {
-      const userId = app.daySheetUserId;
+    // userId を渡したときはその方(ケア記録の取り消し)、渡さないときは開いていた当日の状況の方。保存できたら true
+    async function applyDayStatus(patch, targetUserId) {
+      const userId = targetUserId || app.daySheetUserId;
       closeSheet();
-      if (!userId || app.pendingDayChanges.has(userId)) return;
+      app.dayStatusError = '';
+      if (!userId) return false;
+      if (app.pendingDayChanges.has(userId)) {
+        app.dayStatusError = '前の変更を保存しています。少し待ってから、もう一度押してください。';
+        return false;
+      }
+      let saved = false;
       // サーバー応答を待たずに表示へ反映し、失敗時だけ元に戻す。
       const previousRecord = recordFor(userId);
       app.pendingDayChanges.set(userId, patch);
@@ -4915,11 +5009,16 @@
         renderToday();
         document.getElementById('todayFeedback').textContent = '変更を保存しました。';
         beep('success');
+        saved = true;
       } catch (error) {
-        document.getElementById('todayFeedback').textContent = `保存できなかったため、元の表示に戻しました。${friendlyError(error)}`;
+        app.dayStatusError = friendlyError(error);
+        document.getElementById('todayFeedback').textContent = `保存できなかったため、元の表示に戻しました。${app.dayStatusError}`;
         // この利用者の変更項目だけを戻す。他の利用者やQRの記録を巻き戻さない。
         const latest = Object.assign({}, recordFor(userId) || {});
         const changedFields = Object.keys(patch);
+        // 取り消し(clearService)は実績の印・利用状態・入浴状況を変えているので、それを戻す
+        // (戻さないと、取り消せなかったのに取り消し済みに見え、ボタンも消える)
+        if (patch.clearService) changedFields.push('actualFlags', 'attendanceStatus', 'bathStatus');
         if (patch.attendanceStatus !== undefined) {
           changedFields.push('cancelReason');
           changedFields.push(patch.attendanceStatus === 'cancelled' ? 'usageActual' : 'cancelNote');
@@ -4937,6 +5036,7 @@
         cacheCurrentState();
         renderToday();
       }
+      return saved;
     }
 
     function applyDayStatusLocally(userId, patch) {
@@ -5353,8 +5453,37 @@
       return `<label class="care-field"><span>${label}</span><span class="care-input"><input data-care="${key}" inputmode="${mode}" autocomplete="off" placeholder="${placeholder}" value="${escapeHtml(value)}" aria-label="${label}（${unit}）"><em>${unit}</em></span></label>`;
     }
 
-    function careTimeField(key, label, value) {
-      return `<label class="care-field"><span>${label}</span><span class="care-time"><input type="time" data-care="${key}" value="${escapeHtml(value)}" aria-label="${label}の時刻"><button type="button" data-care-now="${key}" aria-label="${label}を今の時刻にする">今</button></span></label>`;
+    // undo: その記録(来所・入浴・昼食・おやつ・送り)が付いているとき、下に「この記録を取り消す」を出す(2026-11-20 現場の要望)
+    // 取り消しの確かめの枠は label の外に置く(枠の文を触っても時刻の欄が反応しないように)
+    function careTimeField(key, label, value, undo) {
+      const field = `<span>${label}</span><span class="care-time"><input type="time" data-care="${key}" value="${escapeHtml(value)}" aria-label="${label}の時刻"><button type="button" data-care-now="${key}" aria-label="${label}を今の時刻にする">今</button></span>`;
+      if (!undo) return `<label class="care-field">${field}</label>`;
+      return `<div class="care-field"><label class="care-time-label">${field}</label>` +
+        `<button type="button" class="care-time-undo" data-care-undo="${key}">この記録を取り消す</button><div class="care-undo-ask" data-care-undo-ask="${key}" role="alert" hidden></div></div>`;
+    }
+
+    // 時刻の欄と、その記録(日次実績の印)の対応。時刻を消すだけでは記録は残るので、取り消しは記録ごと行う。
+    // 取り消すと、実績の印・読取履歴(cleared にして行は残す)・時刻・食べた量・送迎がまとめて消え、修正履歴に残る(サーバーの setDailyStatus の clearService)
+    const CARE_TIME_SERVICE = { arrivalTime: 'arrival', departureTime: 'departure', bathTime: 'bath', lunchTime: 'lunch', snackTime: 'snack' };
+    const CARE_TIME_SERVICE_NAMES = { arrival: '来所', departure: '送り', bath: '入浴', lunch: '昼食', snack: 'おやつ' };
+
+    function careServiceRecorded(host, userId, key) {
+      if (!host || typeof host.clearService !== 'function' || typeof host.flags !== 'function') return false;
+      const service = CARE_TIME_SERVICE[key];
+      return Boolean(service && (host.flags(userId) || {})[service]);
+    }
+
+    function careUndoAskHtml(key, time) {
+      const name = CARE_TIME_SERVICE_NAMES[CARE_TIME_SERVICE[key]];
+      const notes = {
+        arrival: '来所を取り消すと、この日は来所していない扱いになります。送迎の記録も消えます。',
+        departure: '送りの送迎の記録も消えます。',
+        bath: '「入浴した」も消えます。',
+        lunch: '食べた量も消えます。',
+        snack: '食べた量も消えます。'
+      };
+      return `<b>${escapeHtml(name)}${time ? `（${escapeHtml(time)}）` : ''}の記録を取り消しますか？</b><small>${escapeHtml(notes[CARE_TIME_SERVICE[key]] || '')}押し間違い・読み間違いのときだけ使ってください。</small>` +
+        `<span class="care-undo-buttons"><button type="button" data-care-undo-yes="${key}">取り消す</button><button type="button" data-care-undo-no="${key}">やめる</button></span>`;
     }
 
     function careSelectField(key, label, value) {
@@ -5429,8 +5558,8 @@
           <fieldset class="care-group"><legend>送迎</legend>
             <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押すと、そのまま来所・送りの記録になります。</p>
             <div class="care-grid two">
-              ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
-              ${careTimeField('departureTime', '送り出発', v.departureTime)}
+              ${careTimeField('arrivalTime', '到着', v.arrivalTime, careServiceRecorded(host, user.userId, 'arrivalTime'))}
+              ${careTimeField('departureTime', '送り出発', v.departureTime, careServiceRecorded(host, user.userId, 'departureTime'))}
             </div>
             ${careTransportHtml(user, v)}
           </fieldset>
@@ -5446,8 +5575,8 @@
           </fieldset>
           <fieldset class="care-group"><legend>昼食・おやつ（摂取量）</legend>
             <div class="care-grid two care-time-row">
-              ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime)}
-              ${careTimeField('snackTime', 'おやつの時刻', v.snackTime)}
+              ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime, careServiceRecorded(host, user.userId, 'lunchTime'))}
+              ${careTimeField('snackTime', 'おやつの時刻', v.snackTime, careServiceRecorded(host, user.userId, 'snackTime'))}
             </div>
             <div class="care-grid two">
               ${careSelectField('mealAmount', '食事量', v.mealAmount)}
@@ -5463,7 +5592,7 @@
           </fieldset>
           <fieldset class="care-group"><legend>入浴</legend>
             <div class="care-grid two care-time-row">
-              ${careTimeField('bathTime', '入浴時刻', v.bathTime)}
+              ${careTimeField('bathTime', '入浴時刻', v.bathTime, careServiceRecorded(host, user.userId, 'bathTime'))}
             </div>
             ${careChoice('bathStatus', '入ったかどうか', [['done', '入浴した'], ['refused', '入浴しなかった']], v.bathStatus)}
             ${careChoice('bathType', '入浴方法', [['general', '一般浴'], ['special', '特浴']], v.bathType)}
@@ -5577,6 +5706,7 @@
           `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         if (button.dataset.careNow === 'bathTime') selectBathDone();
       }));
+      bindCareUndo(form);
       form.querySelectorAll('[data-care-add]').forEach((button) => button.addEventListener('click', () => {
         const input = form.querySelector('[data-care="fluidMl"]');
         const current = Number(careToHalfWidth(input.value)) || 0;
@@ -6241,6 +6371,65 @@
     }
 
     // 連絡帳・実費などへ移る前に、待っている保存を送り終える
+    // ---- 記録の取り消し(時刻の欄の下の「この記録を取り消す」) ----
+    function bindCareUndo(form) {
+      form.querySelectorAll('[data-care-undo]').forEach((button) => button.addEventListener('click', () => {
+        const key = button.dataset.careUndo;
+        const ask = form.querySelector(`[data-care-undo-ask="${key}"]`);
+        const input = form.querySelector(`[data-care="${key}"]`);
+        if (!ask) return;
+        ask.innerHTML = careUndoAskHtml(key, careTimeText((careUi.initial && careUi.initial[key]) || (input && input.value) || ''));
+        ask.hidden = false;
+        button.hidden = true;
+        ask.querySelector('[data-care-undo-no]').addEventListener('click', () => {
+          ask.hidden = true;
+          ask.innerHTML = '';
+          button.hidden = false;
+          button.focus();
+        });
+        ask.querySelector('[data-care-undo-yes]').addEventListener('click', () => careUndoService(key));
+        ask.querySelector('[data-care-undo-no]').focus();
+      }));
+      // 時刻を消しただけでは記録は残る。iPad の時刻の「リセット」は、開いたときの時刻に戻すだけ(2026-11-19 おやつ 9:02 の件)
+      Object.keys(CARE_TIME_SERVICE).forEach((key) => {
+        const input = form.querySelector(`[data-care="${key}"]`);
+        if (!input || !form.querySelector(`[data-care-undo="${key}"]`)) return;
+        input.addEventListener('change', () => {
+          if (input.value) return;
+          showCareStatus(`時刻を消しても、${CARE_TIME_SERVICE_NAMES[CARE_TIME_SERVICE[key]]}の記録は残ります。記録ごと消すときは、時刻の下の「この記録を取り消す」を押してください。`, false);
+        });
+      });
+    }
+
+    // 待っている保存を送り終えてから取り消す(取り消したあとに古い時刻の保存が届いて戻らないように)。
+    // 取り消したら、ケア記録を開き直して今の記録を出す
+    function careUndoService(key) {
+      const service = CARE_TIME_SERVICE[key];
+      const name = CARE_TIME_SERVICE_NAMES[service];
+      return careAfterSave(async () => {
+        const host = careUi.host;
+        const userId = careUi.userId;
+        const ask = document.querySelector(`#careSheet [data-care-undo-ask="${key}"]`);
+        if (ask) ask.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+        showCareStatus(`${name}の記録を取り消しています…`, false);
+        // 取り消せなかったときは、理由(通信できない・確定済みの日など)をそのまま出す
+        let ok = false;
+        let reason = '';
+        try {
+          ok = Boolean(await host.clearService(userId, service));
+        } catch (error) {
+          ok = false;
+          reason = error && error.message ? String(error.message) : '';
+        }
+        if (!document.getElementById('careSheet') || careUi.userId !== userId || careUi.host !== host) return;
+        closeCareForm(true);
+        openCareForm(host, userId);
+        showCareStatus(ok ? `${name}の記録を取り消しました。` : `${name}の記録を取り消せませんでした。${reason || '通信を確かめて、もう一度押してください。'}`, !ok);
+        const field = document.querySelector(`#careSheet [data-care="${key}"]`);
+        if (field) field.scrollIntoView({ block: 'center' });
+      });
+    }
+
     async function careAfterSave(next) {
       if (careUi.saving || !document.getElementById('careSheet')) return;
       const token = careUi.token;
