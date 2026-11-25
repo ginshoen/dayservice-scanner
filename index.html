@@ -1966,6 +1966,92 @@
     .ds-vitals .ds-weight-add { align-self: end; }
     .care-ch-transport { margin: 6px 0 0; color: #5b6472; }
     .ds-ch-note { margin: 0; padding: 8px 10px; border-radius: 10px; background: #f6f7f9; color: #5b6472; font-size: 13px; }
+
+    /* ===== 2026-11-19 服薬を時刻で・時刻の順の記録・過去の記録 ===== */
+    /* 月の実績(95)・バイタルの振り返り(95)の上に重ねる */
+    #dsCareDay { z-index: 97; }
+    #dsTreatPhotos { z-index: 99; }
+    .care-med-row { background: #f3fbf8; }
+    .care-med-row.missed { background: #fdf3f2; }
+    .care-med-chips { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .care-med-add button { border-color: #5eada3; background: #f0fdfa; color: #0f5f57; }
+    .um-day { display: block; padding: 0; }
+    .um-day-open { display: grid; grid-template-columns: 92px minmax(0, 1fr) 20px; gap: 10px; align-items: start; width: 100%; min-height: 48px; padding: 10px 12px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    .um-day-open:hover, .um-day-open:focus-visible { background: #f3f8ff; }
+    .um-go { align-self: center; color: #94a3b8; font-size: 22px; line-height: 1; }
+    .cd-days strong { font-size: 16px; }
+    .cd-status { margin: 0 0 10px; text-align: center; }
+    .cd-list { list-style: none; margin: 0 0 12px; padding: 0; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; overflow: hidden; }
+    .cd-item { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; padding: 10px 12px; border-top: 1px solid #edf1f6; border-left: 5px solid #cbd5e1; }
+    .cd-item:first-child { border-top: 0; }
+    .cd-time { font-weight: 700; color: #1f2937; font-variant-numeric: tabular-nums; }
+    .cd-body { display: grid; gap: 2px; min-width: 0; }
+    .cd-label { font-weight: 700; color: #334155; }
+    .cd-text { color: #475569; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .cd-item.time { border-left-color: #60a5fa; }
+    .cd-item.vital { border-left-color: #f472b6; }
+    .cd-item.toilet { border-left-color: #d4a017; }
+    .cd-item.med { border-left-color: #34a37f; }
+    .cd-item.med.missed { border-left-color: #e05a47; }
+    .cd-item.meal, .cd-item.snack { border-left-color: #a78bfa; }
+    .cd-item.bath, .cd-item.refused { border-left-color: #f59e0b; }
+    .cd-item.rec { border-left-color: #22c55e; }
+    .cd-item.training { border-left-color: #6366f1; }
+    .cd-item.treat { border-left-color: #0ea5e9; }
+    .cd-item.note { border-left-color: #64748b; background: #fafbfc; }
+    .cd-item.fee { border-left-color: #16a34a; }
+    .cd-item.fluid { border-left-color: #14b8a6; }
+    .cd-heading { margin: 16px 0 8px; font-size: 15px; color: #475569; }
+    .cd-month { display: block; width: 100%; min-height: 48px; margin-top: 12px; }
+    @media (max-width: 600px) {
+      .um-day-open { grid-template-columns: minmax(0, 1fr) 20px; gap: 4px; }
+      .um-day-open .um-date { grid-column: 1; }
+      .um-day-open .um-main { grid-column: 1; }
+      .um-day-open .um-go { grid-column: 2; grid-row: 1 / span 2; }
+      .cd-item { grid-template-columns: 54px minmax(0, 1fr); }
+    }
+    @media print {
+      .um-go { display: none; }
+      .um-day-open { grid-template-columns: 92px minmax(0, 1fr); padding: 6px 10px; min-height: 0; }
+      .um-day-open .um-date, .um-day-open .um-main { grid-column: auto; }
+    }
+
+    /* ===== 2026-11-19 処置を1回ごとに＋写真 ===== */
+    .care-treat-list { display: grid; gap: 8px; }
+    .care-treat-row { padding: 10px 12px; border: 1px solid var(--line, #e0e3e7); border-radius: 12px; background: #f3f9fd; }
+    .care-treat-photos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+    .care-treat-count { font-weight: 700; color: #075985; }
+    .care-treat-photos button, .care-treat-shot { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 1px solid #b6dcf2; border-radius: 10px; background: #fff; color: #075985; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .care-treat-shot { border-style: dashed; background: #f0f9ff; }
+    .care-treat-add { width: 100%; min-height: 48px; margin: 10px 0 6px; border: 1px dashed #38bdf8; border-radius: 12px; background: #f0f9ff; color: #075985; font: inherit; font-size: 15px; font-weight: 700; }
+    .care-treat-add:disabled { opacity: .45; }
+    .care-treat-status { margin: 0; padding: 8px 10px; border-radius: 10px; background: #ecfdf3; color: #166534; font-size: 14px; }
+    .care-treat-status.error { background: #fdecea; color: #a12c1d; }
+    .cd-photos { justify-self: start; min-height: 40px; margin-top: 4px; padding: 0 12px; border: 1px solid #b6dcf2; border-radius: 10px; background: #f0f9ff; color: #075985; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .tp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .tp-item { margin: 0; display: grid; gap: 8px; }
+    .tp-frame { display: grid; place-items: center; min-height: 200px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; overflow: hidden; }
+    .tp-frame img { display: block; width: 100%; height: auto; }
+    .tp-remove { min-height: 44px; border: 1px solid #f1c9c4; border-radius: 10px; background: #fff; color: #a12c1d; font: inherit; font-weight: 700; cursor: pointer; }
+    .tp-status { color: #a12c1d; }
+    @media print {
+      #dsTreatPhotos, .care-treat-photos, .cd-photos { display: none !important; }
+    }
+    .cd-days { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .cd-days button { padding: 0 12px; white-space: nowrap; }
+    .cd-days strong { white-space: normal; line-height: 1.3; }
+    /* 時刻の欄の下の「この記録を取り消す」と確認(2026-11-20 現場の要望) */
+    .care-time-label { display: grid; gap: 4px; min-width: 0; }
+    .care-time-undo { justify-self: start; min-height: 36px; margin-top: 4px; padding: 4px 10px; border: 1px solid #f1c4c0; border-radius: 10px; background: #fff; color: #b42318; font-size: 13px; }
+    .care-undo-ask { display: grid; gap: 6px; margin-top: 6px; padding: 10px; border-radius: 12px; background: #fdf1f0; color: #7a1d14; font-size: 13.5px; line-height: 1.5; }
+    .care-undo-ask[hidden] { display: none; }
+    .care-undo-ask small { color: #7a1d14; font-size: 12.5px; }
+    .care-undo-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+    .care-undo-buttons button { min-height: 40px; padding: 4px 14px; font-size: 14px; }
+    .care-undo-buttons button:first-child { color: #fff; background: #b42318; border-color: #b42318; }
+    /* 朝に「昼食」「おやつ」で読んだときの確かめ(現場の画面) */
+    .scan-early-ask { display: grid; gap: 8px; margin-top: 10px; }
+    .scan-early-ask button { min-height: 48px; font-size: 15px; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2430,7 +2516,7 @@
       </section>
 
       <section id="todayView" class="view">
-        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
+        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openPastRecords" aria-label="過去の記録を見る（利用者を選んで、月・日ごとに）">過去の記録</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
         <div id="todayNewUserBar" hidden></div>
         <div id="todayBoardBar"></div>
         <div class="plan-bar" aria-live="polite">
@@ -2627,6 +2713,9 @@
 
     const app = {
       mode: 'arrival',
+      // modeDate: 記録する内容を選んだ日(日付が変わったら「来所」に戻す)。earlyModeOk: 朝の昼食・おやつを「このまま記録する」とした日
+      modeDate: '',
+      earlyModeOk: {},
       config: {
         url: API_URL,
         key: '',
@@ -2787,6 +2876,7 @@
         openRecordList(scannerCareHost, metric.dataset.metric);
       });
       document.getElementById('openFeePicker').addEventListener('click', () => openFeePicker(scannerDsHost));
+      document.getElementById('openPastRecords').addEventListener('click', () => openPastRecordPicker(scannerCareHost));
       document.getElementById('openPlanSheet').addEventListener('click', () => openPlanSheet(scannerPlanHost));
       document.getElementById('loginSubmit').addEventListener('click', submitLogin);
       document.getElementById('loginCancel').addEventListener('click', () => {
@@ -2844,6 +2934,7 @@
       if (id === 'settingsView') {
         updateSettingsLock();
       }
+      if (id === 'scanView') resetModeForNewDay();
     }
 
     function buildModeButtons() {
@@ -2868,6 +2959,7 @@
 
     function setMode(mode) {
       app.mode = mode;
+      app.modeDate = todayStr();
       const meta = MODE_META[mode];
       document.getElementById('modeTitle').textContent = mode === 'info' ? '情報を確認' : (mode === 'vital' ? 'バイタルを入力' : `${meta.label}を記録`);
       document.getElementById('modeSubtitle').textContent = mode === 'info' ? '記録は追加せず、利用者の情報を表示します'
@@ -2884,6 +2976,35 @@
         button.style.setProperty('--mode-color', buttonMeta.color);
       });
       document.getElementById('modeIcon').innerHTML = modeIconSvg(mode);
+    }
+
+    // 日付が変わったら「来所」に戻す(2026-11-19 前の日の夕方の「おやつ」のまま朝のQRを読み、来所が付かなかった件)。
+    // 戻したときは true(その読み取りは記録しない。内容を確かめてから読み直してもらう)
+    // quiet: 案内を出さずに戻すだけ(「名前から記録」を開いたとき・アプリへ戻ったとき)
+    function resetModeForNewDay(quiet) {
+      if (!app.modeDate || app.modeDate === todayStr()) return false;
+      const was = app.mode;
+      app.earlyModeOk = {};
+      setMode('arrival');
+      if (was === 'arrival' || quiet) return false;
+      showResult('warning', '記録する内容を「来所」に戻しました', `日付が変わったため、「${MODE_META[was] ? MODE_META[was].label : was}」から「来所」に戻しました。記録する内容を確かめて、もう一度QRを読んでください。`);
+      return true;
+    }
+
+    // スリープから戻ったとき、見出しが前の日の「おやつを記録」のままにならないように(案内は出さない)
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') resetModeForNewDay(true);
+      });
+    }
+
+    // 朝の昼食・おやつは一度確かめる(この時刻より前。1日に1回「このまま記録する」を押せば、その日は聞かない)
+    const EARLY_MODE_HOURS = { lunch: 11, snack: 12 };
+
+    function needsEarlyModeConfirm(mode) {
+      const limit = EARLY_MODE_HOURS[mode];
+      if (!limit || new Date().getHours() >= limit) return false;
+      return app.earlyModeOk[mode] !== todayStr();
     }
 
     // ---- 設定 ----
@@ -3769,6 +3890,11 @@
         finishSetupQrScan(rawValue);
         return;
       }
+      if (resetModeForNewDay()) {
+        beep('warning');
+        freezeScanFeedback('warning', '「来所」に戻しました', '内容を確かめて読み直してください');
+        return;
+      }
       if (app.lastScan.value === rawValue && now - app.lastScan.at < REPEAT_SUPPRESS_MS) {
         return;
       }
@@ -3829,6 +3955,34 @@
         return;
       }
 
+      if (needsEarlyModeConfirm(app.mode) && !isLocallyRecorded(`${todayStr()}:${user.userId}:${app.mode}`)) {
+        showEarlyModeAsk(user, match);
+        return;
+      }
+      recordScanFor(user, match);
+    }
+
+    // 朝に「昼食」「おやつ」で読んだとき: 記録せずに確かめる。「来所」に切り替えて記録するか、このまま記録するかを選ぶ
+    function showEarlyModeAsk(user, match) {
+      const mode = app.mode;
+      const label = SERVICE_META[mode].label;
+      beep('warning');
+      freezeScanFeedback('warning', user.displayName, `まだ記録していません（${label}でよいか確かめてください）`);
+      showUserResult('warning', `「${label}」で記録しますか？`, `${user.displayName} 様。今は ${dsNowTime()} です。「${label}」のままになっていませんか。まだ記録していません。`, user);
+      const panel = document.getElementById('resultPanel');
+      panel.insertAdjacentHTML('beforeend', `<div class="scan-early-ask"><button type="button" class="primary" data-early-arrival>「来所」に切り替えて記録する</button><button type="button" data-early-keep>「${escapeHtml(label)}」で記録する</button></div>`);
+      panel.querySelector('[data-early-arrival]').addEventListener('click', () => {
+        setMode('arrival');
+        recordScanFor(user, match);
+      });
+      panel.querySelector('[data-early-keep]').addEventListener('click', () => {
+        if (app.mode !== mode) setMode(mode);
+        app.earlyModeOk[mode] = todayStr();
+        recordScanFor(user, match);
+      });
+    }
+
+    function recordScanFor(user, match) {
       const businessDate = todayStr();
       const localKey = `${businessDate}:${user.userId}:${app.mode}`;
       if (isLocallyRecorded(localKey)) {
@@ -3910,6 +4064,8 @@
     const manualUi = { service: 'arrival', time: '', query: '', message: '', error: false, last: null, undoing: false };
 
     function openManualRecord() {
+      // 日付が変わっていたら、前の日の種類(おやつなど)を初めの選択にしない
+      resetModeForNewDay(true);
       // バイタルモードでは、来所した方の一覧(バイタル)からまとめて入れる
       if (app.mode === 'vital') {
         openRecordList(scannerCareHost, DS_VITAL_TAB);
@@ -4661,6 +4817,12 @@
       feedback: (text) => { document.getElementById('todayFeedback').textContent = text; },
       orderedUserIds: () => app.todayVisibleIds.slice(),
       openDayMenu: (userId) => openDaySheet(userId),
+      // ケア記録の時刻の下の「この記録を取り消す」(2026-11-20)。キャンセル・午前終了などの「○○の記録を取り消す」と同じ処理
+      // 取り消せなかったときは理由を投げる(ケア記録の画面に出す)
+      clearService: async (userId, service) => {
+        if (await applyDayStatus({ clearService: service }, userId)) return true;
+        throw new Error(app.dayStatusError || '');
+      },
       recordMealAll: (service, userIds) => scannerRecordMealAll(service, userIds)
     });
 
@@ -4812,10 +4974,17 @@
       if (existing) GinNav.closed('daySheet');
     }
 
-    async function applyDayStatus(patch) {
-      const userId = app.daySheetUserId;
+    // userId を渡したときはその方(ケア記録の取り消し)、渡さないときは開いていた当日の状況の方。保存できたら true
+    async function applyDayStatus(patch, targetUserId) {
+      const userId = targetUserId || app.daySheetUserId;
       closeSheet();
-      if (!userId || app.pendingDayChanges.has(userId)) return;
+      app.dayStatusError = '';
+      if (!userId) return false;
+      if (app.pendingDayChanges.has(userId)) {
+        app.dayStatusError = '前の変更を保存しています。少し待ってから、もう一度押してください。';
+        return false;
+      }
+      let saved = false;
       // サーバー応答を待たずに表示へ反映し、失敗時だけ元に戻す。
       const previousRecord = recordFor(userId);
       app.pendingDayChanges.set(userId, patch);
@@ -4840,11 +5009,16 @@
         renderToday();
         document.getElementById('todayFeedback').textContent = '変更を保存しました。';
         beep('success');
+        saved = true;
       } catch (error) {
-        document.getElementById('todayFeedback').textContent = `保存できなかったため、元の表示に戻しました。${friendlyError(error)}`;
+        app.dayStatusError = friendlyError(error);
+        document.getElementById('todayFeedback').textContent = `保存できなかったため、元の表示に戻しました。${app.dayStatusError}`;
         // この利用者の変更項目だけを戻す。他の利用者やQRの記録を巻き戻さない。
         const latest = Object.assign({}, recordFor(userId) || {});
         const changedFields = Object.keys(patch);
+        // 取り消し(clearService)は実績の印・利用状態・入浴状況を変えているので、それを戻す
+        // (戻さないと、取り消せなかったのに取り消し済みに見え、ボタンも消える)
+        if (patch.clearService) changedFields.push('actualFlags', 'attendanceStatus', 'bathStatus');
         if (patch.attendanceStatus !== undefined) {
           changedFields.push('cancelReason');
           changedFields.push(patch.attendanceStatus === 'cancelled' ? 'usageActual' : 'cancelNote');
@@ -4862,6 +5036,7 @@
         cacheCurrentState();
         renderToday();
       }
+      return saved;
     }
 
     function applyDayStatusLocally(userId, patch) {
@@ -4908,11 +5083,13 @@
       'arrivalTime', 'departureTime', 'bathTime', 'lunchTime', 'snackTime', 'temperature', 'bpHigh', 'bpLow', 'pulse', 'spo2',
       'mealMain', 'mealSide', 'snackAmount', 'fluidMl', 'bathType', 'recreation', 'notebookNote',
       'arrivalTransport', 'departureTransport', 'weight', 'mealAmount', 'medication', 'excretionLog', 'training',
-      'treatment', 'treatmentNote'
+      'treatment', 'treatmentNote', 'medicationLog'
     ];
     // 処置(2026-11-18 現場の要望「内服・処置の記録ができない」)。行った/なし と、その内容(任意)
     const CARE_TREATMENT_CHOICES = [['done', '行った'], ['none', 'なし']];
     const CARE_TREATMENT_NOTE_MAX = 200;
+    // 処置を1回ごとに(時刻・内容・写真3枚まで。2026-11-19 原山さん)。サーバーは treatments / saveTreatment / deleteTreatment / addTreatmentPhoto / removeTreatmentPhoto / treatmentPhoto
+    const CARE_TREATMENT_PHOTO_MAX = 3;
     const CARE_RECREATION_CHOICES = [['joined', '参加'], ['absent', '不参加']];
     // 服薬(2026-11-17 現場の要望「入浴と同じ形で、飲んだ・飲まないだけ」)
     const CARE_MEDICATION_CHOICES = [['taken', '飲んだ'], ['missed', '飲まなかった']];
@@ -4922,6 +5099,10 @@
     const CARE_EXCRETION_AMOUNTS = ['少量', '普通', '多量'];
     const CARE_EXCRETION_FORMS = ['硬便', '普通便', '軟便', '水様便'];
     const CARE_EXCRETION_MAX = 12;
+    // 服薬を時刻で(2026-11-19 現場の要望「服薬を時間で記録。排泄と同じシステムでいい」)。サーバー(Code.gs の MEDICATION_*)と同じ言葉。
+    // 1回ずつ「12:30 飲んだ」。以前の1日1つの服薬(medication)は、過去の日の表示のためだけに残す
+    const CARE_MEDICATION_RESULTS = ['飲んだ', '飲まなかった'];
+    const CARE_MEDICATION_MAX = 12;
     // 来所・送りの送迎。家族送迎(事業所が送迎しない片道)は送迎減算の確認に使う
     const CARE_TRANSPORT_CHOICES = [['facility', '施設送迎'], ['family', '家族送迎']];
     const CARE_TRANSPORT_LABELS = { facility: '施設送迎', family: '家族送迎' };
@@ -5183,6 +5364,48 @@
       return value === 'taken' ? '服薬 飲んだ' : (value === 'missed' ? '服薬 飲まなかった' : '');
     }
 
+    // 服薬の記録「12:30 飲んだ／15:00 飲まなかった」を1回ずつに分ける(読めない部分は飛ばす。検査はサーバー)
+    function careMedicationEntries(text) {
+      return String(text == null ? '' : text).split(/[／/\n]+/).map((piece) => piece.trim()).filter(Boolean).map((piece) => {
+        const words = piece.split(/\s+/);
+        return { time: careTimeText(words.shift() || ''), result: CARE_MEDICATION_RESULTS.includes(words[0]) ? words[0] : '' };
+      }).filter((entry) => entry.result);
+    }
+
+    function careMedicationLogText(entries) {
+      return entries.slice().sort((a, b) => (a.time === b.time
+        ? CARE_MEDICATION_RESULTS.indexOf(a.result) - CARE_MEDICATION_RESULTS.indexOf(b.result)
+        : (a.time < b.time ? -1 : 1)))
+        .map((entry) => [entry.time, entry.result].filter(Boolean).join(' ')).join('／');
+    }
+
+    // 今日の一覧・月の実績の短い表示: 「服薬 12:30」「服薬 飲まなかった 15:00」。時刻の記録が無い日は以前の1日1つの記録
+    function careMedicationParts(care) {
+      const c = care || {};
+      const entries = careMedicationEntries(c.medicationLog);
+      if (!entries.length) {
+        return careMedicationText(c.medication) ? [[c.medication === 'missed' ? 'med missed' : 'med', careMedicationText(c.medication)]] : [];
+      }
+      const taken = entries.filter((entry) => entry.result === '飲んだ').map((entry) => entry.time);
+      const missed = entries.filter((entry) => entry.result === '飲まなかった').map((entry) => entry.time);
+      const parts = [];
+      if (taken.length) parts.push(['med', `服薬 ${taken.join('・')}`]);
+      if (missed.length) parts.push(['med missed', `服薬 飲まなかった ${missed.join('・')}`]);
+      return parts;
+    }
+
+    // 連絡帳の「お薬」: 「12:30 飲まれました」。時刻の記録が無い日は以前の1日1つの記録
+    function careMedicationNotebookText(care) {
+      const c = care || {};
+      const entries = careMedicationEntries(c.medicationLog);
+      if (entries.length) {
+        return entries.map((entry) => `${entry.time} ${entry.result === '飲んだ' ? '飲まれました' : '飲まれませんでした'}`).join('　');
+      }
+      if (c.medication === 'taken') return '飲まれました';
+      if (c.medication === 'missed') return '本日は飲まれませんでした';
+      return '';
+    }
+
     // 今日の一覧に出す短い要約(色付きの小さなタグで表示する)
     function careSummaryParts(care, bathStatus) {
       const c = care || {};
@@ -5197,12 +5420,19 @@
       if (careHas(c.snackAmount)) parts.push(['snack', `おやつ ${careAmountText(c.snackAmount)}`]);
       if (careHas(c.fluidMl)) parts.push(['fluid', `水分 ${c.fluidMl}ml`]);
       if (bathStatus === 'done') parts.push(['bath', (c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : '入浴')) + (careHas(c.bathTime) ? ` ${careTimeText(c.bathTime)}` : '')]);
-      if (careMedicationText(c.medication)) parts.push([c.medication === 'missed' ? 'med missed' : 'med', careMedicationText(c.medication)]);
+      careMedicationParts(c).forEach((part) => parts.push(part));
       careExcretionSummary(c).forEach((text) => parts.push(['toilet', text]));
       if (c.training === 'done') parts.push(['training', '機能訓練 やった']);
       if (c.training === 'skipped') parts.push(['training skipped', '機能訓練 やっていない']);
-      if (c.treatment === 'done') parts.push(['treat', careHas(c.treatmentNote) ? `処置 ${String(c.treatmentNote).split('\n')[0].slice(0, 20)}` : '処置 行った']);
-      if (c.treatment === 'none') parts.push(['treat none', '処置 なし']);
+      const treatments = Array.isArray(c.treatmentList) ? c.treatmentList : [];
+      if (treatments.length === 1) {
+        parts.push(['treat', `処置 ${treatments[0].time}${careHas(treatments[0].note) ? ` ${String(treatments[0].note).split('\n')[0].slice(0, 14)}` : ''}`]);
+      } else if (treatments.length > 1) {
+        parts.push(['treat', `処置 ${treatments.length}回`]);
+      } else {
+        if (c.treatment === 'done') parts.push(['treat', careHas(c.treatmentNote) ? `処置 ${String(c.treatmentNote).split('\n')[0].slice(0, 20)}` : '処置 行った']);
+        if (c.treatment === 'none') parts.push(['treat none', '処置 なし']);
+      }
       if (c.recreation === 'joined') parts.push(['rec', 'レク参加']);
       if (c.recreation === 'absent') parts.push(['rec', 'レク不参加']);
       return parts;
@@ -5223,8 +5453,37 @@
       return `<label class="care-field"><span>${label}</span><span class="care-input"><input data-care="${key}" inputmode="${mode}" autocomplete="off" placeholder="${placeholder}" value="${escapeHtml(value)}" aria-label="${label}（${unit}）"><em>${unit}</em></span></label>`;
     }
 
-    function careTimeField(key, label, value) {
-      return `<label class="care-field"><span>${label}</span><span class="care-time"><input type="time" data-care="${key}" value="${escapeHtml(value)}" aria-label="${label}の時刻"><button type="button" data-care-now="${key}" aria-label="${label}を今の時刻にする">今</button></span></label>`;
+    // undo: その記録(来所・入浴・昼食・おやつ・送り)が付いているとき、下に「この記録を取り消す」を出す(2026-11-20 現場の要望)
+    // 取り消しの確かめの枠は label の外に置く(枠の文を触っても時刻の欄が反応しないように)
+    function careTimeField(key, label, value, undo) {
+      const field = `<span>${label}</span><span class="care-time"><input type="time" data-care="${key}" value="${escapeHtml(value)}" aria-label="${label}の時刻"><button type="button" data-care-now="${key}" aria-label="${label}を今の時刻にする">今</button></span>`;
+      if (!undo) return `<label class="care-field">${field}</label>`;
+      return `<div class="care-field"><label class="care-time-label">${field}</label>` +
+        `<button type="button" class="care-time-undo" data-care-undo="${key}">この記録を取り消す</button><div class="care-undo-ask" data-care-undo-ask="${key}" role="alert" hidden></div></div>`;
+    }
+
+    // 時刻の欄と、その記録(日次実績の印)の対応。時刻を消すだけでは記録は残るので、取り消しは記録ごと行う。
+    // 取り消すと、実績の印・読取履歴(cleared にして行は残す)・時刻・食べた量・送迎がまとめて消え、修正履歴に残る(サーバーの setDailyStatus の clearService)
+    const CARE_TIME_SERVICE = { arrivalTime: 'arrival', departureTime: 'departure', bathTime: 'bath', lunchTime: 'lunch', snackTime: 'snack' };
+    const CARE_TIME_SERVICE_NAMES = { arrival: '来所', departure: '送り', bath: '入浴', lunch: '昼食', snack: 'おやつ' };
+
+    function careServiceRecorded(host, userId, key) {
+      if (!host || typeof host.clearService !== 'function' || typeof host.flags !== 'function') return false;
+      const service = CARE_TIME_SERVICE[key];
+      return Boolean(service && (host.flags(userId) || {})[service]);
+    }
+
+    function careUndoAskHtml(key, time) {
+      const name = CARE_TIME_SERVICE_NAMES[CARE_TIME_SERVICE[key]];
+      const notes = {
+        arrival: '来所を取り消すと、この日は来所していない扱いになります。送迎の記録も消えます。',
+        departure: '送りの送迎の記録も消えます。',
+        bath: '「入浴した」も消えます。',
+        lunch: '食べた量も消えます。',
+        snack: '食べた量も消えます。'
+      };
+      return `<b>${escapeHtml(name)}${time ? `（${escapeHtml(time)}）` : ''}の記録を取り消しますか？</b><small>${escapeHtml(notes[CARE_TIME_SERVICE[key]] || '')}押し間違い・読み間違いのときだけ使ってください。</small>` +
+        `<span class="care-undo-buttons"><button type="button" data-care-undo-yes="${key}">取り消す</button><button type="button" data-care-undo-no="${key}">やめる</button></span>`;
     }
 
     function careSelectField(key, label, value) {
@@ -5299,8 +5558,8 @@
           <fieldset class="care-group"><legend>送迎</legend>
             <p class="care-hint">QRの「来所」「送り」を読み取ると自動で入ります。QRが読めなかったときは「今」を押すと、そのまま来所・送りの記録になります。</p>
             <div class="care-grid two">
-              ${careTimeField('arrivalTime', '到着', v.arrivalTime)}
-              ${careTimeField('departureTime', '送り出発', v.departureTime)}
+              ${careTimeField('arrivalTime', '到着', v.arrivalTime, careServiceRecorded(host, user.userId, 'arrivalTime'))}
+              ${careTimeField('departureTime', '送り出発', v.departureTime, careServiceRecorded(host, user.userId, 'departureTime'))}
             </div>
             ${careTransportHtml(user, v)}
           </fieldset>
@@ -5316,8 +5575,8 @@
           </fieldset>
           <fieldset class="care-group"><legend>昼食・おやつ（摂取量）</legend>
             <div class="care-grid two care-time-row">
-              ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime)}
-              ${careTimeField('snackTime', 'おやつの時刻', v.snackTime)}
+              ${careTimeField('lunchTime', '昼食を食べた時刻', v.lunchTime, careServiceRecorded(host, user.userId, 'lunchTime'))}
+              ${careTimeField('snackTime', 'おやつの時刻', v.snackTime, careServiceRecorded(host, user.userId, 'snackTime'))}
             </div>
             <div class="care-grid two">
               ${careSelectField('mealAmount', '食事量', v.mealAmount)}
@@ -5333,13 +5592,20 @@
           </fieldset>
           <fieldset class="care-group"><legend>入浴</legend>
             <div class="care-grid two care-time-row">
-              ${careTimeField('bathTime', '入浴時刻', v.bathTime)}
+              ${careTimeField('bathTime', '入浴時刻', v.bathTime, careServiceRecorded(host, user.userId, 'bathTime'))}
             </div>
             ${careChoice('bathStatus', '入ったかどうか', [['done', '入浴した'], ['refused', '入浴しなかった']], v.bathStatus)}
             ${careChoice('bathType', '入浴方法', [['general', '一般浴'], ['special', '特浴']], v.bathType)}
           </fieldset>
           <fieldset class="care-group care-med"><legend>服薬</legend>
-            ${careChoice('medication', '薬を飲んだか', CARE_MEDICATION_CHOICES, v.medication)}
+            <div class="care-toilet-list care-med-list" data-med-list></div>
+            <input type="hidden" data-care="medicationLog" value="${escapeHtml(v.medicationLog)}">
+            ${!careHas(v.medicationLog) && careMedicationText(v.medication) ? `<p class="care-hint">以前の入力：${escapeHtml(careMedicationText(v.medication))}（時刻なし）</p>` : ''}
+            <div class="care-toilet-add care-med-add" role="group" aria-label="服薬を足す">
+              <button type="button" data-med-add="飲んだ">＋ 飲んだ</button>
+              <button type="button" data-med-add="飲まなかった">＋ 飲まなかった</button>
+            </div>
+            <p class="care-hint">押すと今の時刻で1回分が増えます。時刻は直せます。</p>
           </fieldset>
           <fieldset class="care-group care-toilet"><legend>排泄</legend>
             <div class="care-toilet-list" data-toilet-list></div>
@@ -5351,8 +5617,10 @@
             <p class="care-hint">押すと今の時刻で1回分が増えます。時刻は直せます。</p>
           </fieldset>
           <fieldset class="care-group care-treat"><legend>処置</legend>
-            ${careChoice('treatment', '処置をしたか', CARE_TREATMENT_CHOICES, v.treatment)}
-            <label class="care-field care-treat-note"><span>処置の内容（任意）</span><input data-care="treatmentNote" maxlength="${CARE_TREATMENT_NOTE_MAX}" autocomplete="off" placeholder="例: 軟膏、湿布、点眼" value="${escapeHtml(v.treatmentNote)}"></label>
+            ${(v.treatment === 'done' || v.treatment === 'none') ? `<p class="care-hint">以前の入力：処置 ${v.treatment === 'done' ? `行った${careHas(v.treatmentNote) ? `（${escapeHtml(v.treatmentNote)}）` : ''}` : 'なし'}（時刻なし）</p>` : ''}
+            ${host.call ? `<div class="care-treat-list" data-treat-list></div>
+            <button type="button" class="care-treat-add" data-treat-add>＋ 処置を記録する</button>
+            <p class="care-hint">押すと今の時刻で1回分が増えます。写真は1回に${CARE_TREATMENT_PHOTO_MAX}枚まで。写真は連絡帳・印刷には出ません。</p>` : ''}
           </fieldset>
           <fieldset class="care-group care-training"><legend>機能訓練</legend>
             ${careChoice('training', 'やったかどうか', CARE_TRAINING_CHOICES, v.training)}
@@ -5368,7 +5636,8 @@
           <div class="care-links">
             <button type="button" data-care-notebook>この方の連絡帳を見る</button>
             ${host.call ? `<button type="button" data-care-notes>${careNotesButtonText(host, user.userId)}</button>` : ''}
-            ${host.call ? '<button type="button" data-care-month>この方の月の実績</button>' : ''}
+            ${host.call ? '<button type="button" data-care-day-view>この日の記録を時刻の順に見る</button>' : ''}
+            ${host.call ? '<button type="button" data-care-month>この方の月の実績・過去の記録</button>' : ''}
             ${host.call ? '<button type="button" data-care-fee>実費（おむつ・マスクなど）</button>' : ''}
             ${host.openDayMenu ? '<button type="button" data-care-day>キャンセル・午前終了など</button>' : ''}
           </div>
@@ -5401,10 +5670,10 @@
       });
       // 1項目ずつその都度保存する: 押して選ぶ・欄から離れると、変わった項目だけを送る
       form.addEventListener('click', (event) => {
-        if (event.target.closest('[data-choice-value], [data-care-now], [data-care-add], [data-toilet-add], [data-toilet-del], [data-toilet-set]')) careScheduleSave(CARE_SAVE_DELAY.tap);
+        if (event.target.closest('[data-choice-value], [data-care-now], [data-care-add], [data-toilet-add], [data-toilet-del], [data-toilet-set], [data-med-add], [data-med-del], [data-med-set]')) careScheduleSave(CARE_SAVE_DELAY.tap);
       });
       form.addEventListener('change', (event) => {
-        if (event.target.closest('[data-care], [data-toilet-time]')) careScheduleSave(CARE_SAVE_DELAY.change);
+        if (event.target.closest('[data-care], [data-toilet-time], [data-med-time]')) careScheduleSave(CARE_SAVE_DELAY.change);
       });
       // バイタルを入れ終えて次の欄へ移ったとき(打った欄から離れた)は、待たずに送る。打っている途中は送らない
       form.addEventListener('input', (event) => {
@@ -5437,6 +5706,7 @@
           `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
         if (button.dataset.careNow === 'bathTime') selectBathDone();
       }));
+      bindCareUndo(form);
       form.querySelectorAll('[data-care-add]').forEach((button) => button.addEventListener('click', () => {
         const input = form.querySelector('[data-care="fluidMl"]');
         const current = Number(careToHalfWidth(input.value)) || 0;
@@ -5462,6 +5732,8 @@
         }));
       });
       bindCareToilet(form);
+      bindCareMed(form);
+      bindCareTreatments(form);
       // 「＋ 体重を入れる」: 体重測定が「測る」でない方も、測った日は体重を入れられる
       const weightAdd = form.querySelector('[data-care-weight-add]');
       if (weightAdd) weightAdd.addEventListener('click', () => {
@@ -5480,6 +5752,8 @@
       }));
       const notesButton = form.querySelector('[data-care-notes]');
       if (notesButton) notesButton.addEventListener('click', () => openUserNotes(careUi.host, careUi.userId));
+      const dayViewButton = form.querySelector('[data-care-day-view]');
+      if (dayViewButton) dayViewButton.addEventListener('click', () => careAfterSave(() => openCareDay(careUi.host, careUi.userId, careUi.businessDate || careUi.host.businessDate())));
       const monthButton = form.querySelector('[data-care-month]');
       if (monthButton) monthButton.addEventListener('click', () => openUserMonth(careUi.host, careUi.userId, careUi.host.businessDate()));
       const feeButton = form.querySelector('[data-care-fee]');
@@ -5577,6 +5851,355 @@
       });
     }
 
+    // ---- 処置の入力(1回ごとに時刻・内容・写真3枚まで。2026-11-19) ----
+    // ケア記録の自動保存とは別に、押したとき・欄から離れたときにその1回分だけを送る(写真があるため別のシート)。
+    // 送れたら、サーバーが返したその方のケア記録(処置の一覧つき)で今日の一覧も直す。
+    const careTreatUi = { list: [], busy: false, message: '', error: false, pendingAdd: null };
+
+    // 「＋ 処置を記録する」の番号。送れなかったとき(電波が切れて返事が来なかったときも)は、押し直しても同じ番号を送る。
+    // サーバーは同じ番号の処置がもうあれば足さないので、押し直しで2行にならない。送れたら次の1回は新しい番号
+    function careTreatAddKey(userId, businessDate) {
+      const pending = careTreatUi.pendingAdd;
+      if (pending && pending.userId === userId && pending.businessDate === businessDate) return pending.key;
+      let key = '';
+      try {
+        const bytes = new Uint8Array(12);
+        window.crypto.getRandomValues(bytes);
+        key = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+      } catch (error) {
+        key = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`;
+      }
+      careTreatUi.pendingAdd = { userId, businessDate, key };
+      return key;
+    }
+
+    function careTreatEditable() {
+      return Boolean(careUi.host && careUi.host.call);
+    }
+
+    function careTreatRowHtml(treatment) {
+      const photos = (treatment.photoIds || []).length;
+      return `<div class="care-treat-row" data-treat-id="${escapeHtml(treatment.treatmentId)}">
+        <div class="care-toilet-top">
+          <span class="care-toilet-kind">処置</span>
+          <input type="time" data-treat-time value="${escapeHtml(treatment.time)}" aria-label="処置の時刻">
+          <button type="button" class="care-toilet-del" data-treat-del aria-label="この処置の記録を消す">消す</button>
+        </div>
+        <label class="care-field care-treat-note"><span>内容</span><input data-treat-note maxlength="${CARE_TREATMENT_NOTE_MAX}" autocomplete="off" placeholder="例: 右ひざの擦り傷に軟膏、湿布、点眼" value="${escapeHtml(treatment.note || '')}"></label>
+        <div class="care-treat-photos">
+          <span class="care-treat-count">写真 ${photos}枚</span>
+          ${photos ? '<button type="button" data-treat-view>写真を見る・外す</button>' : ''}
+          ${photos < CARE_TREATMENT_PHOTO_MAX ? `<label class="care-treat-shot">＋ 写真を撮る・選ぶ<input type="file" accept="image/*" data-treat-photo hidden></label>` : ''}
+        </div>
+      </div>`;
+    }
+
+    function renderCareTreatments(form) {
+      const list = form.querySelector('[data-treat-list]');
+      if (!list) return;
+      list.innerHTML = `${careTreatUi.list.length ? careTreatUi.list.map(careTreatRowHtml).join('') : '<p class="care-toilet-empty">まだ記録はありません。</p>'}
+        ${careTreatUi.message ? `<p class="care-treat-status${careTreatUi.error ? ' error' : ''}" role="status">${escapeHtml(careTreatUi.message)}</p>` : ''}`;
+      const add = form.querySelector('[data-treat-add]');
+      if (add) add.disabled = careTreatUi.busy;
+    }
+
+    // サーバーの返事(careRecord つき)を、画面の一覧と今日の一覧に当てはめる
+    function careTreatApply(form, result, message) {
+      if (result && result.careRecord) {
+        careUi.host.applySaved(careUi.userId, { careRecord: result.careRecord });
+        careTreatUi.list = (result.careRecord.treatmentList || []).slice();
+      }
+      careTreatUi.message = message || '';
+      careTreatUi.error = false;
+      renderCareTreatments(form);
+    }
+
+    async function careTreatCall(form, action, payload, message) {
+      if (careTreatUi.busy) return null;
+      const token = careUi.token;
+      careTreatUi.busy = true;
+      careTreatUi.message = '送っています…';
+      careTreatUi.error = false;
+      renderCareTreatments(form);
+      try {
+        const result = await careUi.host.call(action, payload);
+        if (!result || result.ok === false) throw new Error((result && result.error) || '保存できませんでした。');
+        careTreatUi.busy = false;
+        if (token !== careUi.token || !document.getElementById('careSheet')) return result;
+        careTreatApply(form, result, message);
+        return result;
+      } catch (error) {
+        careTreatUi.busy = false;
+        if (token !== careUi.token || !document.getElementById('careSheet')) return null;
+        careTreatUi.message = `送れませんでした。${friendlyError(error)}（処置と写真は、電波のある所で送ってください）`;
+        careTreatUi.error = true;
+        renderCareTreatments(form);
+        return null;
+      }
+    }
+
+    function bindCareTreatments(form) {
+      const box = form.querySelector('.care-treat');
+      if (!box || !form.querySelector('[data-treat-list]')) return;
+      const care = careUi.host.care(careUi.userId) || {};
+      careTreatUi.list = Array.isArray(care.treatmentList) ? care.treatmentList.slice() : [];
+      careTreatUi.busy = false;
+      careTreatUi.message = '';
+      careTreatUi.error = false;
+      renderCareTreatments(form);
+      const findRow = (target) => {
+        const row = target.closest('[data-treat-id]');
+        return row ? { row, treatment: careTreatUi.list.find((item) => item.treatmentId === row.dataset.treatId) } : null;
+      };
+      const now = () => {
+        const date = new Date();
+        return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+      };
+      box.addEventListener('click', (event) => {
+        if (event.target.closest('[data-treat-add]')) {
+          if (careTreatUi.busy) return;
+          const businessDate = careUi.businessDate || careUi.host.businessDate();
+          const clientKey = careTreatAddKey(careUi.userId, businessDate);
+          careTreatCall(form, 'saveTreatment', { userId: careUi.userId, businessDate, time: now(), note: '', clientKey }, '処置を1回足しました。内容を入れて、写真があれば撮ってください。').then((result) => {
+            if (result && careTreatUi.pendingAdd && careTreatUi.pendingAdd.key === clientKey) careTreatUi.pendingAdd = null;
+            const row = result && form.querySelector(`[data-treat-id="${result.treatmentId}"] [data-treat-note]`);
+            if (row) row.focus();
+          });
+          return;
+        }
+        const hit = findRow(event.target);
+        if (!hit || !hit.treatment) return;
+        if (event.target.closest('[data-treat-del]')) {
+          const photos = (hit.treatment.photoIds || []).length;
+          if (!window.confirm(`${hit.treatment.time} の処置の記録を消しますか？${photos ? `（写真${photos}枚も外れます）` : ''}`)) return;
+          careTreatCall(form, 'deleteTreatment', { treatmentId: hit.treatment.treatmentId }, '処置の記録を消しました。');
+          return;
+        }
+        if (event.target.closest('[data-treat-view]')) {
+          openTreatmentPhotos(careUi.host, hit.treatment, (result) => {
+            if (document.getElementById('careSheet')) careTreatApply(form, result, '写真を外しました。');
+          });
+        }
+      });
+      // 時刻・内容は欄から離れたときに送る(打っている途中は送らない)
+      box.addEventListener('change', (event) => {
+        const hit = findRow(event.target);
+        if (!hit || !hit.treatment) return;
+        if (event.target.closest('[data-treat-photo]')) {
+          const file = event.target.files && event.target.files[0];
+          event.target.value = '';
+          if (!file) return;
+          careTreatUi.message = '写真を縮めています…';
+          renderCareTreatments(form);
+          dsResizePhoto(file).then((dataUrl) => careTreatCall(form, 'addTreatmentPhoto', { treatmentId: hit.treatment.treatmentId, dataUrl }, '写真を保存しました。'))
+            .catch((error) => {
+              careTreatUi.message = `写真を読めませんでした。${friendlyError(error)}`;
+              careTreatUi.error = true;
+              renderCareTreatments(form);
+            });
+          return;
+        }
+        const time = hit.row.querySelector('[data-treat-time]').value;
+        const note = hit.row.querySelector('[data-treat-note]').value.trim();
+        if (!/^\d{1,2}:\d{2}$/.test(careToHalfWidth(time))) {
+          careTreatUi.message = '処置の時刻を「9:30」の形で入れてください。';
+          careTreatUi.error = true;
+          renderCareTreatments(form);
+          return;
+        }
+        if (careTimeText(time) === hit.treatment.time && note === (hit.treatment.note || '')) return;
+        careTreatCall(form, 'saveTreatment', { treatmentId: hit.treatment.treatmentId, time, note }, '処置を保存しました。');
+      });
+    }
+
+    // 写真を端末で縮める(長辺1280pxのJPEG)。傷の様子が分かる程度に残し、送る量を減らす
+    function dsResizePhoto(file) {
+      return new Promise((resolve, reject) => {
+        if (!file || !/^image\//.test(file.type || 'image/')) {
+          reject(new Error('写真のファイルを選んでください。'));
+          return;
+        }
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          try {
+            const scale = Math.min(1, 1280 / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext('2d');
+            context.fillStyle = '#fff';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+            if (dataUrl.length > 2600000) dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+            URL.revokeObjectURL(url);
+            resolve(dataUrl);
+          } catch (error) {
+            URL.revokeObjectURL(url);
+            reject(error);
+          }
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error('この写真は読めませんでした。'));
+        };
+        image.src = url;
+      });
+    }
+
+    // 処置の写真を見る(押したときだけ1枚ずつ読み込む。端末には残さない)。onRemoved があれば「この写真を外す」を出す
+    function openTreatmentPhotos(host, treatment, onRemoved) {
+      if (!host || !host.call || !treatment) return;
+      const previous = document.getElementById('dsTreatPhotos');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsTreatPhotos';
+      overlay.className = 'nb-overlay ds-treat-photos';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '処置の写真');
+      const close = () => {
+        const existing = document.getElementById('dsTreatPhotos');
+        if (!existing) return;
+        existing.remove();
+        GinNav.closed('dsTreatPhotos');
+      };
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-tp-close>← 戻る</button>
+          <div class="nb-title"><strong>処置の写真</strong><span>${escapeHtml(treatment.time || '')} ${escapeHtml(treatment.note || '')}</span></div>
+          <span></span>
+        </div>
+        <div class="um-body tp-body">
+          <p class="ds-note">この写真は連絡帳・印刷には出ません。画面を閉じると端末には残りません。</p>
+          <div class="tp-grid">${(treatment.photoIds || []).map((photoId, index) => `<figure class="tp-item" data-tp-photo="${escapeHtml(photoId)}">
+            <div class="tp-frame"><span class="ds-note">${index + 1}枚目を読み込んでいます…</span></div>
+            ${onRemoved ? `<button type="button" class="tp-remove" data-tp-remove="${escapeHtml(photoId)}">この写真を外す（撮り直す）</button>` : ''}
+          </figure>`).join('')}</div>
+          <p class="tp-status" role="status"></p>
+        </div>`;
+      document.body.appendChild(overlay);
+      if (!GinNav.isTop('dsTreatPhotos')) GinNav.push('dsTreatPhotos', close);
+      overlay.querySelector('[data-tp-close]').addEventListener('click', close);
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          close();
+        }
+      });
+      overlay.addEventListener('click', async (event) => {
+        const remove = event.target.closest('[data-tp-remove]');
+        if (!remove || remove.disabled) return;
+        if (!window.confirm('この写真を外しますか？（ドライブのゴミ箱に移ります）')) return;
+        remove.disabled = true;
+        const status = overlay.querySelector('.tp-status');
+        status.textContent = '外しています…';
+        try {
+          const result = await host.call('removeTreatmentPhoto', { treatmentId: treatment.treatmentId, photoId: remove.dataset.tpRemove });
+          if (!result || result.ok === false) throw new Error((result && result.error) || '外せませんでした。');
+          close();
+          onRemoved(result);
+        } catch (error) {
+          remove.disabled = false;
+          status.textContent = `外せませんでした。${friendlyError(error)}`;
+        }
+      });
+      (treatment.photoIds || []).reduce((chain, photoId) => chain.then(() => host.call('treatmentPhoto', { treatmentId: treatment.treatmentId, photoId })
+        .then((result) => {
+          const frame = overlay.querySelector(`[data-tp-photo="${photoId}"] .tp-frame`);
+          if (!frame) return;
+          if (!result || result.ok === false || !/^data:image\//.test(result.dataUrl || '')) {
+            frame.innerHTML = `<span class="ds-note">${escapeHtml((result && result.error) || '読めませんでした。')}</span>`;
+            return;
+          }
+          frame.innerHTML = '';
+          const image = document.createElement('img');
+          image.alt = '処置の写真';
+          image.src = result.dataUrl;
+          frame.appendChild(image);
+        })
+        .catch((error) => {
+          const frame = overlay.querySelector(`[data-tp-photo="${photoId}"] .tp-frame`);
+          if (frame) frame.innerHTML = `<span class="ds-note">読めませんでした。${escapeHtml(friendlyError(error))}</span>`;
+        })), Promise.resolve());
+      overlay.querySelector('[data-tp-close]').focus({ preventScroll: true });
+    }
+
+    // ---- 服薬の入力(1日に何回でも。排泄と同じ形) ----
+    // 画面の行は careMedRows に持ち、変わるたびに隠し欄 data-care="medicationLog" へ文にして入れる
+    let careMedRows = [];
+
+    function careMedRowHtml(entry, index) {
+      return `<div class="care-toilet-row care-med-row ${entry.result === '飲まなかった' ? 'missed' : ''}">
+        <div class="care-toilet-top">
+          <span class="care-toilet-kind">服薬</span>
+          <input type="time" data-med-time="${index}" value="${escapeHtml(entry.time)}" aria-label="服薬の時刻">
+          <button type="button" class="care-toilet-del" data-med-del="${index}" aria-label="この服薬の記録を消す">消す</button>
+        </div>
+        <div class="care-choice care-toilet-chips care-med-chips" role="group" aria-label="飲んだかどうか">${CARE_MEDICATION_RESULTS.map((choice) =>
+        `<button type="button" data-med-set="${index}" data-med-value="${choice}" aria-pressed="${String(entry.result === choice)}">${choice}</button>`).join('')}</div>
+      </div>`;
+    }
+
+    function renderCareMed(form) {
+      const list = form.querySelector('[data-med-list]');
+      if (!list) return;
+      list.innerHTML = careMedRows.length
+        ? careMedRows.map(careMedRowHtml).join('')
+        : '<p class="care-toilet-empty">まだ記録はありません。</p>';
+      form.querySelectorAll('[data-med-add]').forEach((button) => { button.disabled = careMedRows.length >= CARE_MEDICATION_MAX; });
+    }
+
+    function syncCareMed(form) {
+      const hidden = form.querySelector('[data-care="medicationLog"]');
+      if (hidden) hidden.value = careMedicationLogText(careMedRows);
+    }
+
+    function bindCareMed(form) {
+      const box = form.querySelector('.care-med');
+      const hidden = form.querySelector('[data-care="medicationLog"]');
+      if (!box || !hidden) return;
+      careMedRows = careMedicationEntries(hidden.value);
+      renderCareMed(form);
+      box.addEventListener('click', (event) => {
+        const add = event.target.closest('[data-med-add]');
+        if (add) {
+          if (careMedRows.length >= CARE_MEDICATION_MAX) return;
+          const now = new Date();
+          careMedRows.push({ time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`, result: add.dataset.medAdd });
+          renderCareMed(form);
+          syncCareMed(form);
+          const rows = box.querySelectorAll('.care-med-row');
+          if (rows.length) rows[rows.length - 1].scrollIntoView({ block: 'nearest' });
+          return;
+        }
+        const del = event.target.closest('[data-med-del]');
+        if (del) {
+          careMedRows.splice(Number(del.dataset.medDel), 1);
+          renderCareMed(form);
+          syncCareMed(form);
+          return;
+        }
+        const set = event.target.closest('[data-med-set]');
+        if (set) {
+          const entry = careMedRows[Number(set.dataset.medSet)];
+          if (!entry) return;
+          // 飲んだ/飲まなかったは、どちらか必ず選んでおく(押すと切り替わる)
+          entry.result = set.dataset.medValue;
+          renderCareMed(form);
+          syncCareMed(form);
+        }
+      });
+      box.addEventListener('change', (event) => {
+        const time = event.target.closest('[data-med-time]');
+        if (!time) return;
+        const entry = careMedRows[Number(time.dataset.medTime)];
+        if (entry) entry.time = careTimeText(time.value);
+        syncCareMed(form);
+      });
+    }
+
     function careCurrentValues() {
       const form = document.querySelector('#careSheet form');
       const values = {};
@@ -5616,6 +6239,9 @@
       }
       if ('excretionLog' in changed && careToiletRows.some((entry) => !entry.time)) {
         return { key: 'excretionLog', message: '排泄の時刻を入れてください（時刻が空の行があります）。' };
+      }
+      if ('medicationLog' in changed && careMedRows.some((entry) => !entry.time)) {
+        return { key: 'medicationLog', message: '服薬の時刻を入れてください（時刻が空の行があります）。' };
       }
       if (values && ('bathTime' in changed || 'bathStatus' in changed) && values.bathTime && values.bathStatus !== 'done') {
         return { key: 'bathTime', message: '入浴しなかったときは、入浴時刻を空にしてください。' };
@@ -5692,6 +6318,7 @@
       try {
         // 排泄は最後に保存した記録も送る(別の端末で同じ方の排泄を足していても消さない)
         const base = 'excretionLog' in send ? { excretionLogBase: (careUi.initial && careUi.initial.excretionLog) || '' } : {};
+        if ('medicationLog' in send) base.medicationLogBase = (careUi.initial && careUi.initial.medicationLog) || '';
         const result = await host.save(Object.assign({ businessDate: careUi.businessDate || host.businessDate(), userId }, send, base));
         host.applySaved(userId, result || {});
         dsRefreshRecordList();
@@ -5700,6 +6327,7 @@
         Object.keys(send).forEach((key) => { careUi.initial[key] = values[key]; });
         careUi.savedCount += 1;
         if ('excretionLog' in send) careTakeMergedExcretion(result, values.excretionLog);
+        if ('medicationLog' in send) careTakeMergedMedication(result, values.medicationLog);
         const now = new Date();
         const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
         if (careUi.problem) showCareStatus(`${problem.message}（ほかの項目は ${time} に保存しました）`, true);
@@ -5727,7 +6355,81 @@
       careUi.initial.excretionLog = hidden.value;
     }
 
+    // 服薬も排泄と同じ: 別の端末で足された分があれば、まとめた記録を画面に出す
+    function careTakeMergedMedication(result, sent) {
+      const saved = result && result.careRecord ? String(result.careRecord.medicationLog || '') : null;
+      if (saved === null) return;
+      const form = document.querySelector('#careSheet form');
+      const hidden = form && form.querySelector('[data-care="medicationLog"]');
+      if (!hidden || hidden.value !== sent) return;
+      const merged = careMedicationLogText(careMedicationEntries(saved));
+      if (merged === careMedicationLogText(careMedicationEntries(sent))) return;
+      careMedRows = careMedicationEntries(merged);
+      renderCareMed(form);
+      syncCareMed(form);
+      careUi.initial.medicationLog = hidden.value;
+    }
+
     // 連絡帳・実費などへ移る前に、待っている保存を送り終える
+    // ---- 記録の取り消し(時刻の欄の下の「この記録を取り消す」) ----
+    function bindCareUndo(form) {
+      form.querySelectorAll('[data-care-undo]').forEach((button) => button.addEventListener('click', () => {
+        const key = button.dataset.careUndo;
+        const ask = form.querySelector(`[data-care-undo-ask="${key}"]`);
+        const input = form.querySelector(`[data-care="${key}"]`);
+        if (!ask) return;
+        ask.innerHTML = careUndoAskHtml(key, careTimeText((careUi.initial && careUi.initial[key]) || (input && input.value) || ''));
+        ask.hidden = false;
+        button.hidden = true;
+        ask.querySelector('[data-care-undo-no]').addEventListener('click', () => {
+          ask.hidden = true;
+          ask.innerHTML = '';
+          button.hidden = false;
+          button.focus();
+        });
+        ask.querySelector('[data-care-undo-yes]').addEventListener('click', () => careUndoService(key));
+        ask.querySelector('[data-care-undo-no]').focus();
+      }));
+      // 時刻を消しただけでは記録は残る。iPad の時刻の「リセット」は、開いたときの時刻に戻すだけ(2026-11-19 おやつ 9:02 の件)
+      Object.keys(CARE_TIME_SERVICE).forEach((key) => {
+        const input = form.querySelector(`[data-care="${key}"]`);
+        if (!input || !form.querySelector(`[data-care-undo="${key}"]`)) return;
+        input.addEventListener('change', () => {
+          if (input.value) return;
+          showCareStatus(`時刻を消しても、${CARE_TIME_SERVICE_NAMES[CARE_TIME_SERVICE[key]]}の記録は残ります。記録ごと消すときは、時刻の下の「この記録を取り消す」を押してください。`, false);
+        });
+      });
+    }
+
+    // 待っている保存を送り終えてから取り消す(取り消したあとに古い時刻の保存が届いて戻らないように)。
+    // 取り消したら、ケア記録を開き直して今の記録を出す
+    function careUndoService(key) {
+      const service = CARE_TIME_SERVICE[key];
+      const name = CARE_TIME_SERVICE_NAMES[service];
+      return careAfterSave(async () => {
+        const host = careUi.host;
+        const userId = careUi.userId;
+        const ask = document.querySelector(`#careSheet [data-care-undo-ask="${key}"]`);
+        if (ask) ask.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+        showCareStatus(`${name}の記録を取り消しています…`, false);
+        // 取り消せなかったときは、理由(通信できない・確定済みの日など)をそのまま出す
+        let ok = false;
+        let reason = '';
+        try {
+          ok = Boolean(await host.clearService(userId, service));
+        } catch (error) {
+          ok = false;
+          reason = error && error.message ? String(error.message) : '';
+        }
+        if (!document.getElementById('careSheet') || careUi.userId !== userId || careUi.host !== host) return;
+        closeCareForm(true);
+        openCareForm(host, userId);
+        showCareStatus(ok ? `${name}の記録を取り消しました。` : `${name}の記録を取り消せませんでした。${reason || '通信を確かめて、もう一度押してください。'}`, !ok);
+        const field = document.querySelector(`#careSheet [data-care="${key}"]`);
+        if (field) field.scrollIntoView({ block: 'center' });
+      });
+    }
+
     async function careAfterSave(next) {
       if (careUi.saving || !document.getElementById('careSheet')) return;
       const token = careUi.token;
@@ -7097,8 +7799,7 @@
         { label: '水分', value: careHas(c.fluidMl) ? `${c.fluidMl} ml` : '' },
         { label: '入浴', value: bath },
         // 服薬・排泄は記録した日だけ載せる(薬のない方・記録のない日に「未記録」を出さない)
-        c.medication === 'taken' || c.medication === 'missed'
-          ? { label: 'お薬', value: c.medication === 'taken' ? '飲まれました' : '本日は飲まれませんでした' } : null,
+        careMedicationNotebookText(c) ? { label: 'お薬', value: careMedicationNotebookText(c) } : null,
         careExcretionNotebookText(c) ? { label: '排泄', value: careExcretionNotebookText(c) } : null,
         c.training === 'done' || c.training === 'skipped'
           ? { label: '機能訓練', value: c.training === 'done' ? '行いました' : '本日は行いませんでした' } : null,
@@ -8149,6 +8850,8 @@
         }
         if (event.target.closest('[data-um-retry]')) loadUserMonth();
         if (event.target.closest('[data-um-pdf]')) dsShareUserMonthPdf();
+        const dayButton = event.target.closest('[data-um-day]');
+        if (dayButton) openCareDay(dsUmUi.host, dsUmUi.userId, dayButton.dataset.umDay);
       });
       overlay.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
@@ -8208,12 +8911,16 @@
       return tags;
     }
 
+    // 1日の行。押すと、その日の記録を時刻の順に見る(2026-11-19 現場の要望「過去の記録も見れるように」)
     function dsUmDayHtml(day, today) {
       const [statusKind, statusText] = dsUmStatus(day);
       const tagHtml = dsUmDayTags(day, today).map(([kind, text]) => `<span class="um-tag ${kind}">${escapeHtml(text)}</span>`).join('');
       return `<li class="um-day${day.status === 'cancelled' || day.status === 'off' ? ' muted' : ''}">
-        <span class="um-date">${escapeHtml(dsVhShortDate(day.businessDate))}</span>
-        <span class="um-main"><span class="um-status ${statusKind}">${escapeHtml(statusText)}</span>${tagHtml ? `<span class="um-tags">${tagHtml}</span>` : ''}</span>
+        <button type="button" class="um-day-open" data-um-day="${escapeHtml(day.businessDate)}" aria-label="${escapeHtml(dsVhShortDate(day.businessDate))}の記録を時刻の順に見る">
+          <span class="um-date">${escapeHtml(dsVhShortDate(day.businessDate))}</span>
+          <span class="um-main"><span class="um-status ${statusKind}">${escapeHtml(statusText)}</span>${tagHtml ? `<span class="um-tags">${tagHtml}</span>` : ''}</span>
+          <span class="um-go" aria-hidden="true">›</span>
+        </button>
       </li>`;
     }
 
@@ -8450,7 +9157,248 @@
       }
       body.innerHTML = `${switcher}${help}${printTitle}<div class="um-tiles">${tiles}</div>
         <ol class="um-days">${data.days.map((day) => dsUmDayHtml(day, today)).join('')}</ol>
-        <p class="ds-legend">記録のある日だけを日付の順に出しています。数え方は月次表と同じです（来所・入浴・昼食のどれかを記録した日を「利用」）。記録を直すときは、その日のケア記録や「キャンセル・午前終了など」から直します。</p>`;
+        <p class="ds-legend">日付を押すと、その日の記録を時刻の順に見られます。記録のある日だけを日付の順に出しています。数え方は月次表と同じです（来所・入浴・昼食のどれかを記録した日を「利用」）。記録を直すときは、その日のケア記録や「キャンセル・午前終了など」から直します。</p>`;
+    }
+
+    // ===== 1人の1日を時刻の順に見る・過去の記録(2026-11-19 現場の要望) =====
+    // 「時系列でケア記録が見れるように」「過去の記録も見れるように。過去の記録は期間を限定しません」。
+    // サーバーは careDay(getCareDay)。読むだけで、ここから記録は直さない(直すのは今日のケア記録・管理画面)。
+    // 時刻のある記録(到着・排泄・服薬・昼食・入浴・おやつ・送り・特記事項・実費、バイタル・レク・機能訓練は最初に入れた時刻)を時刻の順に、
+    // 時刻の無い記録(以前の日のバイタルなど・水分の合計・連絡帳の連絡事項)は下にまとめる。
+    const dsCdUi = { seq: 0, host: null, userId: '', date: '', data: null, error: '' };
+
+    // 「バイタル 10:40／レク 14:00」→ { バイタル: '10:40', レク: '14:00' }
+    function careItemTimes(text) {
+      const map = {};
+      String(text == null ? '' : text).split(/[／/]+/).forEach((piece) => {
+        const match = piece.trim().match(/^(\S+)\s+(\d{2}:\d{2})$/);
+        if (match) map[match[1]] = match[2];
+      });
+      return map;
+    }
+
+    // day: careDay の結果(care・bath・status・notes・fees)。{ timed: [{ time, kind, label, text }], untimed: [...] } を返す
+    function careTimelineItems(day) {
+      const d = day || {};
+      const c = d.care || {};
+      const timed = [];
+      const untimed = [];
+      const put = (time, kind, label, text) => {
+        const item = { time: careTimeText(time), kind, label, text: text || '' };
+        (item.time ? timed : untimed).push(item);
+      };
+      const itemTimes = careItemTimes(c.itemTimes);
+      const transport = (value) => CARE_TRANSPORT_LABELS[value] || '';
+      if (careHas(c.arrivalTime) || c.arrivalTransport) put(c.arrivalTime, 'time', '到着', transport(c.arrivalTransport));
+      const vitals = careVitalTexts(c);
+      if (vitals.length) put(itemTimes['バイタル'], 'vital', 'バイタル', vitals.join('　'));
+      careExcretionEntries(c.excretionLog).forEach((entry) => {
+        put(entry.time, 'toilet', entry.kind === '便' ? '排便' : '排尿', [entry.amount, entry.form].filter(Boolean).join('・'));
+      });
+      careMedicationEntries(c.medicationLog).forEach((entry) => {
+        put(entry.time, entry.result === '飲まなかった' ? 'med missed' : 'med', '服薬', entry.result);
+      });
+      if (!careMedicationEntries(c.medicationLog).length && careMedicationText(c.medication)) {
+        put('', c.medication === 'missed' ? 'med missed' : 'med', '服薬', c.medication === 'missed' ? '飲まなかった' : '飲んだ');
+      }
+      const meal = careMealTexts(c);
+      if (careHas(c.lunchTime) || meal.length || d.lunch) put(c.lunchTime, 'meal', '昼食', meal.join('　'));
+      if (d.bath === 'done' || careHas(c.bathTime) || c.bathType) {
+        put(c.bathTime, 'bath', '入浴', c.bathType === 'special' ? '特浴' : (c.bathType === 'general' ? '一般浴' : ''));
+      }
+      if (d.bath === 'refused') put('', 'refused', '入浴', '入浴しなかった');
+      if (careHas(c.snackTime) || careHas(c.snackAmount) || d.snack) put(c.snackTime, 'snack', 'おやつ', careHas(c.snackAmount) ? careAmountText(c.snackAmount) : '');
+      if (c.recreation === 'joined' || c.recreation === 'absent') put(itemTimes['レク'], 'rec', 'レク', c.recreation === 'joined' ? '参加' : '不参加');
+      if (c.training === 'done' || c.training === 'skipped') put(itemTimes['機能訓練'], c.training === 'done' ? 'training' : 'training skipped', '機能訓練', c.training === 'done' ? 'やった' : 'やっていない');
+      const treatments = Array.isArray(c.treatmentList) ? c.treatmentList : [];
+      treatments.forEach((treatment) => {
+        const photos = (treatment.photoIds || []).length;
+        put(treatment.time, 'treat', '処置', `${treatment.note || '（内容なし）'}${photos ? `（写真${photos}枚）` : ''}`);
+        const item = (careTimeText(treatment.time) ? timed : untimed)[(careTimeText(treatment.time) ? timed : untimed).length - 1];
+        if (photos) item.treatment = treatment;
+      });
+      if (!treatments.length && (c.treatment === 'done' || c.treatment === 'none')) put('', c.treatment === 'done' ? 'treat' : 'treat none', '処置', c.treatment === 'done' ? (careHas(c.treatmentNote) ? String(c.treatmentNote) : '行った') : 'なし');
+      (d.notes || []).forEach((note) => put(note.time, 'note', '特記事項', note.body));
+      (d.fees || []).forEach((fee) => put(fee.time, 'fee', '実費', `${fee.itemName}${Number(fee.quantity) > 1 ? ` ×${fee.quantity}` : ''}`));
+      if (careHas(c.departureTime) || c.departureTransport) put(c.departureTime, 'time', '送り', transport(c.departureTransport));
+      if (careHas(c.fluidMl)) untimed.push({ time: '', kind: 'fluid', label: '水分', text: `1日の合計 ${c.fluidMl}ml` });
+      if (careHas(c.notebookNote)) untimed.push({ time: '', kind: 'nb', label: '連絡帳の連絡事項', text: String(c.notebookNote) });
+      // 時刻の順(同じ時刻は上で入れた順のまま)
+      const order = timed.map((item, index) => ({ item, index }));
+      order.sort((a, b) => (a.item.time === b.item.time ? a.index - b.index : (a.item.time < b.item.time ? -1 : 1)));
+      return { timed: order.map(({ item }) => item), untimed };
+    }
+
+    function dsCdItemHtml(item) {
+      return `<li class="cd-item ${escapeHtml(item.kind)}">
+        <span class="cd-time">${item.time ? escapeHtml(item.time) : '—'}</span>
+        <span class="cd-body"><span class="cd-label">${escapeHtml(item.label)}</span>${item.text ? `<span class="cd-text">${escapeHtml(item.text)}</span>` : ''}${item.treatment ? `<button type="button" class="cd-photos" data-cd-photos="${escapeHtml(item.treatment.treatmentId)}">写真を見る</button>` : ''}</span>
+      </li>`;
+    }
+
+    function dsCdShiftDate(dateText, delta) {
+      const [year, month, day] = String(dateText || '').split('-').map(Number);
+      const next = new Date(year, month - 1, day + delta);
+      return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`;
+    }
+
+    function openCareDay(host, userId, dateText) {
+      if (!host || !host.call) return;
+      dsCdUi.host = host;
+      dsCdUi.userId = normalizeClientUserId(userId);
+      dsCdUi.date = dateText || host.businessDate();
+      const user = host.findUser(dsCdUi.userId) || {};
+      const previous = document.getElementById('dsCareDay');
+      if (previous) previous.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'dsCareDay';
+      overlay.className = 'nb-overlay ds-careday';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '時刻の順の記録');
+      overlay.innerHTML = `
+        <div class="nb-toolbar">
+          <button type="button" data-cd-close>← 戻る</button>
+          <div class="nb-title"><strong>時刻の順の記録</strong><span>${escapeHtml(user.displayName || '')} 様${dsIsCareHouse(user) ? '（ケアハウス）' : ''}</span></div>
+          <span></span>
+        </div>
+        <div class="um-body cd-body-wrap" id="dsCdBody"></div>`;
+      document.body.appendChild(overlay);
+      if (!GinNav.isTop('dsCareDay')) GinNav.push('dsCareDay', closeCareDay);
+      overlay.querySelector('[data-cd-close]').addEventListener('click', closeCareDay);
+      overlay.addEventListener('click', (event) => {
+        const shift = event.target.closest('[data-cd-shift]');
+        if (shift && !shift.disabled) {
+          dsCdUi.date = dsCdShiftDate(dsCdUi.date, Number(shift.dataset.cdShift));
+          loadCareDay();
+        }
+        if (event.target.closest('[data-cd-retry]')) loadCareDay();
+        const photos = event.target.closest('[data-cd-photos]');
+        if (photos && dsCdUi.data) {
+          const treatment = ((dsCdUi.data.care || {}).treatmentList || []).find((item) => item.treatmentId === photos.dataset.cdPhotos);
+          if (treatment) openTreatmentPhotos(dsCdUi.host, treatment, null);
+        }
+        if (event.target.closest('[data-cd-month]')) {
+          const { host: monthHost, userId: monthUser, date } = dsCdUi;
+          closeCareDay();
+          if (!document.getElementById('dsUserMonth')) openUserMonth(monthHost, monthUser, date);
+        }
+      });
+      overlay.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.stopPropagation();
+          closeCareDay();
+        }
+      });
+      loadCareDay();
+      overlay.querySelector('[data-cd-close]').focus({ preventScroll: true });
+    }
+
+    function closeCareDay() {
+      const existing = document.getElementById('dsCareDay');
+      if (existing) existing.remove();
+      dsCdUi.seq++;
+      if (existing) GinNav.closed('dsCareDay');
+    }
+
+    function loadCareDay() {
+      const seq = ++dsCdUi.seq;
+      dsCdUi.data = null;
+      dsCdUi.error = '';
+      renderCareDay();
+      dsCdUi.host.call('careDay', { userId: dsCdUi.userId, businessDate: dsCdUi.date }).then((result) => {
+        if (seq !== dsCdUi.seq) return;
+        if (!result || result.ok === false) throw new Error((result && result.error) || '読み込めませんでした。');
+        dsCdUi.data = result;
+        renderCareDay();
+      }).catch((error) => {
+        if (seq !== dsCdUi.seq) return;
+        dsCdUi.error = typeof friendlyError === 'function' ? friendlyError(error) : String((error && error.message) || error);
+        renderCareDay();
+      });
+    }
+
+    function renderCareDay() {
+      const body = document.getElementById('dsCdBody');
+      if (!body) return;
+      const today = dsUmToday();
+      const switcher = `<div class="um-months cd-days" role="group" aria-label="日を選ぶ">
+        <button type="button" data-cd-shift="-1" aria-label="前の日">‹ 前の日</button>
+        <strong>${escapeHtml(careDateLabel(dsCdUi.date))}</strong>
+        <button type="button" data-cd-shift="1" aria-label="次の日" ${dsCdUi.date >= today ? 'disabled' : ''}>次の日 ›</button>
+      </div>`;
+      const monthLink = '<button type="button" class="ds-umonth-open cd-month" data-cd-month>この方の月の一覧（ほかの日を選ぶ）</button>';
+      if (dsCdUi.error) {
+        body.innerHTML = `${switcher}<div class="empty-state"><strong>読み込めませんでした</strong>${escapeHtml(dsCdUi.error)}<br><button type="button" data-cd-retry>もう一度読む</button></div>${monthLink}`;
+        return;
+      }
+      const data = dsCdUi.data;
+      if (!data) {
+        body.innerHTML = `${switcher}<p class="ds-note">読み込んでいます…</p>`;
+        return;
+      }
+      const { timed, untimed } = careTimelineItems(data);
+      const [statusKind, statusText] = dsUmStatus(data);
+      const status = data.status ? `<p class="cd-status"><span class="um-status ${statusKind}">${escapeHtml(statusText)}</span></p>` : '';
+      if (!timed.length && !untimed.length) {
+        body.innerHTML = `${switcher}${status}<div class="empty-state"><strong>この日の記録はありません</strong>前の日・次の日へ進むか、月の一覧から日を選んでください。</div>${monthLink}`;
+        return;
+      }
+      body.innerHTML = `${switcher}${status}
+        ${timed.length ? `<ol class="cd-list">${timed.map(dsCdItemHtml).join('')}</ol>` : ''}
+        ${untimed.length ? `<h2 class="cd-heading">時刻の記録がないもの</h2><ul class="cd-list untimed">${untimed.map(dsCdItemHtml).join('')}</ul>` : ''}
+        <p class="ds-legend">見るだけの画面です。バイタル・レク・機能訓練の時刻は、その日に最初に入れた時刻です（この仕組みを入れる前の記録には時刻がありません）。直すときは、その日のケア記録から直します。</p>
+        ${monthLink}`;
+    }
+
+    // 今日の画面の「過去の記録」: 利用者を選ぶ → 月の一覧 → 日を押すと時刻の順の記録
+    function openPastRecordPicker(host) {
+      const previous = document.getElementById('dsPastPicker');
+      if (previous) previous.remove();
+      const backdrop = document.createElement('div');
+      backdrop.className = 'sheet-backdrop';
+      backdrop.id = 'dsPastPicker';
+      const close = () => {
+        const existing = document.getElementById('dsPastPicker');
+        if (!existing) return;
+        existing.remove();
+        GinNav.closed('dsPastPicker');
+      };
+      if (!GinNav.isTop('dsPastPicker')) GinNav.push('dsPastPicker', close);
+      backdrop.innerHTML = `
+        <div class="sheet ds-fee-sheet" role="dialog" aria-modal="true" aria-labelledby="dsPastTitle">
+          <div class="care-head">
+            <div><h3 id="dsPastTitle" tabindex="-1">過去の記録</h3><p class="sub">利用者を選ぶと、月ごとの一覧が開きます。日付を押すと、その日の記録を時刻の順に見られます。</p></div>
+            <button type="button" class="care-close" data-picker-close aria-label="閉じる">×</button>
+          </div>
+          <div class="material-search plan-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="dsPastSearch" placeholder="名前・ふりがなで絞り込み" aria-label="利用者を検索" autocomplete="off" type="search">
+            <span></span>
+          </div>
+          <div class="list plan-results" id="dsPastResults"></div>
+        </div>`;
+      backdrop.addEventListener('click', (event) => {
+        if (event.target === backdrop) close();
+      });
+      document.body.appendChild(backdrop);
+      backdrop.querySelector('[data-picker-close]').addEventListener('click', close);
+      const input = backdrop.querySelector('#dsPastSearch');
+      const render = () => {
+        const query = normalizeForSearch(input.value);
+        const users = host.users().slice().sort(kanaSort).filter((user) =>
+          !query || normalizeForSearch(`${user.displayName || ''}${user.kana || ''}`).includes(query));
+        backdrop.querySelector('#dsPastResults').innerHTML = users.map((user) =>
+          `<button type="button" class="row plan-pick-row" data-past-user="${escapeHtml(user.userId)}">${avatarHtml(user)}<span class="plan-pick-name"><strong>${escapeHtml(user.displayName)}${dsCareHouseMark(user)}</strong><small>${escapeHtml(user.kana || '')}</small></span><span class="plan-badge none">見る ›</span></button>`
+        ).join('') || '<div class="empty-state"><strong>該当する利用者がいません</strong>名前を入れ直してください。</div>';
+        backdrop.querySelectorAll('[data-past-user]').forEach((button) => button.addEventListener('click', () => {
+          const userId = button.dataset.pastUser;
+          close();
+          openUserMonth(host, userId, host.businessDate());
+        }));
+      };
+      input.addEventListener('input', render);
+      render();
     }
 
     // ===== 職員向けの今日の予定表(お休み・キャンセル料・連絡・献立)と、利用者ごとの特記事項 =====
