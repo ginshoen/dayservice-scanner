@@ -2052,6 +2052,36 @@
     /* 朝に「昼食」「おやつ」で読んだときの確かめ(現場の画面) */
     .scan-early-ask { display: grid; gap: 8px; margin-top: 10px; }
     .scan-early-ask button { min-height: 48px; font-size: 15px; }
+    /* ===== 日付を選んで、その日の記録を見る(2026-11-26。現場の画面と管理画面で同じ形) ===== */
+    .ds-daybar { margin: 0 0 14px; }
+    .ds-daybar-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+    .ds-daybar-row > button { min-height: 48px; padding: 0 14px; border: 1px solid var(--gin-line-strong, #d5dbe4); border-radius: 14px; background: var(--gin-surface, #fff); color: var(--gin-primary-ink, #334155); font: inherit; font-size: 15px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .ds-daybar-row > button:disabled { opacity: .4; cursor: default; }
+    .ds-daybar-pick { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 12px; border: 1px solid var(--gin-line-strong, #d5dbe4); border-radius: 14px; background: var(--gin-surface, #fff); color: var(--gin-text, #1c2b45); font-size: 17px; font-weight: 800; cursor: pointer; overflow: hidden; }
+    .ds-daybar-pick svg { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--gin-primary, #2f5bd3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .ds-daybar-pick [data-day-label] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 日付の欄は透明にして全体に重ねる(どこを押してもカレンダーが開く) */
+    .ds-daybar-pick input[type="date"] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; opacity: 0; cursor: pointer; font-size: 16px; -webkit-appearance: none; appearance: none; }
+    .ds-daybar-pick input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+    .ds-daybar.is-past .ds-daybar-pick { border-color: #f59e0b; background: #fffbeb; }
+    .ds-daybar-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; border: 1px solid #f5c26b; border-radius: 14px; background: #fff4d6; color: #7a4a00; font-size: 15px; font-weight: 700; line-height: 1.5; }
+    .ds-daybar-note[hidden] { display: none; }
+    .ds-daybar-note button { min-height: 46px; padding: 0 16px; border: 0; border-radius: 12px; background: #b45309; color: #fff; font: inherit; font-size: 15px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    @media (max-width: 420px) {
+      .ds-daybar-row { gap: 6px; }
+      .ds-daybar-row > button { padding: 0 8px; font-size: 14px; }
+      .ds-daybar-pick { gap: 4px; font-size: 15px; padding: 0 6px; }
+      .ds-daybar-pick svg { width: 17px; height: 17px; }
+      .ds-daybar-note { grid-template-columns: 1fr; }
+      .ds-daybar-note button { width: 100%; }
+    }
+    @media print { .ds-daybar { display: none !important; } }
+    /* 現場の画面で今日以外を見ているときは、記録する・印刷するボタンを隠す(見るだけ) */
+    .is-past-day [data-today-only] { display: none !important; }
+    .is-past-day .metric { cursor: default; }
+    .is-past-day .today-metrics div.metric { padding-bottom: 18px; }
+    /* 管理画面: 日付を変えて読み込んでいる間は、一覧などを押せないようにする(前の日の中身のまま新しい日付に保存しない) */
+    #adminView.is-day-loading > *:not(.page-heading):not(.ds-daybar) { pointer-events: none; opacity: .45; transition: opacity .15s; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2516,12 +2546,20 @@
       </section>
 
       <section id="todayView" class="view">
-        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openPastRecords" aria-label="過去の記録を見る（利用者を選んで、月・日ごとに）">過去の記録</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
-        <div id="todayNewUserBar" hidden></div>
-        <div id="todayBoardBar"></div>
+        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1 id="todayTitle">今日の記録</h1><p id="todayLead">利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" data-today-only aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" data-today-only aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openPastRecords" aria-label="過去の記録を見る（利用者を選んで、月・日ごとに）">過去の記録</button><button id="openNotebook" data-today-only aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="表示している日の記録を更新">↻ 更新</button></div></div>
+        <div class="ds-daybar" id="todayDayBar" role="group" aria-label="見る日を選ぶ">
+          <div class="ds-daybar-row">
+            <button type="button" data-day-step="-1" aria-label="前の日を見る">‹ 前の日</button>
+            <label class="ds-daybar-pick"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-day-label>今日</span><input type="date" id="todayDayInput" data-day-input aria-label="見る日を選ぶ（押すとカレンダーが開きます）"></label>
+            <button type="button" data-day-step="1" aria-label="次の日を見る">次の日 ›</button>
+          </div>
+          <div class="ds-daybar-note" data-day-note role="status" hidden><span data-day-note-text></span><button type="button" data-day-today>今日に戻る</button></div>
+        </div>
+        <div id="todayNewUserBar" data-today-only hidden></div>
+        <div id="todayBoardBar" data-today-only></div>
         <div class="plan-bar" aria-live="polite">
           <div><span class="plan-bar-count" id="planBarCount">今日の予定</span><span class="plan-bar-detail" id="planBarDetail"></span></div>
-          <button id="openPlanSheet">予定の変更・追加</button>
+          <button id="openPlanSheet" data-today-only>予定の変更・追加</button>
         </div>
         <div class="today-metrics" id="todaySummary" aria-label="今日の集計"></div>
         <div class="panel">
@@ -2531,7 +2569,7 @@
             <button id="clearTodaySearch" class="search-clear hidden" aria-label="今日の検索を消す">×</button>
           </div>
           <div class="filter-bar" role="group" aria-label="今日の表示を絞り込み">
-            <button data-today-filter="planned" aria-pressed="true">今日の予定</button>
+            <button data-today-filter="planned" aria-pressed="true" id="todayFilterPlanned">今日の予定</button>
             <button data-today-filter="all" aria-pressed="false">全員</button>
             <button data-today-filter="arrived" aria-pressed="false">来所済み</button>
             <button data-today-filter="unrecorded" aria-pressed="false">来所未記録</button>
@@ -2731,6 +2769,9 @@
       // その日に特記事項を書いた方(今日の一覧の「特記事項 記入済み」)
       notedUserIds: new Set(),
       todayVisibleIds: [],
+      // 今日以外の日を見ているときの、その日の記録(見るだけ。今日の記録 app.records などとは別に持つ)。null は今日
+      dayView: null,
+      dayViewSeq: 0,
       recordsRevision: 0,
       // ケア記録を保存した回数。読み直しを始めたあとに保存があれば、その読み直しのケア記録は古いので使わない
       careRevision: 0,
@@ -2863,6 +2904,8 @@
         renderToday();
       }));
       document.getElementById('refreshToday').addEventListener('click', refreshState);
+      // 見る日を選ぶ(前の日・次の日・カレンダー・今日に戻る)
+      dsDayBarBind(document.getElementById('todayDayBar'), todayViewDate, setTodayViewDate);
       document.getElementById('openNotebook').addEventListener('click', () => openNotebookMenu(scannerCareHost));
       document.getElementById('openRecordList').addEventListener('click', () => openRecordList(scannerCareHost));
       document.getElementById('todaySummary').addEventListener('click', (event) => {
@@ -2873,6 +2916,8 @@
           renderToday();
           return;
         }
+        // 今日以外の日は見るだけ(記録一覧は、その場で直せる欄があるので開かない)
+        if (app.dayView) return;
         openRecordList(scannerCareHost, metric.dataset.metric);
       });
       document.getElementById('openFeePicker').addEventListener('click', () => openFeePicker(scannerDsHost));
@@ -2934,7 +2979,11 @@
       if (id === 'settingsView') {
         updateSettingsLock();
       }
-      if (id === 'scanView') resetModeForNewDay();
+      if (id === 'scanView') {
+        resetModeForNewDay();
+        // スキャン画面へ移ったら、今日の記録の画面も今日に戻す(過去の日のまま記録しないように)
+        backToTodayView();
+      }
     }
 
     function buildModeButtons() {
@@ -3519,6 +3568,10 @@
     }
 
     async function refreshState() {
+      if (app.dayView) {
+        loadDayView(app.dayView.date);
+        return;
+      }
       const button = document.getElementById('refreshToday');
       if (button.disabled) return;
       button.disabled = true;
@@ -4599,27 +4652,130 @@
       return flags;
     }
 
+    // ---- 日付を選んで、その日の記録を見る(2026-11-26 原山さん。現場は見るだけ) ----
+    // 今日以外の日は app.dayView に読み込む(今日の記録 app.records・送信待ち・端末の控えには混ぜない)。
+    // 今日に戻るのは「今日に戻る」・スキャン画面へ移ったとき・スリープから戻ったとき・アプリを開き直したとき。
+    function todayViewDate() {
+      return app.dayView ? app.dayView.date : todayStr();
+    }
+
+    function setTodayViewDate(dateText) {
+      const today = todayStr();
+      const date = dsDayClamp(dateText, today) || today;
+      if (date === today) {
+        backToTodayView();
+        renderToday();
+        refreshStateQuiet();
+        return;
+      }
+      loadDayView(date);
+    }
+
+    function loadDayView(dateText) {
+      const seq = ++app.dayViewSeq;
+      app.dayView = { date: dateText, loading: true, error: '', records: [], careRecords: [], plans: [], feeRecords: [], notedUserIds: new Set() };
+      renderToday();
+      api('scanState', { businessDate: dateText }).then((state) => {
+        if (seq !== app.dayViewSeq || !app.dayView) return;
+        const norm = (item) => Object.assign({}, item, { userId: normalizeClientUserId(item.userId) });
+        app.dayView = {
+          date: dateText,
+          loading: false,
+          error: '',
+          records: (state.records || []).map(norm),
+          careRecords: (state.careRecords || []).map(norm),
+          plans: (state.plans || []).map(norm),
+          feeRecords: (state.feeRecords || []).map(norm),
+          notedUserIds: new Set((state.notedUserIds || []).map((id) => normalizeClientUserId(id)))
+        };
+        renderToday();
+        document.getElementById('todayFeedback').textContent = '';
+      }).catch((error) => {
+        if (seq !== app.dayViewSeq || !app.dayView) return;
+        app.dayView.loading = false;
+        app.dayView.error = friendlyError(error);
+        renderToday();
+      });
+    }
+
+    // 今日に戻す。戻したら true
+    function backToTodayView() {
+      if (!app.dayView) return false;
+      app.dayView = null;
+      app.dayViewSeq++;
+      return true;
+    }
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible' || !backToTodayView()) return;
+        if (document.getElementById('todayView').classList.contains('active')) renderToday();
+      });
+    }
+
+    function dayViewFind(items, userId) {
+      const id = normalizeClientUserId(userId);
+      return (items || []).find((item) => normalizeClientUserId(item.userId) === id) || null;
+    }
+
+    function renderTodayHeading(view) {
+      const today = todayStr();
+      const date = view ? view.date : today;
+      document.getElementById('todayView').classList.toggle('is-past-day', Boolean(view));
+      document.getElementById('todayDate').textContent = view
+        ? '見るだけ（直すときは主任・管理者へ）'
+        : new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
+      document.getElementById('todayTitle').textContent = view ? `${dsDayShortLabel(date, today)}の記録` : '今日の記録';
+      document.getElementById('todayLead').textContent = view
+        ? '利用者を押すと、その方のこの日の記録を時刻の順に見られます。'
+        : '利用者を選ぶと、バイタルや食事などを記録できます。';
+      document.getElementById('todayFilterPlanned').textContent = view ? 'この日の予定' : '今日の予定';
+      dsDayBarSync(document.getElementById('todayDayBar'), date, today, '見ています（見るだけ）');
+    }
+
     function renderToday() {
       const list = document.getElementById('todayList');
       const rawQuery = document.getElementById('todaySearch').value;
       const query = normalizeForSearch(rawQuery);
-      document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
+      // 日付が変わったまま開いていたら、昨日の「今日」を出さない
+      if (app.dayView && app.dayView.date >= todayStr()) backToTodayView();
+      const view = app.dayView;
+      renderTodayHeading(view);
       document.getElementById('clearTodaySearch').classList.toggle('hidden', !rawQuery);
       document.querySelectorAll('[data-today-filter]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.todayFilter === app.todayFilter)));
+      if (view && (view.loading || view.error)) {
+        document.getElementById('todaySummary').innerHTML = '';
+        document.getElementById('planBarCount').textContent = 'この日の予定';
+        document.getElementById('planBarDetail').textContent = view.loading ? '読み込み中…' : '';
+        document.getElementById('todayResultCount').textContent = '';
+        app.todayVisibleIds = [];
+        list.innerHTML = view.loading
+          ? '<div class="empty-state"><strong>読み込み中…</strong>この日の記録を読んでいます。</div>'
+          : `<div class="empty-state"><strong>この日の記録を読めませんでした</strong>${escapeHtml(view.error)}<br>通信を確かめて、上の「↻ 更新」を押してください。</div>`;
+        return;
+      }
+      // 今日は今までどおり(送信待ちの読み取りも足す)。今日以外の日は、その日に読み込んだ記録だけ
+      const dayRecordFor = view ? (userId) => dayViewFind(view.records, userId) : recordFor;
+      const dayFlagsFor = view ? (userId) => { const record = dayRecordFor(userId); return record ? safeJson(record.actualFlags, {}) : {}; } : localFlagsFor;
+      const dayCareFor = view ? (userId) => dayViewFind(view.careRecords, userId) || {} : careRecordWithPendingScans;
+      const dayPlans = view ? view.plans : app.plans;
+      const dayHost = view
+        ? { feeRecords: () => view.feeRecords, noted: (userId) => view.notedUserIds.has(normalizeClientUserId(userId)) }
+        : scannerDsHost;
       const counts = { arrival: 0, bath: 0, lunch: 0, snack: 0, departure: 0, cancelled: 0, vital: 0 };
       const entries = app.users.slice().sort(kanaSort).map((user) => {
-        const record = recordFor(user.userId);
+        const record = dayRecordFor(user.userId);
         const cancelled = Boolean(record && record.attendanceStatus === 'cancelled');
-        const flags = localFlagsFor(user.userId);
-        const plan = planFor(app.plans, user.userId);
+        const flags = dayFlagsFor(user.userId);
+        const plan = planFor(dayPlans, user.userId);
         // バイタルは記録一覧の「バイタル」タブと同じく、体温・血圧・脈拍・SpO2 のどれかが入っていれば「測った」とする
-        const vital = !cancelled && scannerVitalMeasured(user.userId);
+        const vital = !cancelled && scannerVitalMeasured(user.userId, view ? dayCareFor(user.userId) : undefined);
         if (cancelled) counts.cancelled++;
         else Object.keys(SERVICE_META).forEach((key) => { if (flags[key]) counts[key]++; });
         if (vital && flags.arrival) counts.vital++;
         return { user, record, cancelled, flags, plan, vital, planned: Boolean(plan && plan.planned) };
       });
-      renderPlanBar(entries);
+      renderPlanBar(entries, Boolean(view));
       // 押すと、その記録をした方の一覧(名前・時刻・食べた量・送迎)が開く。キャンセルは下の一覧をキャンセルで絞り込む
       // バイタルは「来所した方のうち測った方 / 来所した方」。押すと記録一覧の「バイタル」タブ(その場で入力できる)
       document.getElementById('todaySummary').innerHTML = [
@@ -4628,6 +4784,11 @@
         const color = key === 'cancelled' ? '#c2410c' : (key === 'vital' ? MODE_META.vital.color : SERVICE_META[key].color);
         const count = key === 'vital' ? `${counts.vital}<small>/${counts.arrival}名</small>` : `${counts[key]}<small>名</small>`;
         const spoken = key === 'vital' ? `バイタル 来所${counts.arrival}名のうち${counts.vital}名が測定済み。押すとバイタルの一覧を表示` : `${label} ${counts[key]}名。押すと一覧を表示`;
+        // 今日以外の日は数だけ(押しても一覧は開かない)。キャンセルは下の一覧を絞り込めるので押せるまま
+        if (view && key !== 'cancelled') {
+          const quiet = key === 'vital' ? `バイタル 来所${counts.arrival}名のうち${counts.vital}名が測定済み` : `${label} ${counts[key]}名`;
+          return `<div class="metric${key === 'vital' ? ' metric-vital' : ''}" style="--c:${color}" role="group" aria-label="${quiet}"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${count}</strong><span>${label}</span></div>`;
+        }
         return `<button type="button" class="metric${key === 'vital' ? ' metric-vital' : ''}" data-metric="${key}" style="--c:${color}" aria-label="${spoken}"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${count}</strong><span>${label}</span></button>`;
       }).join('');
       const filtered = entries.filter(({user, cancelled, flags, planned}) => {
@@ -4641,7 +4802,7 @@
       });
       app.todayVisibleIds = filtered.filter((entry) => !entry.cancelled).map((entry) => entry.user.userId);
       document.getElementById('todayResultCount').textContent = `${filtered.length}名を表示 / 全${entries.length}名` +
-        (app.todayFilter === 'unrecorded' ? '（今日の予定があり、来所が未記録の方）' : '');
+        (app.todayFilter === 'unrecorded' ? `（${view ? 'この日' : '今日'}の予定があり、来所が未記録の方）` : '');
       list.innerHTML = filtered.map(({user, record, cancelled, flags, plan, vital}) => {
         // 印の並び: 来所・バイタル・入浴・昼食・おやつ・送り(バイタルは読取履歴ではなくケア記録の値で判定)
         const flagKeys = ['arrival', 'vital'].concat(Object.keys(SERVICE_META).filter((key) => key !== 'arrival'));
@@ -4655,17 +4816,25 @@
         const marks = [planBadgeHtml(plan, Boolean(flags.arrival))];
         if (!cancelled && record && record.bathStatus === 'refused') marks.push('<span class="status-chip refused">入浴拒否</span>');
         if (!cancelled && record && record.usageActual === 'half_am') marks.push('<span class="status-chip half">午前のみ</span>');
-        marks.push(feeBadgeHtml(scannerDsHost, user.userId));
-        marks.push(dsNotedTagHtml(scannerDsHost, user.userId));
+        marks.push(feeBadgeHtml(dayHost, user.userId));
+        marks.push(dsNotedTagHtml(dayHost, user.userId));
         const reason = cancelled && record.cancelReason ? ` / ${escapeHtml(record.cancelReason)}` : '';
-        const saving = app.pendingDayChanges.has(user.userId);
-        const careLine = cancelled ? '' : careSummaryHtml(careRecordWithPendingScans(user.userId), scannerBathState(user.userId));
+        const saving = !view && app.pendingDayChanges.has(user.userId);
+        const bathState = view
+          ? (record && record.bathStatus === 'refused' ? 'refused' : (flags.bath ? 'done' : ''))
+          : scannerBathState(user.userId);
+        const careLine = cancelled ? '' : careSummaryHtml(dayCareFor(user.userId), bathState);
         const isOff = Boolean(plan && plan.source === 'off' && !flags.arrival);
         return `<button class="row day-row${cancelled ? ' is-cancelled' : ''}${isOff ? ' is-off' : ''}" data-day-user="${escapeHtml(user.userId)}" ${saving ? 'disabled aria-busy="true"' : ''} style="width:100%;text-align:left;font-weight:400">${avatarHtml(user)}<span class="day-person"><strong>${escapeHtml(user.displayName)}${dsCareHouseMark(user)}</strong><small>${escapeHtml(user.kana || '')}${reason}</small>${marks.join('')}${careLine}${saving ? '<small>保存中…</small>' : ''}</span>${chips}</button>`;
       }).join('') || `<div class="empty-state"><strong>${entries.length ? '該当する利用者はいません' : '利用者情報を取得できません'}</strong>${entries.length ? '検索文字や絞り込み条件を変えてください。' : '通信を確認して、上の「更新」を押してください。'}</div>`;
       list.querySelectorAll('[data-day-user]').forEach((button) => {
         // キャンセルの方は取消メニュー、それ以外はケア記録の入力を開く
         button.addEventListener('click', () => {
+          // 今日以外の日は見るだけ: その方のその日の記録を時刻の順に開く(版53の「1人の1日」)
+          if (app.dayView) {
+            openCareDay(scannerCareHost, button.dataset.dayUser, app.dayView.date);
+            return;
+          }
           const record = recordFor(button.dataset.dayUser);
           if (record && record.attendanceStatus === 'cancelled') openDaySheet(button.dataset.dayUser);
           else openCareForm(scannerCareHost, button.dataset.dayUser);
@@ -4674,8 +4843,8 @@
     }
 
     // 今日のバイタルを測ったか。体温・血圧(上)・脈拍・SpO2 のどれかが入っていれば測った(体重だけでは数えない)
-    function scannerVitalMeasured(userId) {
-      const care = careRecordFor(userId);
+    // care: 今日以外の日を見ているときは、その日のケア記録を渡す
+    function scannerVitalMeasured(userId, care = careRecordFor(userId)) {
       return Boolean(care) && ['temperature', 'bpHigh', 'pulse', 'spo2'].some((field) => careHas(care[field]));
     }
 
@@ -4725,12 +4894,12 @@
       }).map((user) => user.userId);
     }
 
-    function renderPlanBar(entries) {
+    function renderPlanBar(entries, past) {
       const planned = entries.filter((entry) => entry.planned).length;
       const added = entries.filter((entry) => entry.plan && entry.plan.source === 'added').length;
       const off = entries.filter((entry) => entry.plan && entry.plan.source === 'off').length;
       const extra = entries.filter((entry) => !entry.planned && !entry.cancelled && entry.flags.arrival).length;
-      document.getElementById('planBarCount').innerHTML = `今日の予定 <b>${planned}</b>名`;
+      document.getElementById('planBarCount').innerHTML = `${past ? 'この日' : '今日'}の予定 <b>${planned}</b>名`;
       const details = [];
       if (added) details.push(`臨時 ${added}名`);
       if (off) details.push(`お休み ${off}名`);
@@ -5889,7 +6058,7 @@
         <div class="care-treat-photos">
           <span class="care-treat-count">写真 ${photos}枚</span>
           ${photos ? '<button type="button" data-treat-view>写真を見る・外す</button>' : ''}
-          ${photos < CARE_TREATMENT_PHOTO_MAX ? `<label class="care-treat-shot">＋ 写真を撮る・選ぶ<input type="file" accept="image/*" data-treat-photo hidden></label>` : ''}
+          ${photos < CARE_TREATMENT_PHOTO_MAX ? `<label class="care-treat-shot">＋ 写真を撮る・選ぶ<input type="file" accept="image/&#42;" data-treat-photo hidden></label>` : ''}
         </div>
       </div>`;
     }
@@ -10242,6 +10411,77 @@
         closeNewUserNotices();
         nuUi.host.registerFromDraft(item);
       }
+    }
+
+
+    // ===== 日付を選んで、その日の記録を見る(2026-11-26 原山さん「今日の記録を見る画面で日付を選択すると、その日の状況がわかるように」) =====
+    // 現場の画面と管理画面の「今日の記録」の見出しの下に、同じ形の日付の切り替えを置く(押して選ぶだけ・選べるのは今日まで)。
+    // 現場は見るだけ(利用者を押すと「1人の1日」が開く)。管理画面は今までどおり主任・管理者が直せる(確定済みの日は不可)。
+    // 画面の部品(id は画面ごと):
+    //   [data-day-step="-1"] 前の日 / [data-day-input] 日付の欄(押すとカレンダー) / [data-day-label] 表示 / [data-day-step="1"] 次の日
+    //   [data-day-note] 今日以外のときの帯 / [data-day-note-text] 帯の文 / [data-day-today] 今日に戻る
+    function dsDayShift(dateText, days) {
+      const [year, month, day] = String(dateText || '').split('-').map(Number);
+      if (!year || !month || !day) return dsTodayJst();
+      const date = new Date(year, month - 1, day + days);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // 「11月25日（水）」(年は今年でなければ付ける)
+    function dsDayShortLabel(dateText, todayText) {
+      const [year, month, day] = String(dateText || '').split('-').map(Number);
+      if (!year || !month || !day) return String(dateText || '');
+      const weekday = '日月火水木金土'.charAt(new Date(year, month - 1, day).getDay());
+      const thisYear = Number(String(todayText || dsTodayJst()).slice(0, 4));
+      return `${year === thisYear ? '' : `${year}年`}${month}月${day}日（${weekday}）`;
+    }
+
+    // 選べるのは今日まで。日付の形でないとき(iPad の「リセット」で空にしたときなど)は null
+    function dsDayClamp(value, todayText) {
+      const text = String(value || '');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+      return text > todayText ? todayText : text;
+    }
+
+    // 表示している日に合わせて、日付の切り替えと帯を書き直す。pastText: 帯の文の続き(「見ています（見るだけ）」など)
+    function dsDayBarSync(bar, dateText, todayText, pastText) {
+      if (!bar) return;
+      const input = bar.querySelector('[data-day-input]');
+      if (input) {
+        if (input.value !== dateText) input.value = dateText;
+        input.max = todayText;
+      }
+      const past = dateText !== todayText;
+      const label = bar.querySelector('[data-day-label]');
+      if (label) label.textContent = dsDayShortLabel(dateText, todayText);
+      const next = bar.querySelector('[data-day-step="1"]');
+      if (next) next.disabled = dateText >= todayText;
+      bar.classList.toggle('is-past', past);
+      const note = bar.querySelector('[data-day-note]');
+      if (note) note.hidden = !past;
+      const noteText = bar.querySelector('[data-day-note-text]');
+      if (noteText) noteText.textContent = past ? `${dsDayShortLabel(dateText, todayText)}の記録を${pastText}` : '';
+    }
+
+    // current(): 今見ている日 / change(date): 日を変える(今日より先は今日にする)
+    function dsDayBarBind(bar, current, change) {
+      if (!bar) return;
+      bar.querySelectorAll('[data-day-step]').forEach((button) => button.addEventListener('click', () => {
+        const today = dsTodayJst();
+        change(dsDayClamp(dsDayShift(current(), Number(button.dataset.dayStep)), today) || today);
+      }));
+      const input = bar.querySelector('[data-day-input]');
+      if (input) input.addEventListener('change', () => {
+        const picked = dsDayClamp(input.value, dsTodayJst());
+        if (!picked) {
+          input.value = current();
+          return;
+        }
+        if (picked !== input.value) input.value = picked;
+        if (picked !== current()) change(picked);
+      });
+      const back = bar.querySelector('[data-day-today]');
+      if (back) back.addEventListener('click', () => change(dsTodayJst()));
     }
     /* @@DS_EXTRA_JS END@@ */
 
