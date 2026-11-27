@@ -2150,6 +2150,9 @@
       .nb-card.nb-tight footer { margin-top: 4px; }
     }
     .nb-cut-warn { box-sizing: border-box; width: calc(100% - 32px); max-width: 728px; margin: 10px auto 0; }
+    /* 2026-11-27 連絡帳の季節のひとこと: いちばん下の行の左(施設名は右のまま) */
+    .nb-card footer { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 2px 16px; }
+    .nb-card footer .nb-greeting { margin-right: auto; text-align: left; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -8112,33 +8115,91 @@
       if (allDay.length) parts.push(`本日は${dsEventQuote(allDay)}でした。`);
       if (timed.length) parts.push(`${allDay.length ? 'また、' : '本日は'}${dsEventPeriod(timed[0])}に${dsEventQuote(timed)}がありました。`);
       // 次回ご利用予定日(利用曜日から2週間以内で最初の日)
+      const found = dsNextUseEvents(user, dateText, all);
+      if (found) {
+        const { date, weekday, next } = found;
+        const [, month, day] = date.split('-').map(Number);
+        const sameMonth = date.slice(0, 7) === String(dateText).slice(0, 7);
+        const label = `${sameMonth ? '' : `${month}月`}${day}日（${weekday}）`;
+        const nextAllDay = next.filter((item) => !item.start);
+        const nextTimed = next.filter((item) => item.start);
+        let text = `次回ご利用予定の${label}は`;
+        if (nextAllDay.length && nextTimed.length) {
+          text += `${dsEventQuote(nextAllDay)}で、${dsEventPeriod(nextTimed[0])}には${dsEventQuote(nextTimed)}があります。`;
+        } else if (nextAllDay.length) {
+          text += `${dsEventQuote(nextAllDay)}です。`;
+        } else {
+          text += `${dsEventPeriod(nextTimed[0])}に${dsEventQuote(nextTimed)}があります。`;
+        }
+        const notes = next.reduce((list, item) => list.concat(item.notes || []), []);
+        parts.push(`${text}${notes.join('')}どうぞお楽しみに。`);
+      }
+      return parts.join('');
+    }
+
+    // 次回ご利用予定日(利用曜日から2週間以内で最初の日)と、その日の行事(今週の期間の行事と同じものは除く)。
+    // 次回の日が分からない・その日に行事がないときは null
+    // 次回ご利用予定日(利用曜日から2週間先まで)。分からなければ null
+    function dsNextUseDate(user, dateText) {
       const weekdays = dsUserWeekdays(user);
-      const spanTitles = new Set((all[dateText] || []).filter((item) => item.span > 1).map((item) => item.title));
       for (let i = 1; weekdays && i <= 14; i++) {
         const date = dsAddDays(dateText, i);
         const [year, month, day] = date.split('-').map(Number);
         const weekday = '日月火水木金土'.charAt(new Date(year, month - 1, day).getDay());
-        if (!weekdays.includes(weekday)) continue;
-        const next = (all[date] || []).filter((item) => !spanTitles.has(item.title));
-        if (next.length) {
-          const sameMonth = date.slice(0, 7) === String(dateText).slice(0, 7);
-          const label = `${sameMonth ? '' : `${month}月`}${day}日（${weekday}）`;
-          const nextAllDay = next.filter((item) => !item.start);
-          const nextTimed = next.filter((item) => item.start);
-          let text = `次回ご利用予定の${label}は`;
-          if (nextAllDay.length && nextTimed.length) {
-            text += `${dsEventQuote(nextAllDay)}で、${dsEventPeriod(nextTimed[0])}には${dsEventQuote(nextTimed)}があります。`;
-          } else if (nextAllDay.length) {
-            text += `${dsEventQuote(nextAllDay)}です。`;
-          } else {
-            text += `${dsEventPeriod(nextTimed[0])}に${dsEventQuote(nextTimed)}があります。`;
-          }
-          const notes = next.reduce((list, item) => list.concat(item.notes || []), []);
-          parts.push(`${text}${notes.join('')}どうぞお楽しみに。`);
-        }
-        break;
+        if (weekdays.includes(weekday)) return { date, weekday };
       }
-      return parts.join('');
+      return null;
+    }
+
+    function dsNextUseEvents(user, dateText, events) {
+      const all = events || {};
+      const found = dsNextUseDate(user, dateText);
+      if (!found) return null;
+      const spanTitles = new Set((all[dateText] || []).filter((item) => item.span > 1).map((item) => item.title));
+      const next = (all[found.date] || []).filter((item) => !spanTitles.has(item.title));
+      return next.length ? { date: found.date, weekday: found.weekday, next } : null;
+    }
+
+    // ---- 季節のひとこと(2026-11-27 原山さん「次回の利用日に行事がなければ、気の利いた文言を」) ----
+    // 次回ご利用予定日の行事の文が出ないとき、連絡帳のいちばん下の行(施設名の左)に1文。紙の高さは増えない。
+    // 月ごとに3文。日付の通し番号で順に回す(その日は全員同じ文。週1回の方も来るたびに変わる)。天気・気温は取らない。
+    const DS_SEASON_GREETINGS = {
+      // 月のどの日に出てもおかしくない言い方にする(「〜になりました」「年の瀬が近づき」など時期を言い切る文は入れない。11/27 点検)
+      1: ['寒さの厳しい日が続きます。どうぞ暖かくしてお過ごしください。', '雪道や凍った道は滑りやすいので、お足元にお気をつけください。', '空気が乾燥しています。こまめな水分補給をおすすめします。'],
+      2: ['まだまだ寒い日が続きます。どうぞ暖かくしてお過ごしください。', '風邪がはやりやすい時期です。どうぞお体を大切になさってください。', '雪道や凍った道は滑りやすいので、お足元にお気をつけください。'],
+      3: ['春の訪れが待ち遠しい頃です。どうぞお元気にお過ごしください。', '朝晩はまだ冷え込みます。どうぞ体調にお気をつけください。', '季節の変わり目です。どうぞお体を大切になさってください。'],
+      4: ['花の便りが届く季節です。どうぞお元気にお過ごしください。', '暖かい日と寒い日の差が大きい頃です。体調にお気をつけください。', '朝晩はまだ冷えますので、どうぞ暖かくしてお過ごしください。'],
+      5: ['新緑のさわやかな季節です。', '日中は汗ばむ日もあります。こまめに水分をおとりください。', '過ごしやすい季節です。どうぞ穏やかにお過ごしください。'],
+      6: ['雨の多い季節です。蒸し暑い日はこまめに水分をおとりください。', '雨の日は足元が滑りやすいので、お気をつけください。', '季節の変わり目です。どうぞお体を大切になさってください。'],
+      7: ['暑さが増す季節です。こまめな水分補給をお願いいたします。', '暑さに負けないよう、どうぞご自愛ください。', '冷房で体が冷えすぎないよう、お気をつけください。'],
+      8: ['暑い日の多い季節です。こまめに水分と休息をおとりください。', '夏の疲れが出やすい頃です。どうぞお体を大切になさってください。', '夜も暑い日があります。お部屋の温度にお気をつけください。'],
+      9: ['朝晩と日中の気温の差にお気をつけください。', '暑さの残る日もあります。水分をこまめにおとりください。', '秋の味覚が楽しみな季節です。どうぞ穏やかにお過ごしください。'],
+      10: ['朝晩は冷え込む日があります。暖かくしてお過ごしください。', '山の紅葉が楽しみな季節です。', '一日の寒暖の差が大きい頃です。どうぞご自愛ください。'],
+      11: ['日ごとに寒さが増す頃です。どうぞ暖かくしてお過ごしください。', '冬の足音が聞こえる季節です。風邪をひかないようお気をつけください。', '空気が乾燥しやすい季節です。こまめな水分補給をおすすめします。'],
+      12: ['寒い日が続きます。どうぞご自愛ください。', '何かと気ぜわしい季節です。どうぞお体を大切になさってください。', '雪道や凍った道は滑りやすいので、お足元にお気をつけください。']
+    };
+
+    function dsSeasonGreeting(dateText) {
+      const [year, month, day] = String(dateText || '').split('-').map(Number);
+      const list = DS_SEASON_GREETINGS[month];
+      if (!list || !year || !day) return '';
+      const serial = Math.floor(Date.UTC(year, month - 1, day) / 86400000);
+      return list[serial % list.length];
+    }
+
+    // 連絡帳に出す季節のひとこと。出さないとき: 職員が行事のお知らせを直した方(直した文をそのまま使う)・
+    // 行事予定表を読めなかったとき・次回ご利用予定日の月の予定表のシートがまだ無いとき(行事があるか分からない)・
+    // 次回ご利用予定日の行事の文が出るとき
+    function dsNotebookGreeting(entry, dateText, eventsResult) {
+      if (dsEventEdited(entry.care)) return '';
+      if (!eventsResult || !eventsResult.ok) return '';
+      const next = dsNextUseDate(entry.user, dateText);
+      if (next) {
+        const [year, month] = next.date.split('-').map(Number);
+        if ((eventsResult.missingMonths || []).includes(year + '年' + month + '月')) return '';
+      }
+      if (dsNextUseEvents(entry.user, dateText, eventsResult.events)) return '';
+      return dsSeasonGreeting(dateText);
     }
 
     function dsEventEdited(care) {
@@ -8192,7 +8253,7 @@
         <header><h2>連絡帳</h2><span>${escapeHtml(careDateLabel(dateText))}</span></header>
         <p class="nb-name">${escapeHtml(entry.user.displayName)} 様</p>
         <table class="nb-table"><tbody>${rows.map((row) => `<tr class="${row.note ? 'nb-note' : (row.notice ? 'nb-notice' : '')}"><th scope="row">${row.label}</th><td>${row.value ? escapeHtml(row.value) : (row.note ? '' : '<span class="nb-empty">—</span>')}</td></tr>`).join('')}</tbody></table>
-        <footer>${escapeHtml(CARE_FACILITY_NAME)}</footer>
+        <footer>${entry.greeting ? `<span class="nb-greeting">${escapeHtml(entry.greeting)}</span>` : ''}<span class="nb-facility">${escapeHtml(CARE_FACILITY_NAME)}</span></footer>
         ${missing.length ? `<p class="nb-missing">未記録: ${escapeHtml(missing.join('・'))}（この表示は印刷されません）</p>` : ''}
         ${entry.canEditEvent ? `<div class="nb-event-edit" data-nb-event-user="${escapeHtml(entry.user.userId)}"><p>${escapeHtml(dsNotebookEventState(entry))}</p><button type="button" data-nb-event-edit>行事のお知らせを直す</button></div>` : ''}
       </article>`;
@@ -8225,6 +8286,7 @@
         entry.canEditEvent = Boolean(host.save);
         entry.eventState = state;
         entry.eventText = dsNotebookEventText(entry, dateText, result);
+        entry.greeting = dsNotebookGreeting(entry, dateText, result);
       });
       const cachedEvents = dsCachedNotebookEvents(dateText);
       const loading = canLoad && !cachedEvents;
@@ -8313,6 +8375,7 @@
             host.applySaved(entry.user.userId, result || {});
             entry.care = host.care(entry.user.userId);
             entry.eventText = dsNotebookEventText(entry, dateText, dsCachedNotebookEvents(dateText));
+            entry.greeting = dsNotebookGreeting(entry, dateText, dsCachedNotebookEvents(dateText));
             rerender();
           })
           .catch((error) => {
@@ -8399,7 +8462,7 @@
     let dsNotebookPdfCache = null;
 
     function dsShareNotebookPdf(entries, dateText) {
-      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus, entry.eventText || '', (entry.notices || []).map((notice) => notice.noticeBody)])]);
+      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus, entry.eventText || '', entry.greeting || '', (entry.notices || []).map((notice) => notice.noticeBody)])]);
       let bytes;
       try {
         bytes = dsNotebookPdfCache && dsNotebookPdfCache.key === key ? dsNotebookPdfCache.bytes : dsNotebookPdf(entries, dateText);
@@ -8692,6 +8755,16 @@
       ctx.textAlign = 'right';
       ctx.fillText(CARE_FACILITY_NAME, right, y + height - pad);
       ctx.textAlign = 'left';
+      // 季節のひとこと: 施設名と同じ行の左(もともと空いている所なので高さは増えない)。入らなければ字を少し小さくする
+      if (entry.greeting) {
+        const room = right - left - ctx.measureText(CARE_FACILITY_NAME).width - 32;
+        let size = 22;
+        while (size > 16 && ctx.measureText(entry.greeting).width > room) {
+          size -= 1;
+          ctx.font = `400 ${size}px ${DS_PDF_SERIF}`;
+        }
+        ctx.fillText(entry.greeting, left, y + height - pad);
+      }
     }
 
     // JPEG の画像を1ページに1枚ずつ入れた、最小限のPDFを作る(A4縦 595.28×841.89pt)
