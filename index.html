@@ -1404,10 +1404,12 @@
     .status-chip.fee { background: #fdf2f8; color: #a0306a; }
     .ds-list .nb-toolbar { grid-template-columns: auto minmax(0, 1fr) auto; }
     .ds-tabs { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; max-width: 860px; margin: 0 auto; padding: 10px 12px; background: #eef1f5; }
+    .ds-tabs[hidden] { display: none; }
     .ds-tabs button { min-height: 44px; padding: 6px 4px; font-size: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 999px; }
     .ds-tabs button[aria-selected="true"] { color: #fff; background: var(--c); border-color: var(--c); font-weight: 700; }
     .ds-list-body { max-width: 860px; margin: 0 auto; padding: 4px 12px 40px; }
-    .ds-counts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
+    .ds-counts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 6px 0 10px; }
+    .ds-counts span small { display: block; color: var(--c, #2f5bd3); font-size: 12px; font-weight: 700; }
     .ds-counts.single { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ds-counts span { padding: 10px 8px; border-radius: 14px; background: #fff; border: 1px solid var(--line, #e3e9f2); color: #3d4f6b; font-size: 13px; text-align: center; }
     .ds-counts span b { display: block; color: var(--c, #2f5bd3); font-size: 24px; line-height: 1.1; }
@@ -1416,7 +1418,15 @@
     .ds-note, .ds-legend { margin: 6px 0; color: var(--muted, #5a6b83); font-size: 12.5px; line-height: 1.6; }
     .ds-table-wrap { overflow-x: auto; background: #fff; border: 1px solid var(--line, #e3e9f2); border-radius: 14px; }
     .ds-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 14px; }
-    .ds-table col.name { width: 28%; }
+    .ds-table col.name { width: 24%; }
+    /* まとめの表の「実費」の欄(品目×数・金額。2026-11-27) */
+    .ds-table col.fee { width: 18%; }
+    .ds-fee-cell { text-align: left !important; font-size: 12px; line-height: 1.4; }
+    .ds-fee-cell.empty { text-align: center !important; }
+    .ds-fee-line-item, .ds-fee-line-total { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 4px; }
+    .ds-fee-line-item span { overflow-wrap: anywhere; }
+    .ds-fee-cell .ds-fee-line-item b, .ds-fee-cell .ds-fee-line-total b { display: inline; font-size: 12px; font-variant-numeric: tabular-nums; color: #a0306a; }
+    .ds-fee-line-total { margin-top: 2px; padding-top: 2px; border-top: 1px dashed #e6b8cf; font-weight: 700; }
     .ds-table th, .ds-table td { padding: 8px 6px; border-bottom: 1px solid #edf1f6; text-align: center; vertical-align: middle; }
     .ds-table thead th { position: sticky; top: 0; background: #f7f9fc; color: var(--c, #3d4f6b); font-size: 13px; }
     .ds-table tbody th { text-align: left; font-weight: 600; overflow-wrap: anywhere; }
@@ -1480,6 +1490,12 @@
     .care-actions.single { grid-template-columns: 1fr; }
     @media (max-width: 480px) {
       .ds-table th, .ds-table td { padding: 7px 3px; }
+      .ds-table thead th { font-size: 12px; }
+      /* 実費の欄を足して7列になったので、スマホでは表の中だけ横にずらす(名前の列は残す。2026-11-27) */
+      .ds-table { min-width: 460px; }
+      .ds-table tbody th, .ds-table thead th:first-child { position: sticky; left: 0; z-index: 1; background: #fff; box-shadow: 1px 0 0 #edf1f6; }
+      .ds-table thead th:first-child { z-index: 2; background: #f7f9fc; }
+      .ds-table tr.is-cancelled th { background: #fff; }
       .ds-cell b { font-size: 15px; }
       .ds-cell small.ds-how { display: none; }
       .ds-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 8px; }
@@ -1602,6 +1618,9 @@
     .ds-edit-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0 0; padding: 10px 12px; border-radius: 12px; background: #f7f9fd; }
     .ds-edit-tools p { flex: 1 1 14em; margin: 0; color: #3d4f6b; font-size: 13px; line-height: 1.6; }
     .ds-edit-tools button { min-height: 44px; padding: 6px 14px; font-size: 14px; background: #fff; border: 1px solid var(--line, #d6deea); }
+    /* 送りをまとめて記録する時刻(2026-11-27) */
+    .ds-departure-time { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #3d4f6b; }
+    .ds-departure-time input { min-height: 44px; padding: 4px 8px; font-size: 18px; border: 1px solid var(--line, #d6deea); border-radius: 10px; background: #fff; }
     /* 一覧の各行の入力欄(食べた量・送迎) */
     .ds-edit { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 10px 10px calc(4.2em + 20px); }
     .ds-edit-field { display: grid; grid-template-columns: auto minmax(5.5em, 1fr); align-items: center; gap: 6px; margin: 0; font-size: 14px; color: #3d4f6b; }
@@ -2052,6 +2071,36 @@
     /* 朝に「昼食」「おやつ」で読んだときの確かめ(現場の画面) */
     .scan-early-ask { display: grid; gap: 8px; margin-top: 10px; }
     .scan-early-ask button { min-height: 48px; font-size: 15px; }
+    /* ===== 日付を選んで、その日の記録を見る(2026-11-26。現場の画面と管理画面で同じ形) ===== */
+    .ds-daybar { margin: 0 0 14px; }
+    .ds-daybar-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; }
+    .ds-daybar-row > button { min-height: 48px; padding: 0 14px; border: 1px solid var(--gin-line-strong, #d5dbe4); border-radius: 14px; background: var(--gin-surface, #fff); color: var(--gin-primary-ink, #334155); font: inherit; font-size: 15px; font-weight: 700; white-space: nowrap; cursor: pointer; }
+    .ds-daybar-row > button:disabled { opacity: .4; cursor: default; }
+    .ds-daybar-pick { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 12px; border: 1px solid var(--gin-line-strong, #d5dbe4); border-radius: 14px; background: var(--gin-surface, #fff); color: var(--gin-text, #1c2b45); font-size: 17px; font-weight: 800; cursor: pointer; overflow: hidden; }
+    .ds-daybar-pick svg { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--gin-primary, #2f5bd3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .ds-daybar-pick [data-day-label] { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 日付の欄は透明にして全体に重ねる(どこを押してもカレンダーが開く) */
+    .ds-daybar-pick input[type="date"] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; opacity: 0; cursor: pointer; font-size: 16px; -webkit-appearance: none; appearance: none; }
+    .ds-daybar-pick input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+    .ds-daybar.is-past .ds-daybar-pick { border-color: #f59e0b; background: #fffbeb; }
+    .ds-daybar-note { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-top: 8px; padding: 10px 12px; border: 1px solid #f5c26b; border-radius: 14px; background: #fff4d6; color: #7a4a00; font-size: 15px; font-weight: 700; line-height: 1.5; }
+    .ds-daybar-note[hidden] { display: none; }
+    .ds-daybar-note button { min-height: 46px; padding: 0 16px; border: 0; border-radius: 12px; background: #b45309; color: #fff; font: inherit; font-size: 15px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+    @media (max-width: 420px) {
+      .ds-daybar-row { gap: 6px; }
+      .ds-daybar-row > button { padding: 0 8px; font-size: 14px; }
+      .ds-daybar-pick { gap: 4px; font-size: 15px; padding: 0 6px; }
+      .ds-daybar-pick svg { width: 17px; height: 17px; }
+      .ds-daybar-note { grid-template-columns: 1fr; }
+      .ds-daybar-note button { width: 100%; }
+    }
+    @media print { .ds-daybar { display: none !important; } }
+    /* 現場の画面で今日以外を見ているときは、記録する・印刷するボタンを隠す(見るだけ) */
+    .is-past-day [data-today-only] { display: none !important; }
+    .is-past-day .metric { cursor: default; }
+    .is-past-day .today-metrics div.metric { padding-bottom: 18px; }
+    /* 管理画面: 日付を変えて読み込んでいる間は、一覧などを押せないようにする(前の日の中身のまま新しい日付に保存しない) */
+    #adminView.is-day-loading > *:not(.page-heading):not(.ds-daybar) { pointer-events: none; opacity: .45; transition: opacity .15s; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2516,12 +2565,20 @@
       </section>
 
       <section id="todayView" class="view">
-        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1>今日の記録</h1><p>利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送りの記録一覧">記録一覧</button><button id="openFeePicker" aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openPastRecords" aria-label="過去の記録を見る（利用者を選んで、月・日ごとに）">過去の記録</button><button id="openNotebook" aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="今日の記録を更新">↻ 更新</button></div></div>
-        <div id="todayNewUserBar" hidden></div>
-        <div id="todayBoardBar"></div>
+        <div class="page-heading"><div><div class="eyebrow" id="todayDate"></div><h1 id="todayTitle">今日の記録</h1><p id="todayLead">利用者を選ぶと、バイタルや食事などを記録できます。</p></div><div class="heading-actions"><button id="openRecordList" aria-label="来所・入浴・昼食・送り・実費の記録一覧">記録一覧</button><button id="openFeePicker" data-today-only aria-label="実費（おむつ・マスクなど）を記録">実費</button><button id="openPastRecords" aria-label="過去の記録を見る（利用者を選んで、月・日ごとに）">過去の記録</button><button id="openNotebook" data-today-only aria-label="今日の連絡帳を作成">連絡帳</button><button id="refreshToday" aria-label="表示している日の記録を更新">↻ 更新</button></div></div>
+        <div class="ds-daybar" id="todayDayBar" role="group" aria-label="見る日を選ぶ">
+          <div class="ds-daybar-row">
+            <button type="button" data-day-step="-1" aria-label="前の日を見る">‹ 前の日</button>
+            <label class="ds-daybar-pick"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-day-label>今日</span><input type="date" id="todayDayInput" data-day-input aria-label="見る日を選ぶ（押すとカレンダーが開きます）"></label>
+            <button type="button" data-day-step="1" aria-label="次の日を見る">次の日 ›</button>
+          </div>
+          <div class="ds-daybar-note" data-day-note role="status" hidden><span data-day-note-text></span><button type="button" data-day-today>今日に戻る</button></div>
+        </div>
+        <div id="todayNewUserBar" data-today-only hidden></div>
+        <div id="todayBoardBar" data-today-only></div>
         <div class="plan-bar" aria-live="polite">
           <div><span class="plan-bar-count" id="planBarCount">今日の予定</span><span class="plan-bar-detail" id="planBarDetail"></span></div>
-          <button id="openPlanSheet">予定の変更・追加</button>
+          <button id="openPlanSheet" data-today-only>予定の変更・追加</button>
         </div>
         <div class="today-metrics" id="todaySummary" aria-label="今日の集計"></div>
         <div class="panel">
@@ -2531,7 +2588,7 @@
             <button id="clearTodaySearch" class="search-clear hidden" aria-label="今日の検索を消す">×</button>
           </div>
           <div class="filter-bar" role="group" aria-label="今日の表示を絞り込み">
-            <button data-today-filter="planned" aria-pressed="true">今日の予定</button>
+            <button data-today-filter="planned" aria-pressed="true" id="todayFilterPlanned">今日の予定</button>
             <button data-today-filter="all" aria-pressed="false">全員</button>
             <button data-today-filter="arrived" aria-pressed="false">来所済み</button>
             <button data-today-filter="unrecorded" aria-pressed="false">来所未記録</button>
@@ -2731,6 +2788,9 @@
       // その日に特記事項を書いた方(今日の一覧の「特記事項 記入済み」)
       notedUserIds: new Set(),
       todayVisibleIds: [],
+      // 今日以外の日を見ているときの、その日の記録(見るだけ。今日の記録 app.records などとは別に持つ)。null は今日
+      dayView: null,
+      dayViewSeq: 0,
       recordsRevision: 0,
       // ケア記録を保存した回数。読み直しを始めたあとに保存があれば、その読み直しのケア記録は古いので使わない
       careRevision: 0,
@@ -2863,8 +2923,18 @@
         renderToday();
       }));
       document.getElementById('refreshToday').addEventListener('click', refreshState);
+      // 見る日を選ぶ(前の日・次の日・カレンダー・今日に戻る)
+      dsDayBarBind(document.getElementById('todayDayBar'), todayViewDate, setTodayViewDate);
       document.getElementById('openNotebook').addEventListener('click', () => openNotebookMenu(scannerCareHost));
-      document.getElementById('openRecordList').addEventListener('click', () => openRecordList(scannerCareHost));
+      // 今日以外の日は、その日の記録一覧を見るだけで開く(まとめの表と実費。2026-11-27 現場の要望「遡って確認したい」)
+      document.getElementById('openRecordList').addEventListener('click', () => {
+        if (!app.dayView) {
+          openRecordList(scannerCareHost);
+          return;
+        }
+        if (app.dayView.loading || app.dayView.error) return;
+        openRecordList(scannerDayViewHost(app.dayView));
+      });
       document.getElementById('todaySummary').addEventListener('click', (event) => {
         const metric = event.target.closest('[data-metric]');
         if (!metric) return;
@@ -2873,6 +2943,8 @@
           renderToday();
           return;
         }
+        // 今日以外の日は見るだけ(記録一覧は、その場で直せる欄があるので開かない)
+        if (app.dayView) return;
         openRecordList(scannerCareHost, metric.dataset.metric);
       });
       document.getElementById('openFeePicker').addEventListener('click', () => openFeePicker(scannerDsHost));
@@ -2934,7 +3006,11 @@
       if (id === 'settingsView') {
         updateSettingsLock();
       }
-      if (id === 'scanView') resetModeForNewDay();
+      if (id === 'scanView') {
+        resetModeForNewDay();
+        // スキャン画面へ移ったら、今日の記録の画面も今日に戻す(過去の日のまま記録しないように)
+        backToTodayView();
+      }
     }
 
     function buildModeButtons() {
@@ -3519,6 +3595,10 @@
     }
 
     async function refreshState() {
+      if (app.dayView) {
+        loadDayView(app.dayView.date);
+        return;
+      }
       const button = document.getElementById('refreshToday');
       if (button.disabled) return;
       button.disabled = true;
@@ -4599,27 +4679,130 @@
       return flags;
     }
 
+    // ---- 日付を選んで、その日の記録を見る(2026-11-26 原山さん。現場は見るだけ) ----
+    // 今日以外の日は app.dayView に読み込む(今日の記録 app.records・送信待ち・端末の控えには混ぜない)。
+    // 今日に戻るのは「今日に戻る」・スキャン画面へ移ったとき・スリープから戻ったとき・アプリを開き直したとき。
+    function todayViewDate() {
+      return app.dayView ? app.dayView.date : todayStr();
+    }
+
+    function setTodayViewDate(dateText) {
+      const today = todayStr();
+      const date = dsDayClamp(dateText, today) || today;
+      if (date === today) {
+        backToTodayView();
+        renderToday();
+        refreshStateQuiet();
+        return;
+      }
+      loadDayView(date);
+    }
+
+    function loadDayView(dateText) {
+      const seq = ++app.dayViewSeq;
+      app.dayView = { date: dateText, loading: true, error: '', records: [], careRecords: [], plans: [], feeRecords: [], notedUserIds: new Set() };
+      renderToday();
+      api('scanState', { businessDate: dateText }).then((state) => {
+        if (seq !== app.dayViewSeq || !app.dayView) return;
+        const norm = (item) => Object.assign({}, item, { userId: normalizeClientUserId(item.userId) });
+        app.dayView = {
+          date: dateText,
+          loading: false,
+          error: '',
+          records: (state.records || []).map(norm),
+          careRecords: (state.careRecords || []).map(norm),
+          plans: (state.plans || []).map(norm),
+          feeRecords: (state.feeRecords || []).map(norm),
+          notedUserIds: new Set((state.notedUserIds || []).map((id) => normalizeClientUserId(id)))
+        };
+        renderToday();
+        document.getElementById('todayFeedback').textContent = '';
+      }).catch((error) => {
+        if (seq !== app.dayViewSeq || !app.dayView) return;
+        app.dayView.loading = false;
+        app.dayView.error = friendlyError(error);
+        renderToday();
+      });
+    }
+
+    // 今日に戻す。戻したら true
+    function backToTodayView() {
+      if (!app.dayView) return false;
+      app.dayView = null;
+      app.dayViewSeq++;
+      return true;
+    }
+
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible' || !backToTodayView()) return;
+        if (document.getElementById('todayView').classList.contains('active')) renderToday();
+      });
+    }
+
+    function dayViewFind(items, userId) {
+      const id = normalizeClientUserId(userId);
+      return (items || []).find((item) => normalizeClientUserId(item.userId) === id) || null;
+    }
+
+    function renderTodayHeading(view) {
+      const today = todayStr();
+      const date = view ? view.date : today;
+      document.getElementById('todayView').classList.toggle('is-past-day', Boolean(view));
+      document.getElementById('todayDate').textContent = view
+        ? '見るだけ（直すときは主任・管理者へ）'
+        : new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
+      document.getElementById('todayTitle').textContent = view ? `${dsDayShortLabel(date, today)}の記録` : '今日の記録';
+      document.getElementById('todayLead').textContent = view
+        ? '利用者を押すと、その方のこの日の記録を時刻の順に見られます。'
+        : '利用者を選ぶと、バイタルや食事などを記録できます。';
+      document.getElementById('todayFilterPlanned').textContent = view ? 'この日の予定' : '今日の予定';
+      dsDayBarSync(document.getElementById('todayDayBar'), date, today, '見ています（見るだけ）');
+    }
+
     function renderToday() {
       const list = document.getElementById('todayList');
       const rawQuery = document.getElementById('todaySearch').value;
       const query = normalizeForSearch(rawQuery);
-      document.getElementById('todayDate').textContent = new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'long' });
+      // 日付が変わったまま開いていたら、昨日の「今日」を出さない
+      if (app.dayView && app.dayView.date >= todayStr()) backToTodayView();
+      const view = app.dayView;
+      renderTodayHeading(view);
       document.getElementById('clearTodaySearch').classList.toggle('hidden', !rawQuery);
       document.querySelectorAll('[data-today-filter]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.todayFilter === app.todayFilter)));
+      if (view && (view.loading || view.error)) {
+        document.getElementById('todaySummary').innerHTML = '';
+        document.getElementById('planBarCount').textContent = 'この日の予定';
+        document.getElementById('planBarDetail').textContent = view.loading ? '読み込み中…' : '';
+        document.getElementById('todayResultCount').textContent = '';
+        app.todayVisibleIds = [];
+        list.innerHTML = view.loading
+          ? '<div class="empty-state"><strong>読み込み中…</strong>この日の記録を読んでいます。</div>'
+          : `<div class="empty-state"><strong>この日の記録を読めませんでした</strong>${escapeHtml(view.error)}<br>通信を確かめて、上の「↻ 更新」を押してください。</div>`;
+        return;
+      }
+      // 今日は今までどおり(送信待ちの読み取りも足す)。今日以外の日は、その日に読み込んだ記録だけ
+      const dayRecordFor = view ? (userId) => dayViewFind(view.records, userId) : recordFor;
+      const dayFlagsFor = view ? (userId) => { const record = dayRecordFor(userId); return record ? safeJson(record.actualFlags, {}) : {}; } : localFlagsFor;
+      const dayCareFor = view ? (userId) => dayViewFind(view.careRecords, userId) || {} : careRecordWithPendingScans;
+      const dayPlans = view ? view.plans : app.plans;
+      const dayHost = view
+        ? { feeRecords: () => view.feeRecords, noted: (userId) => view.notedUserIds.has(normalizeClientUserId(userId)) }
+        : scannerDsHost;
       const counts = { arrival: 0, bath: 0, lunch: 0, snack: 0, departure: 0, cancelled: 0, vital: 0 };
       const entries = app.users.slice().sort(kanaSort).map((user) => {
-        const record = recordFor(user.userId);
+        const record = dayRecordFor(user.userId);
         const cancelled = Boolean(record && record.attendanceStatus === 'cancelled');
-        const flags = localFlagsFor(user.userId);
-        const plan = planFor(app.plans, user.userId);
+        const flags = dayFlagsFor(user.userId);
+        const plan = planFor(dayPlans, user.userId);
         // バイタルは記録一覧の「バイタル」タブと同じく、体温・血圧・脈拍・SpO2 のどれかが入っていれば「測った」とする
-        const vital = !cancelled && scannerVitalMeasured(user.userId);
+        const vital = !cancelled && scannerVitalMeasured(user.userId, view ? dayCareFor(user.userId) : undefined);
         if (cancelled) counts.cancelled++;
         else Object.keys(SERVICE_META).forEach((key) => { if (flags[key]) counts[key]++; });
         if (vital && flags.arrival) counts.vital++;
         return { user, record, cancelled, flags, plan, vital, planned: Boolean(plan && plan.planned) };
       });
-      renderPlanBar(entries);
+      renderPlanBar(entries, Boolean(view));
       // 押すと、その記録をした方の一覧(名前・時刻・食べた量・送迎)が開く。キャンセルは下の一覧をキャンセルで絞り込む
       // バイタルは「来所した方のうち測った方 / 来所した方」。押すと記録一覧の「バイタル」タブ(その場で入力できる)
       document.getElementById('todaySummary').innerHTML = [
@@ -4628,6 +4811,11 @@
         const color = key === 'cancelled' ? '#c2410c' : (key === 'vital' ? MODE_META.vital.color : SERVICE_META[key].color);
         const count = key === 'vital' ? `${counts.vital}<small>/${counts.arrival}名</small>` : `${counts[key]}<small>名</small>`;
         const spoken = key === 'vital' ? `バイタル 来所${counts.arrival}名のうち${counts.vital}名が測定済み。押すとバイタルの一覧を表示` : `${label} ${counts[key]}名。押すと一覧を表示`;
+        // 今日以外の日は数だけ(押しても一覧は開かない)。キャンセルは下の一覧を絞り込めるので押せるまま
+        if (view && key !== 'cancelled') {
+          const quiet = key === 'vital' ? `バイタル 来所${counts.arrival}名のうち${counts.vital}名が測定済み` : `${label} ${counts[key]}名`;
+          return `<div class="metric${key === 'vital' ? ' metric-vital' : ''}" style="--c:${color}" role="group" aria-label="${quiet}"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${count}</strong><span>${label}</span></div>`;
+        }
         return `<button type="button" class="metric${key === 'vital' ? ' metric-vital' : ''}" data-metric="${key}" style="--c:${color}" aria-label="${spoken}"><span class="metric-icon">${modeIconSvg(key)}</span><strong>${count}</strong><span>${label}</span></button>`;
       }).join('');
       const filtered = entries.filter(({user, cancelled, flags, planned}) => {
@@ -4641,7 +4829,7 @@
       });
       app.todayVisibleIds = filtered.filter((entry) => !entry.cancelled).map((entry) => entry.user.userId);
       document.getElementById('todayResultCount').textContent = `${filtered.length}名を表示 / 全${entries.length}名` +
-        (app.todayFilter === 'unrecorded' ? '（今日の予定があり、来所が未記録の方）' : '');
+        (app.todayFilter === 'unrecorded' ? `（${view ? 'この日' : '今日'}の予定があり、来所が未記録の方）` : '');
       list.innerHTML = filtered.map(({user, record, cancelled, flags, plan, vital}) => {
         // 印の並び: 来所・バイタル・入浴・昼食・おやつ・送り(バイタルは読取履歴ではなくケア記録の値で判定)
         const flagKeys = ['arrival', 'vital'].concat(Object.keys(SERVICE_META).filter((key) => key !== 'arrival'));
@@ -4655,17 +4843,25 @@
         const marks = [planBadgeHtml(plan, Boolean(flags.arrival))];
         if (!cancelled && record && record.bathStatus === 'refused') marks.push('<span class="status-chip refused">入浴拒否</span>');
         if (!cancelled && record && record.usageActual === 'half_am') marks.push('<span class="status-chip half">午前のみ</span>');
-        marks.push(feeBadgeHtml(scannerDsHost, user.userId));
-        marks.push(dsNotedTagHtml(scannerDsHost, user.userId));
+        marks.push(feeBadgeHtml(dayHost, user.userId));
+        marks.push(dsNotedTagHtml(dayHost, user.userId));
         const reason = cancelled && record.cancelReason ? ` / ${escapeHtml(record.cancelReason)}` : '';
-        const saving = app.pendingDayChanges.has(user.userId);
-        const careLine = cancelled ? '' : careSummaryHtml(careRecordWithPendingScans(user.userId), scannerBathState(user.userId));
+        const saving = !view && app.pendingDayChanges.has(user.userId);
+        const bathState = view
+          ? (record && record.bathStatus === 'refused' ? 'refused' : (flags.bath ? 'done' : ''))
+          : scannerBathState(user.userId);
+        const careLine = cancelled ? '' : careSummaryHtml(dayCareFor(user.userId), bathState);
         const isOff = Boolean(plan && plan.source === 'off' && !flags.arrival);
         return `<button class="row day-row${cancelled ? ' is-cancelled' : ''}${isOff ? ' is-off' : ''}" data-day-user="${escapeHtml(user.userId)}" ${saving ? 'disabled aria-busy="true"' : ''} style="width:100%;text-align:left;font-weight:400">${avatarHtml(user)}<span class="day-person"><strong>${escapeHtml(user.displayName)}${dsCareHouseMark(user)}</strong><small>${escapeHtml(user.kana || '')}${reason}</small>${marks.join('')}${careLine}${saving ? '<small>保存中…</small>' : ''}</span>${chips}</button>`;
       }).join('') || `<div class="empty-state"><strong>${entries.length ? '該当する利用者はいません' : '利用者情報を取得できません'}</strong>${entries.length ? '検索文字や絞り込み条件を変えてください。' : '通信を確認して、上の「更新」を押してください。'}</div>`;
       list.querySelectorAll('[data-day-user]').forEach((button) => {
         // キャンセルの方は取消メニュー、それ以外はケア記録の入力を開く
         button.addEventListener('click', () => {
+          // 今日以外の日は見るだけ: その方のその日の記録を時刻の順に開く(版53の「1人の1日」)
+          if (app.dayView) {
+            openCareDay(scannerCareHost, button.dataset.dayUser, app.dayView.date);
+            return;
+          }
           const record = recordFor(button.dataset.dayUser);
           if (record && record.attendanceStatus === 'cancelled') openDaySheet(button.dataset.dayUser);
           else openCareForm(scannerCareHost, button.dataset.dayUser);
@@ -4674,8 +4870,8 @@
     }
 
     // 今日のバイタルを測ったか。体温・血圧(上)・脈拍・SpO2 のどれかが入っていれば測った(体重だけでは数えない)
-    function scannerVitalMeasured(userId) {
-      const care = careRecordFor(userId);
+    // care: 今日以外の日を見ているときは、その日のケア記録を渡す
+    function scannerVitalMeasured(userId, care = careRecordFor(userId)) {
       return Boolean(care) && ['temperature', 'bpHigh', 'pulse', 'spo2'].some((field) => careHas(care[field]));
     }
 
@@ -4725,12 +4921,12 @@
       }).map((user) => user.userId);
     }
 
-    function renderPlanBar(entries) {
+    function renderPlanBar(entries, past) {
       const planned = entries.filter((entry) => entry.planned).length;
       const added = entries.filter((entry) => entry.plan && entry.plan.source === 'added').length;
       const off = entries.filter((entry) => entry.plan && entry.plan.source === 'off').length;
       const extra = entries.filter((entry) => !entry.planned && !entry.cancelled && entry.flags.arrival).length;
-      document.getElementById('planBarCount').innerHTML = `今日の予定 <b>${planned}</b>名`;
+      document.getElementById('planBarCount').innerHTML = `${past ? 'この日' : '今日'}の予定 <b>${planned}</b>名`;
       const details = [];
       if (added) details.push(`臨時 ${added}名`);
       if (off) details.push(`お休み ${off}名`);
@@ -4823,16 +5019,42 @@
         if (await applyDayStatus({ clearService: service }, userId)) return true;
         throw new Error(app.dayStatusError || '');
       },
-      recordMealAll: (service, userIds) => scannerRecordMealAll(service, userIds)
+      recordMealAll: (service, userIds) => scannerRecordMealAll(service, userIds),
+      recordDepartureAll: (userIds, time) => scannerRecordManyManual('departure', userIds, time)
     });
+
+    // 今日以外の日の記録一覧(見るだけ)へ渡す接続部分。app.dayView に読み込んだその日の記録だけを使う
+    // (今日の記録・送信待ち・端末の控えには触れない。save・送信待ちの列が無いので、直す欄・まとめて記録するボタンは出ない)
+    function scannerDayViewHost(view) {
+      return {
+        viewOnly: true,
+        businessDate: () => view.date,
+        users: () => app.users,
+        findUser: scannerDsHost.findUser,
+        flags: (userId) => { const record = dayViewFind(view.records, userId); return record ? safeJson(record.actualFlags, {}) : {}; },
+        record: (userId) => dayViewFind(view.records, userId),
+        care: (userId) => dayViewFind(view.careRecords, userId) || {},
+        plan: (userId) => planFor(view.plans, userId),
+        feeItems: () => app.feeItems,
+        feeRecords: () => view.feeRecords,
+        call: (name, payload) => api(name, payload),
+        canEditPast: () => false
+      };
+    }
 
     // 記録一覧の「来所した方の昼食をまとめて記録」(2026-11-19 原山さん「昼食にも空欄の方を全量にするボタンを」)。
     // 名前から記録と同じ送信待ちの列に、1人1件ずつ「入力元 manual・今の時刻・全量」で入れる(電波がなくても記録でき、あとで1人ずつ取り消せる)。
     // すでに記録済み・当日キャンセルの方は入れない(サーバーも同じ日・同じ項目の2件目は重複として受け付けない)。
     function scannerRecordMealAll(service, userIds) {
       if (service !== 'lunch' && service !== 'snack') return 0;
+      return scannerRecordManyManual(service, userIds, dsNowTime());
+    }
+
+    // 何人かの記録を、名前から記録と同じ送信待ちの列に1人1件(入力元 manual)で入れる。昼食・おやつは全量、
+    // 送りは施設送迎(送りの送迎で家族送迎を選んでいた方は家族送迎のまま。QRで送りを読んだときと同じ。2026-11-27)
+    function scannerRecordManyManual(service, userIds, time) {
+      if (!['lunch', 'snack', 'departure'].includes(service) || !/^\d{2}:\d{2}$/.test(String(time || ''))) return 0;
       const businessDate = todayStr();
-      const time = dsNowTime();
       let count = 0;
       (userIds || []).forEach((userId) => {
         const user = app.users.find((item) => normalizeClientUserId(item.userId) === normalizeClientUserId(userId));
@@ -4841,7 +5063,7 @@
         if (record && record.attendanceStatus === 'cancelled') return;
         const localKey = `${businessDate}:${user.userId}:${service}`;
         if (isLocallyRecorded(localKey)) return;
-        app.queue.push({
+        const event = {
           eventId: nextEventId(),
           clientEventSeq: app.clientSeq,
           deviceId: app.deviceId,
@@ -4851,10 +5073,15 @@
           qrTokenHash: user.qrTokenHash || '',
           serviceType: service,
           source: 'manual',
-          amount: 10,
           localKey,
           localStatus: 'pending'
-        });
+        };
+        if (service === 'lunch' || service === 'snack') event.amount = 10;
+        // ケアハウスの方は送迎の項目なし(2026-11-18)
+        if (service === 'departure' && !dsIsCareHouse(user)) {
+          event.transport = (careRecordFor(user.userId) || {}).departureTransport === 'family' ? 'family' : 'facility';
+        }
+        app.queue.push(event);
         count++;
       });
       if (!count) return 0;
@@ -5889,7 +6116,7 @@
         <div class="care-treat-photos">
           <span class="care-treat-count">写真 ${photos}枚</span>
           ${photos ? '<button type="button" data-treat-view>写真を見る・外す</button>' : ''}
-          ${photos < CARE_TREATMENT_PHOTO_MAX ? `<label class="care-treat-shot">＋ 写真を撮る・選ぶ<input type="file" accept="image/*" data-treat-photo hidden></label>` : ''}
+          ${photos < CARE_TREATMENT_PHOTO_MAX ? `<label class="care-treat-shot">＋ 写真を撮る・選ぶ<input type="file" accept="image/&#42;" data-treat-photo hidden></label>` : ''}
         </div>
       </div>`;
     }
@@ -6553,6 +6780,8 @@
     // 記録一覧の「レク」タブ(来所した方のレクの参加・不参加をまとめて入れる。2026-11-18 現場の要望「レクも項目に入れたい」)
     const DS_REC_TAB = 'rec';
     const DS_REC_COLOR = '#4d7c0f';
+    // まとめの表の「実費」の欄(今日の一覧の実費の目印と同じ色)
+    const DS_FEE_COLOR = '#a0306a';
     const DS_TRANSPORT_BY_SERVICE = { arrival: 'arrivalTransport', departure: 'departureTransport' };
     // 名前から記録した昼食・おやつに入れる量の欄(サーバーの MANUAL_AMOUNT_FIELDS と同じ)
     const DS_MANUAL_AMOUNT_FIELDS = { lunch: 'mealAmount', snack: 'snackAmount' };
@@ -6565,7 +6794,7 @@
       other: 'その他'
     };
     // drafts: 一覧で変えて、まだ保存していない値 { 利用者ID: { 項目: 値 } }
-    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, filled: {}, weightOpen: {}, saving: false, status: '', statusError: false, confirmClose: false };
+    const dsListUi = { host: null, tab: 'summary', events: null, eventsError: false, seq: 0, drafts: {}, filled: {}, weightOpen: {}, saving: false, status: '', statusError: false, confirmClose: false, departureTime: '' };
     const dsFeeUi = { host: null, userId: '', itemId: '', quantity: 1, saving: false, monthTotal: null, monthSeq: 0, confirmCancel: '' };
 
     function dsYen(value) {
@@ -6634,6 +6863,7 @@
         halfDay: record.usageActual === 'half_am',
         // 今日が午前のみか(実績が無ければ予定)。一括の全量記録でおやつの対象から外すのに使う
         halfDayToday: record.usageActual ? record.usageActual === 'half_am' : Boolean(plan && plan.usage === 'half_am'),
+        fees: host.feeRecords ? dsFeeRecordsFor(host, userId) : [],
         services
       };
     }
@@ -6641,7 +6871,16 @@
     function dsListEntries(host) {
       return host.users().slice().sort(kanaSort)
         .map((user) => dsEntryFor(host, user, dsListUi.events))
-        .filter((entry) => entry.planned || entry.cancelled || DS_SERVICES.some((key) => entry.services[key].done));
+        // 予定・記録がなく実費だけある方も出す(実績入力で実費を見落とさないように。2026-11-27 現場の要望)
+        .filter((entry) => entry.planned || entry.cancelled || DS_SERVICES.some((key) => entry.services[key].done) || entry.fees.length);
+    }
+
+    // まとめの表の「実費」の欄: 品目×数・金額を1行ずつ、2件以上なら合計も(2026-11-27 現場の要望「記録一覧で実費も見たい」)
+    function dsFeeCellHtml(fees) {
+      if (!fees.length) return '<td class="ds-cell ds-fee-cell empty">—</td>';
+      const lines = fees.map((record) => `<span class="ds-fee-line-item"><span>${escapeHtml(record.itemName || '')}×${Number(record.quantity) || 0}</span><b>${escapeHtml(dsYen(record.amount))}</b></span>`).join('');
+      const total = fees.length > 1 ? `<span class="ds-fee-line-total"><span>合計</span><b>${escapeHtml(dsYen(dsFeeTotal(fees)))}</b></span>` : '';
+      return `<td class="ds-cell ds-fee-cell">${lines}${total}</td>`;
     }
 
     function dsDraftCount() {
@@ -6651,7 +6890,8 @@
     // tab: 'summary'(まとめ) または記録の種類(arrival など)。今日の画面の「来所 ○名」から開くときは種類を渡す
     function openRecordList(host, tab) {
       dsListUi.host = host;
-      dsListUi.tab = DS_SERVICES.includes(tab) || tab === DS_VITAL_TAB || tab === DS_REC_TAB ? tab : 'summary';
+      // host.viewOnly: 現場画面で今日以外の日を見ているとき。直す欄のある種類ごとのタブは出さず、まとめの表だけ(2026-11-27)
+      dsListUi.tab = !host.viewOnly && (DS_SERVICES.includes(tab) || tab === DS_VITAL_TAB || tab === DS_REC_TAB) ? tab : 'summary';
       dsListUi.weightOpen = {};
       dsListUi.events = null;
       dsListUi.eventsError = false;
@@ -6661,6 +6901,7 @@
       dsListUi.status = '';
       dsListUi.statusError = false;
       dsListUi.confirmClose = false;
+      dsListUi.departureTime = '';
       const seq = ++dsListUi.seq;
       const previous = document.getElementById('dsRecordList');
       if (previous) previous.remove();
@@ -6673,10 +6914,10 @@
       overlay.innerHTML = `
         <div class="nb-toolbar">
           <button type="button" data-ds-close>← 戻る</button>
-          <div class="nb-title"><strong>記録一覧</strong><span>${escapeHtml(careDateLabel(host.businessDate()))}</span></div>
+          <div class="nb-title"><strong>記録一覧</strong><span>${escapeHtml(careDateLabel(host.businessDate()))}${host.viewOnly ? '（見るだけ）' : ''}</span></div>
           <button type="button" class="primary" data-ds-print>印刷</button>
         </div>
-        <div class="ds-tabs" role="tablist" aria-label="一覧の種類">
+        <div class="ds-tabs" role="tablist" aria-label="一覧の種類"${host.viewOnly ? ' hidden' : ''}>
           ${[['summary', 'まとめ']].concat(DS_SERVICES.map((key) => [key, DS_SERVICE_LABELS[key]]), [[DS_VITAL_TAB, 'バイタル'], [DS_REC_TAB, 'レク']]).map(([key, label]) =>
             `<button type="button" role="tab" data-ds-tab="${key}" style="--c:${key === DS_VITAL_TAB ? DS_VITAL_COLOR : (key === DS_REC_TAB ? DS_REC_COLOR : (DS_SERVICE_COLORS[key] || '#2f5bd3'))}">${label}</button>`).join('')}
         </div>
@@ -6732,6 +6973,11 @@
           if (host.save && host.bathState) openCareForm(host, open.dataset.dsOpen);
           return;
         }
+        const day = event.target.closest('[data-ds-day]');
+        if (day) {
+          openCareDay(host, day.dataset.dsDay, host.businessDate());
+          return;
+        }
         const seg = event.target.closest('[data-ds-seg-value]');
         if (seg) {
           const group = seg.closest('[data-ds-edit]');
@@ -6752,6 +6998,12 @@
           renderRecordList();
           const list = document.getElementById('dsRecordList');
           if (list) list.scrollTop = 0;
+          return;
+        }
+        if (event.target.closest('[data-ds-departure-all]')) {
+          // 時刻は、職員が欄を変えたときだけその値(dsListUi.departureTime)。変えていなければ押した時刻(11/27 点検)
+          dsRecordDepartureAll();
+          renderRecordList();
           return;
         }
         const mealAll = event.target.closest('[data-ds-meal-all]');
@@ -6794,6 +7046,11 @@
       });
       // バイタルの数字は打つたびに下書きへ入れる(一覧が書き直されても、下書きと入力中の欄は戻す)
       overlay.addEventListener('input', (event) => {
+        // 送りをまとめて記録する時刻(一覧が書き直されても選んだ時刻を残す)
+        if (event.target.id === 'dsDepartureAllTime') {
+          dsListUi.departureTime = event.target.value;
+          return;
+        }
         const input = event.target.closest('input[data-ds-vital]');
         if (!input) return;
         dsSetDraft(input.dataset.dsUser, input.dataset.dsVital, input.value.trim());
@@ -6802,6 +7059,10 @@
         renderRecordListFooter();
       });
       overlay.addEventListener('change', (event) => {
+        if (event.target.id === 'dsDepartureAllTime') {
+          dsListUi.departureTime = event.target.value;
+          return;
+        }
         const select = event.target.closest('select[data-ds-edit]');
         if (!select) return;
         dsSetDraft(select.dataset.dsUser, select.dataset.dsEdit, select.value);
@@ -6876,6 +7137,46 @@
       if (!window.confirm(`次の${targets.length}名の${label}を、今の時刻・全量で記録します。よろしいですか？\n\n${names}\n\n間違えた方は、あとでその方のケア記録から取り消せます。`)) return;
       const count = host.recordMealAll(key, targets.map((entry) => entry.userId));
       dsListUi.status = count ? `${count}名の${label}を全量で記録しました。食べなかった方・量が違う方は直してください。` : `記録する方がいませんでした（ほかの端末で記録済みの可能性があります）。`;
+      dsListUi.statusError = !count;
+    }
+
+    // 送りをまとめて記録する方: 来所済み・当日キャンセルでない・まだ送りの記録がない・午前のみでない方
+    // (午前のみの方は昼に帰るので、午後にまとめて付けると時刻がずれる。2026-11-27 原山さん了承)
+    function dsDepartureAllTargets(active) {
+      return active.filter((entry) => entry.arrived && !entry.services.departure.done && !entry.halfDayToday);
+    }
+
+    // 記録一覧の「送り」の「来所した方の送りを記録する」(2026-11-27 現場の要望「送りの一括入力を来所と同じように」)。
+    // 送迎は施設送迎で入れる(QRで送りを読んだときと同じ。送りの送迎で家族送迎を選んでいた方は家族送迎のまま、ケアハウスの方は送迎なし)。
+    // 家族送迎の方は記録したあと一覧で押し直す。
+    // 時刻: 職員が欄で変えたとき(dsListUi.departureTime)はその値、変えていなければ押した時刻(11/27 点検「押した時刻」)
+    function dsRecordDepartureAll() {
+      const host = dsListUi.host;
+      if (!host || !host.recordDepartureAll) return;
+      const time = careToHalfWidth(String(dsListUi.departureTime || dsNowTime())).trim();
+      if (!/^\d{2}:\d{2}$/.test(time)) {
+        dsListUi.status = '送りの時刻を選んでください。';
+        dsListUi.statusError = true;
+        return;
+      }
+      const targets = dsDepartureAllTargets(dsListEntries(host).filter((entry) => !entry.cancelled));
+      if (!targets.length) return;
+      // 1人ずつ、実際に入る送迎を添える(サーバー・現場画面の scannerRecordManyManual と同じ決まり)
+      const transportNote = (entry) => {
+        if (dsIsCareHouse(entry.user)) return '（ケアハウス・送迎なし）';
+        if (entry.care.departureTransport === 'family') return '（送りは家族送迎のまま）';
+        return entry.care.arrivalTransport === 'family' ? '（施設送迎で入ります）　※来所は家族送迎' : '';
+      };
+      const family = targets.filter((entry) => !dsIsCareHouse(entry.user) && entry.care.departureTransport !== 'family' && entry.care.arrivalTransport === 'family');
+      const names = targets.map((entry) => `・${entry.user.displayName}様${transportNote(entry)}`).join('\n');
+      const note = family.length
+        ? `\n\n※の方は来所が家族送迎でした。送りも家族送迎のときは、記録したあと、この一覧で「家族送迎」を押して保存してください。`
+        : `\n\n家族送迎の方は、記録したあと、この一覧で「家族送迎」を押して保存してください。`;
+      if (!window.confirm(`次の${targets.length}名の送りを ${time} で記録します。送迎は、書いていない方は「施設送迎」で入ります。よろしいですか？\n\n${names}${note}\n\n間違えた方は、あとでその方のケア記録から取り消せます。`)) return;
+      const count = host.recordDepartureAll(targets.map((entry) => entry.userId), time);
+      dsListUi.status = count
+        ? `${count}名の送りを ${time} で記録しました。家族送迎の方は「家族送迎」を押して「変更を保存」を押してください。`
+        : '記録する方がいませんでした（ほかの端末で記録済みの可能性があります）。';
       dsListUi.statusError = !count;
     }
 
@@ -7090,7 +7391,9 @@
       const canOpen = Boolean(host.save && host.bathState);
       const nameHtml = (entry) => canOpen
         ? `<button type="button" class="ds-name-open" data-ds-open="${escapeHtml(entry.userId)}">${escapeHtml(entry.user.displayName)}</button>`
-        : escapeHtml(entry.user.displayName);
+        : (host.viewOnly
+          ? `<button type="button" class="ds-name-open" data-ds-day="${escapeHtml(entry.userId)}">${escapeHtml(entry.user.displayName)}</button>`
+          : escapeHtml(entry.user.displayName));
       const note = dsListUi.eventsError
         ? '<p class="ds-note">記録した職員の表示を読み込めませんでした（時刻は表示しています）。</p>'
         : (dsListUi.events ? '' : '<p class="ds-note">記録した職員を読み込んでいます…</p>');
@@ -7099,18 +7402,23 @@
         return;
       }
       if (dsListUi.tab === 'summary') {
-        const counts = DS_SERVICES.map((key) => `<span style="--c:${DS_SERVICE_COLORS[key]}"><b>${entries.filter((entry) => !entry.cancelled && entry.services[key].done).length}</b>名 ${DS_SERVICE_LABELS[key]}</span>`).join('');
+        const feeEntries = entries.filter((entry) => entry.fees.length);
+        const feeTotal = feeEntries.reduce((sum, entry) => sum + dsFeeTotal(entry.fees), 0);
+        const counts = DS_SERVICES.map((key) => `<span style="--c:${DS_SERVICE_COLORS[key]}"><b>${entries.filter((entry) => !entry.cancelled && entry.services[key].done).length}</b>名 ${DS_SERVICE_LABELS[key]}</span>`).join('')
+          + `<span class="ds-fee-count" style="--c:${DS_FEE_COLOR}"><b>${feeEntries.length}</b>名 実費<small>${escapeHtml(dsYen(feeTotal))}</small></span>`;
         body.innerHTML = `
           <div class="ds-counts">${counts}</div>
           ${note}
           <div class="ds-table-wrap"><table class="ds-table">
-            <colgroup><col class="name">${DS_SERVICES.map(() => '<col>').join('')}</colgroup>
-            <thead><tr><th scope="col">利用者</th>${DS_SERVICES.map((key) => `<th scope="col" style="--c:${DS_SERVICE_COLORS[key]}">${DS_SERVICE_LABELS[key]}</th>`).join('')}</tr></thead>
+            <colgroup><col class="name">${DS_SERVICES.map(() => '<col>').join('')}<col class="fee"></colgroup>
+            <thead><tr><th scope="col">利用者</th>${DS_SERVICES.map((key) => `<th scope="col" style="--c:${DS_SERVICE_COLORS[key]}">${DS_SERVICE_LABELS[key]}</th>`).join('')}<th scope="col" style="--c:${DS_FEE_COLOR}">実費</th></tr></thead>
             <tbody>${entries.map((entry) => `<tr class="${entry.cancelled ? 'is-cancelled' : ''}"><th scope="row">${nameHtml(entry)}${entry.halfDay ? '<small>午前のみ</small>' : ''}</th>${entry.cancelled
               ? `<td colspan="${DS_SERVICES.length}" class="ds-cell refused">当日キャンセル${entry.cancelReason ? `（${escapeHtml(entry.cancelReason)}）` : ''}</td>`
-              : DS_SERVICES.map((key) => dsSummaryCell(entry, key)).join('')}</tr>`).join('')}</tbody>
+              : DS_SERVICES.map((key) => dsSummaryCell(entry, key)).join('')}${dsFeeCellHtml(entry.fees)}</tr>`).join('')}</tbody>
           </table></div>
-          <p class="ds-legend">「未」は予定があってまだ記録がない方です。上の「来所」「昼食」などを押すと、記録した方の一覧が開き、食べた量や送迎をまとめて直せます。${canOpen ? '名前を押すと、その方のケア記録を見る・直すことができます。' : ''}</p>`;
+          <p class="ds-legend">${host.viewOnly
+            ? `この日の記録を見るだけの一覧です（直すときは主任・管理者へ）。名前を押すと、その方のこの日の記録を時刻の順に見られます。「実費」は、その日に記録した実費（取り消したものは除く）です。`
+            : `「未」は予定があってまだ記録がない方です。上の「来所」「昼食」などを押すと、記録した方の一覧が開き、食べた量や送迎をまとめて直せます。${canOpen ? '名前を押すと、その方のケア記録を見る・直すことができます。' : ''}「実費」は、その日に記録した実費（取り消したものは除く）です。`}</p>`;
         return;
       }
       if (dsListUi.tab === DS_VITAL_TAB) {
@@ -7137,7 +7445,9 @@
         const how = dsHowText(service);
         // 食事量が1項目になる前の記録(主食・副食)は、空欄に見えないよう以前の入力を添える
         const legacy = key === 'lunch' && careHasLegacyMeal(entry.care) ? `以前の入力：${careMealTexts(entry.care, true).join(' ')}` : '';
-        const small = (fields.length ? [legacy, how] : [service.detail, how]).filter(Boolean).map(escapeHtml).join(' ・ ');
+        // 送りで、来所が家族送迎だった方には印(施設送迎のまま家族送迎の押し直しを忘れないように。送迎減算にかかわる)
+        const arrivalFamily = key === 'departure' && entry.care.arrivalTransport === 'family' && !dsIsCareHouse(entry.user) ? '来所は家族送迎' : '';
+        const small = (fields.length ? [arrivalFamily, legacy, how] : [service.detail, how]).filter(Boolean).map(escapeHtml).join(' ・ ');
         const inner = `<span class="ds-time">${escapeHtml(service.time || '—')}</span>${avatarHtml(entry.user)}<span class="ds-person"><strong>${escapeHtml(entry.user.displayName)}${dsCareHouseMark(entry.user)}</strong><small>${small}</small></span>`;
         return `<div class="ds-row${fields.length ? ' ds-edit-row' : ''}" style="--c:${DS_SERVICE_COLORS[key]}">${open(entry, inner)}${fields.length ? `<div class="ds-edit">${fields.map(([field, label]) => dsEditControl(entry, field, label)).join('')}</div>` : ''}</div>`;
       };
@@ -7150,10 +7460,15 @@
       // 昼食・おやつ: 来所した方のうち、まだ記録がない方を一度に「全量」で記録する(現場の画面だけ。2026-11-19 原山さん)
       const mealAll = (key === 'lunch' || key === 'snack') && dsListUi.host && dsListUi.host.recordMealAll ? dsMealAllTargets(active, key) : [];
       const mealAllTool = mealAll.length ? `<div class="ds-edit-tools ds-meal-all"><p>来所した方で、まだ${DS_SERVICE_LABELS[key]}の記録がない方が${mealAll.length}名います（${key === 'lunch' ? '食事予定が「なし」の方' : '午前のみの方'}は入りません）。食べなかった方・量が違う方は、あとで記録一覧かケア記録で直してください。</p><button type="button" data-ds-meal-all="${key}">来所した${mealAll.length}名の${DS_SERVICE_LABELS[key]}を全量で記録する</button></div>` : '';
+      // 送り: 来所した方のうち、まだ送りの記録がない方を、選んだ時刻・施設送迎で一度に記録する(現場の画面の今日だけ。2026-11-27)
+      const departureAll = key === 'departure' && dsListUi.host && dsListUi.host.recordDepartureAll ? dsDepartureAllTargets(active) : [];
+      // 欄には、職員が変えた時刻か、今の時刻を出す(変えていなければ、押したときの時刻で記録する)
+      const departureAllTool = departureAll.length ? `<div class="ds-edit-tools ds-meal-all ds-departure-all"><p>来所した方で、まだ送りの記録がない方が${departureAll.length}名います（午前のみの方は入りません）。時刻を変えなければ、押したときの時刻で記録します。送迎は「施設送迎」で入ります（送りで家族送迎を選んでいた方は家族送迎のまま、ケアハウスの方は送迎なし）。</p><label class="ds-departure-time"><span>送りの時刻</span><input type="time" id="dsDepartureAllTime" value="${escapeHtml(dsListUi.departureTime || dsNowTime())}" aria-label="送りの時刻（変えなければ押したときの時刻）"></label><button type="button" data-ds-departure-all>来所した${departureAll.length}名の送りを記録する</button></div>` : '';
       body.innerHTML = `
         <div class="ds-counts single" style="--c:${DS_SERVICE_COLORS[key]}"><span><b>${done.length}</b>名 記録済み</span>${waiting.length ? `<span class="wait"><b>${waiting.length}</b>名 まだ</span>` : ''}${refused.length ? `<span class="wait"><b>${refused.length}</b>名 入浴拒否</span>` : ''}</div>
         ${note}
         ${mealAllTool}
+        ${departureAllTool}
         ${tools}
         <h2 class="ds-heading">${DS_SERVICE_LABELS[key]}を記録した方（時刻の早い順）</h2>
         <div class="list ds-rows">${done.map(row).join('') || '<p class="ds-empty">まだ記録はありません。</p>'}</div>
@@ -10242,6 +10557,77 @@
         closeNewUserNotices();
         nuUi.host.registerFromDraft(item);
       }
+    }
+
+
+    // ===== 日付を選んで、その日の記録を見る(2026-11-26 原山さん「今日の記録を見る画面で日付を選択すると、その日の状況がわかるように」) =====
+    // 現場の画面と管理画面の「今日の記録」の見出しの下に、同じ形の日付の切り替えを置く(押して選ぶだけ・選べるのは今日まで)。
+    // 現場は見るだけ(利用者を押すと「1人の1日」が開く)。管理画面は今までどおり主任・管理者が直せる(確定済みの日は不可)。
+    // 画面の部品(id は画面ごと):
+    //   [data-day-step="-1"] 前の日 / [data-day-input] 日付の欄(押すとカレンダー) / [data-day-label] 表示 / [data-day-step="1"] 次の日
+    //   [data-day-note] 今日以外のときの帯 / [data-day-note-text] 帯の文 / [data-day-today] 今日に戻る
+    function dsDayShift(dateText, days) {
+      const [year, month, day] = String(dateText || '').split('-').map(Number);
+      if (!year || !month || !day) return dsTodayJst();
+      const date = new Date(year, month - 1, day + days);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+
+    // 「11月25日（水）」(年は今年でなければ付ける)
+    function dsDayShortLabel(dateText, todayText) {
+      const [year, month, day] = String(dateText || '').split('-').map(Number);
+      if (!year || !month || !day) return String(dateText || '');
+      const weekday = '日月火水木金土'.charAt(new Date(year, month - 1, day).getDay());
+      const thisYear = Number(String(todayText || dsTodayJst()).slice(0, 4));
+      return `${year === thisYear ? '' : `${year}年`}${month}月${day}日（${weekday}）`;
+    }
+
+    // 選べるのは今日まで。日付の形でないとき(iPad の「リセット」で空にしたときなど)は null
+    function dsDayClamp(value, todayText) {
+      const text = String(value || '');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return null;
+      return text > todayText ? todayText : text;
+    }
+
+    // 表示している日に合わせて、日付の切り替えと帯を書き直す。pastText: 帯の文の続き(「見ています（見るだけ）」など)
+    function dsDayBarSync(bar, dateText, todayText, pastText) {
+      if (!bar) return;
+      const input = bar.querySelector('[data-day-input]');
+      if (input) {
+        if (input.value !== dateText) input.value = dateText;
+        input.max = todayText;
+      }
+      const past = dateText !== todayText;
+      const label = bar.querySelector('[data-day-label]');
+      if (label) label.textContent = dsDayShortLabel(dateText, todayText);
+      const next = bar.querySelector('[data-day-step="1"]');
+      if (next) next.disabled = dateText >= todayText;
+      bar.classList.toggle('is-past', past);
+      const note = bar.querySelector('[data-day-note]');
+      if (note) note.hidden = !past;
+      const noteText = bar.querySelector('[data-day-note-text]');
+      if (noteText) noteText.textContent = past ? `${dsDayShortLabel(dateText, todayText)}の記録を${pastText}` : '';
+    }
+
+    // current(): 今見ている日 / change(date): 日を変える(今日より先は今日にする)
+    function dsDayBarBind(bar, current, change) {
+      if (!bar) return;
+      bar.querySelectorAll('[data-day-step]').forEach((button) => button.addEventListener('click', () => {
+        const today = dsTodayJst();
+        change(dsDayClamp(dsDayShift(current(), Number(button.dataset.dayStep)), today) || today);
+      }));
+      const input = bar.querySelector('[data-day-input]');
+      if (input) input.addEventListener('change', () => {
+        const picked = dsDayClamp(input.value, dsTodayJst());
+        if (!picked) {
+          input.value = current();
+          return;
+        }
+        if (picked !== input.value) input.value = picked;
+        if (picked !== current()) change(picked);
+      });
+      const back = bar.querySelector('[data-day-today]');
+      if (back) back.addEventListener('click', () => change(dsTodayJst()));
     }
     /* @@DS_EXTRA_JS END@@ */
 
