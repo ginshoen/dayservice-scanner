@@ -2101,6 +2101,55 @@
     .is-past-day .today-metrics div.metric { padding-bottom: 18px; }
     /* 管理画面: 日付を変えて読み込んでいる間は、一覧などを押せないようにする(前の日の中身のまま新しい日付に保存しない) */
     #adminView.is-day-loading > *:not(.page-heading):not(.ds-daybar) { pointer-events: none; opacity: .45; transition: opacity .15s; }
+
+    /* ===== 2026-11-27 連絡帳の「全員へのお知らせ」(連絡帳のメニューの上の枠・入れる画面・紙の「お知らせ」の行) ===== */
+    .ds-nbn { display: grid; gap: 10px; margin-top: 12px; }
+    .ds-nbn-item { padding: 12px 14px; border: 1.5px solid #f2c14e; border-radius: 16px; background: #fff8e6; }
+    .ds-nbn-item b { display: block; margin-bottom: 4px; color: #8a5a00; font-size: 14px; }
+    .ds-nbn-item p { margin: 0 0 6px; color: #1c2b45; font-size: 15px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .ds-nbn-item small { display: block; color: #7a6a40; font-size: 12.5px; }
+    .ds-nbn-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .ds-nbn-actions button { min-height: 44px; min-width: 88px; padding: 0 16px; font-size: 14px; background: #fff; border: 1px solid #d6deea; border-radius: 999px; }
+    .ds-nbn-actions button.danger { color: #fff; background: #c5221f; border-color: #c5221f; }
+    .ds-nbn-ask { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: #fff; }
+    .ds-nbn-ask span { display: block; color: #8c1d18; font-size: 13.5px; line-height: 1.5; }
+    .ds-nbn-add { width: 100%; min-height: 52px; font-size: 16px; font-weight: 600; color: #8a5a00; background: #fffdf5; border: 1.5px dashed #e3b341; border-radius: 16px; }
+    .ds-nbn-msg { margin: 0; color: #166534; font-size: 13.5px; font-weight: 600; }
+    .ds-nbn-msg.error { color: #b3261e; }
+    .ds-nbn-body { display: grid; gap: 6px; margin-top: 12px; }
+    .ds-nbn-body textarea { width: 100%; min-height: 104px; font-size: 16px; line-height: 1.55; box-sizing: border-box; }
+    .ds-nbn-count { margin: 4px 0 0; color: #5a6b83; font-size: 12.5px; text-align: right; }
+    .ds-nbn-label { margin: 14px 0 6px; color: #3d4f6b; font-size: 13.5px; font-weight: 700; }
+    .ds-nbn-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .ds-nbn-modes button { min-height: 52px; padding: 4px 6px; font-size: 14.5px; line-height: 1.3; color: #1c2b45; background: #fff; border: 1px solid #c9d3e2; border-radius: 14px; }
+    .ds-nbn-modes button[aria-pressed="true"] { color: #fff; font-weight: 700; background: linear-gradient(135deg, #2f5bd3, #4f7cf0); border: 2px solid #2f5bd3; box-shadow: 0 6px 14px -8px rgba(47, 91, 211, .7); }
+    .ds-nbn-modes button[aria-pressed="true"]::before { content: "✓ "; }
+    .ds-nbn-dates { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    .ds-nbn-dates label { display: grid; gap: 4px; font-size: 13px; color: #3d4f6b; }
+    .ds-nbn-dates input { min-height: 48px; font-size: 16px; min-width: 0; width: 100%; box-sizing: border-box; }
+    .ds-nbn-range { margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: #f3f6fb; color: #1c2b45; font-size: 13.5px; line-height: 1.55; }
+    .ds-nbn-range:empty { display: none; }
+    @media screen and (max-width: 380px) {
+      .ds-nbn-modes { grid-template-columns: minmax(0, 1fr); }
+    }
+    .nb-table tr.nb-notice th, .nb-table tr.nb-notice td { background: #fffbea; }
+    .nb-table tr.nb-notice td { white-space: pre-wrap; }
+    @media print {
+      .nb-table tr.nb-notice th, .nb-table tr.nb-notice td { background: #fffbea; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+    /* 2026-11-27 PDFで連絡事項が切れる方の知らせ(画面だけ) */
+    @media print { #nbCutWarn { display: none !important; } }
+    /* 2026-11-27 全員へのお知らせのある日の印刷: 行の上下の余白を詰め、連絡事項の最低の高さはお知らせの行と合わせて数える(字の大きさは同じ)。2人で1枚に収めるため */
+    @media print {
+      .nb-card.nb-tight { min-height: 126mm; padding-top: 10px; padding-bottom: 6px; }
+      .nb-card.nb-tight header { padding-bottom: 4px; }
+      .nb-card.nb-tight .nb-name { margin: 6px 0 4px; }
+      .nb-card.nb-tight .nb-table th, .nb-card.nb-tight .nb-table td { padding-top: 2px; padding-bottom: 2px; }
+      .nb-card.nb-tight .nb-table td { line-height: 1.3; }
+      .nb-card.nb-tight .nb-table tr.nb-note td { height: auto; }
+      .nb-card.nb-tight footer { margin-top: 4px; }
+    }
+    .nb-cut-warn { box-sizing: border-box; width: calc(100% - 32px); max-width: 728px; margin: 10px auto 0; }
     /* @@DS_EXTRA_CSS END@@ */
 
     .hidden { display: none !important; }
@@ -2785,6 +2834,8 @@
       feeItems: [],
       feeRecords: [],
       notebookGroups: [],
+      // 連絡帳の「全員へのお知らせ」(期間つき。shared/ds-extra.js)
+      notebookNotices: [],
       // その日に特記事項を書いた方(今日の一覧の「特記事項 記入済み」)
       notedUserIds: new Set(),
       todayVisibleIds: [],
@@ -3510,6 +3561,7 @@
           .map((record) => Object.assign({}, record, { userId: normalizeClientUserId(record.userId) }));
       }
       if (Array.isArray(state.notebookGroups)) app.notebookGroups = state.notebookGroups;
+      if (Array.isArray(state.notebookNotices)) app.notebookNotices = state.notebookNotices;
       if (Array.isArray(state.notedUserIds)) {
         app.notedUserIds = new Set(state.businessDate === todayStr() ? state.notedUserIds.map(normalizeClientUserId) : []);
       }
@@ -3545,6 +3597,7 @@
         feeItems: state.feeItems || [],
         feeRecords: state.feeRecords || [],
         notebookGroups: state.notebookGroups || [],
+        notebookNotices: state.notebookNotices || [],
         notedUserIds: Array.isArray(state.notedUserIds) ? state.notedUserIds : [],
         businessDate: state.businessDate || todayStr()
       }));
@@ -4430,7 +4483,7 @@
     function cacheCurrentState() {
       // 保存前の仮表示を、次回起動時の確定データとして残さない。
       if (app.pendingDayChanges.size > 0) return;
-      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, notebookGroups: app.notebookGroups, notedUserIds: Array.from(app.notedUserIds), businessDate: todayStr() });
+      cacheState({ users: app.users, records: app.records, careRecords: app.careRecords, plans: app.plans, feeItems: app.feeItems, feeRecords: app.feeRecords, notebookGroups: app.notebookGroups, notebookNotices: app.notebookNotices, notedUserIds: Array.from(app.notedUserIds), businessDate: todayStr() });
     }
 
     function nextEventId() {
@@ -4985,6 +5038,11 @@
       notebookGroups: () => app.notebookGroups,
       setNotebookGroups: (groups) => {
         app.notebookGroups = Array.isArray(groups) ? groups : [];
+        cacheCurrentState();
+      },
+      notebookNotices: () => app.notebookNotices || [],
+      setNotebookNotices: (notices) => {
+        app.notebookNotices = Array.isArray(notices) ? notices : [];
         cacheCurrentState();
       },
       onFeeChanged: () => {
@@ -8101,7 +8159,8 @@
     //   notebookGroups() / setNotebookGroups(groups)
 
     // eventText: 行事のお知らせ(連絡事項の後ろに続けて出す)
-    function careNotebookRows(care, bathStatus, eventText) {
+    // notices: 全員へのお知らせ(その日の分。連絡事項の下の「お知らせ」の行。無い日は行を出さない)
+    function careNotebookRows(care, bathStatus, eventText, notices) {
       const c = care || {};
       const vitals = careVitalTexts(c);
       const meal = careMealTexts(c);
@@ -8119,17 +8178,20 @@
         c.training === 'done' || c.training === 'skipped'
           ? { label: '機能訓練', value: c.training === 'done' ? '行いました' : '本日は行いませんでした' } : null,
         { label: 'レクリエーション', value: recreation },
-        { label: '連絡事項', value: [careHas(c.notebookNote) ? String(c.notebookNote) : '', eventText || ''].filter(Boolean).join('\n'), note: true }
-      ].filter(Boolean);
+        { label: '連絡事項', value: [careHas(c.notebookNote) ? String(c.notebookNote) : '', eventText || ''].filter(Boolean).join('\n'), note: true },
+        notices && notices.length
+          ? { label: 'お知らせ', value: notices.map((notice) => String(notice.noticeBody || '')).filter(Boolean).join('\n'), notice: true } : null
+      ].filter((row) => row && (!row.notice || row.value));
     }
 
     function careNotebookCardHtml(entry, dateText) {
-      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText, entry.notices);
       const missing = rows.filter((row) => !row.note && !row.value).map((row) => row.label);
-      return `<article class="nb-card">
+      // 全員へのお知らせのある日は、印刷で行を少し詰めて2人で1枚に収める(字の大きさは同じ)
+      return `<article class="nb-card${entry.notices && entry.notices.length ? ' nb-tight' : ''}">
         <header><h2>連絡帳</h2><span>${escapeHtml(careDateLabel(dateText))}</span></header>
         <p class="nb-name">${escapeHtml(entry.user.displayName)} 様</p>
-        <table class="nb-table"><tbody>${rows.map((row) => `<tr class="${row.note ? 'nb-note' : ''}"><th scope="row">${row.label}</th><td>${row.value ? escapeHtml(row.value) : (row.note ? '' : '<span class="nb-empty">—</span>')}</td></tr>`).join('')}</tbody></table>
+        <table class="nb-table"><tbody>${rows.map((row) => `<tr class="${row.note ? 'nb-note' : (row.notice ? 'nb-notice' : '')}"><th scope="row">${row.label}</th><td>${row.value ? escapeHtml(row.value) : (row.note ? '' : '<span class="nb-empty">—</span>')}</td></tr>`).join('')}</tbody></table>
         <footer>${escapeHtml(CARE_FACILITY_NAME)}</footer>
         ${missing.length ? `<p class="nb-missing">未記録: ${escapeHtml(missing.join('・'))}（この表示は印刷されません）</p>` : ''}
         ${entry.canEditEvent ? `<div class="nb-event-edit" data-nb-event-user="${escapeHtml(entry.user.userId)}"><p>${escapeHtml(dsNotebookEventState(entry))}</p><button type="button" data-nb-event-edit>行事のお知らせを直す</button></div>` : ''}
@@ -8144,10 +8206,12 @@
     }
 
     function dsNotebookEntries(host, userIds) {
+      const notices = dsNoticesForDate(host, host.businessDate());
       return (userIds || []).map((userId) => ({
         user: host.findUser(userId),
         care: host.care(userId),
-        bathStatus: host.bathState(userId)
+        bathStatus: host.bathState(userId),
+        notices
       })).filter((entry) => entry.user);
     }
 
@@ -8183,10 +8247,12 @@
         </div>
         <p class="nb-hint">A4用紙1枚に2名分を印刷します。${missingCount ? `未記録の項目がある方が${missingCount}名います。` : ''}</p>
         <div class="nb-print-help hidden" id="nbPrintHelp" role="status"></div>
+        <p class="nb-print-help nb-cut-warn hidden" id="nbCutWarn" role="status"></p>
         <div class="nb-pages">${entries.map((entry) => careNotebookCardHtml(entry, dateText)).join('') ||
           '<div class="empty-state"><strong>連絡帳を作成できる方がいません</strong>来所を記録した方、またはケア記録を入力した方が表示されます。</div>'}</div>`;
       document.body.appendChild(overlay);
       document.body.classList.add('notebook-open');
+      dsUpdateNotebookCutWarn(overlay, entries, dateText);
       if (!GinNav.isTop('careNotebook')) GinNav.push('careNotebook', closeCareNotebook);
       overlay.querySelector('[data-nb-close]').addEventListener('click', closeCareNotebook);
       overlay.querySelector('[data-nb-print]').addEventListener('click', () => dsPrintNotebook(entries, dateText));
@@ -8214,6 +8280,19 @@
     function dsRenderNotebookPages(overlay, entries, dateText) {
       const pages = overlay.querySelector('.nb-pages');
       if (pages && entries.length) pages.innerHTML = entries.map((entry) => careNotebookCardHtml(entry, dateText)).join('');
+      dsUpdateNotebookCutWarn(overlay, entries, dateText);
+    }
+
+    // 用紙1枚に入らずPDFで連絡事項の終わりが切れる方がいれば、印刷の前に知らせる(この表示は印刷されない)
+    function dsUpdateNotebookCutWarn(overlay, entries, dateText) {
+      const warn = overlay && overlay.querySelector('#nbCutWarn');
+      if (!warn) return;
+      const names = entries.length ? dsNotebookPdfCutNames(entries, dateText) : [];
+      warn.classList.toggle('hidden', !names.length);
+      warn.classList.toggle('alert', Boolean(names.length));
+      warn.textContent = names.length
+        ? `${names.map((name) => `${name} 様`).join('・')}は、連絡事項・行事のお知らせ・全員へのお知らせを合わせると用紙1枚に入りません。PDFにすると連絡事項の終わりが「…」で切れます。印刷の前に、連絡事項か行事のお知らせを短くしてください。`
+        : '';
     }
 
     // 連絡帳の画面で、行事のお知らせをその場で直す。保存した文は職員の文として残り、自動では変わらない
@@ -8320,7 +8399,7 @@
     let dsNotebookPdfCache = null;
 
     function dsShareNotebookPdf(entries, dateText) {
-      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus, entry.eventText || ''])]);
+      const key = JSON.stringify([dateText, entries.map((entry) => [entry.user.userId, entry.care, entry.bathStatus, entry.eventText || '', (entry.notices || []).map((notice) => notice.noticeBody)])]);
       let bytes;
       try {
         bytes = dsNotebookPdfCache && dsNotebookPdfCache.key === key ? dsNotebookPdfCache.bytes : dsNotebookPdf(entries, dateText);
@@ -8383,14 +8462,14 @@
       canvas.height = DS_PDF_PAGE.height;
       const ctx = canvas.getContext('2d');
       const cardWidth = DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2;
-      // 1枚に2人分(各780)。中身が780に入らない方は、その方だけ1枚(最大で用紙いっぱい)にして連絡事項を切らない
-      const pages = dsNotebookPdfPages(entries.map((entry) => dsNotebookCardNeed(ctx, entry, dateText, cardWidth)));
+      // 1枚に2人分(各800)。中身が800に入らない方は、その方だけ1枚(最大で用紙いっぱい)にして連絡事項を切らない
+      const pages = dsNotebookPdfPlan(ctx, entries, dateText, cardWidth).pages;
       for (const page of pages) {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         page.forEach((card) => {
-          dsDrawNotebookCard(ctx, entries[card.index], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin + card.top, cardWidth, card.height);
+          dsDrawNotebookCard(ctx, entries[card.index], dateText, DS_PDF_PAGE.margin, DS_PDF_PAGE.margin + card.top, cardWidth, card.height, card.layout);
         });
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         const binary = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
@@ -8404,22 +8483,46 @@
     }
 
     const DS_PDF_CARD = { height: 800, gap: 35 }; // 2人分で用紙いっぱい((1636 - 35) / 2)
-    // 表の1行の高さ・文字の行の高さ・上下の余白・連絡事項の最低の高さ(お薬・排泄・機能訓練の行が増えたので少し詰めた)
-    const DS_PDF_ROW = { height: 54, line: 32, pad: 20, note: 110 };
+    // 表の1行の高さ・文字の行の高さ・上下の余白・連絡事項の最低の高さ・字の位置・枠の内側の余白・見出しと日付とお名前の高さ・施設名の高さ
+    // (お薬・排泄・機能訓練の行が増えたので少し詰めた)
+    const DS_PDF_ROW = { height: 54, line: 32, pad: 20, note: 110, base: 35, inset: 36, head: [44, 22, 52], foot: 50 };
+    // 詰めた寸法(字の大きさは同じ)。全員へのお知らせの行で2人分が1枚に入らなくなったときと、1人分が用紙に入らない方にだけ使う。
+    // 連絡事項の最低の高さは、すぐ下のお知らせの行と合わせて数える
+    const DS_PDF_TIGHT = { height: 46, line: 30, pad: 14, note: 92, base: 31, inset: 28, head: [40, 16, 46], foot: 44, tight: true };
+
+    function dsNotebookValueWidth(width, layout) {
+      return width - layout.inset * 2 - 230 - 32;
+    }
+
+    // 連絡事項でない行の高さ
+    function dsNotebookPlainHeight(ctx, row, valueWidth, layout) {
+      const lines = dsWrapText(ctx, row.value || '—', valueWidth);
+      return lines.length > 1 ? lines.length * layout.line + layout.pad : layout.height;
+    }
+
+    // 連絡事項の最低の高さ(詰めた寸法では、下のお知らせの行の分を引く)
+    function dsNotebookNoteMin(ctx, rows, rowIndex, valueWidth, layout) {
+      if (!layout.tight) return layout.note;
+      const below = rows.slice(rowIndex + 1).reduce((sum, row) => sum + dsNotebookPlainHeight(ctx, row, valueWidth, layout), 0);
+      return Math.max(layout.height, layout.note - below);
+    }
 
     // 連絡帳1人分を切らずに描くのに要る高さ(dsDrawNotebookCard と同じ寸法で数える)
-    function dsNotebookCardNeed(ctx, entry, dateText, width) {
-      const pad = 36;
-      const labelWidth = 230;
-      const valueWidth = width - pad * 2 - labelWidth - 32;
+    function dsNotebookCardNeed(ctx, entry, dateText, width, layout) {
+      const L = layout || DS_PDF_ROW;
+      const valueWidth = dsNotebookValueWidth(width, L);
       ctx.font = `400 23px ${DS_PDF_SERIF}`;
-      let height = pad + 44 + 22 + 52; // 見出し・日付・お名前
-      careNotebookRows(entry.care, entry.bathStatus, entry.eventText).forEach((row) => {
-        const lines = dsWrapText(ctx, row.value || (row.note ? '' : '—'), valueWidth);
-        if (row.note) height += Math.max(DS_PDF_ROW.note, lines.length * DS_PDF_ROW.line + DS_PDF_ROW.pad);
-        else height += lines.length > 1 ? lines.length * DS_PDF_ROW.line + DS_PDF_ROW.pad : DS_PDF_ROW.height;
+      let height = L.inset + L.head[0] + L.head[1] + L.head[2]; // 見出し・日付・お名前
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText, entry.notices);
+      rows.forEach((row, rowIndex) => {
+        if (row.note) {
+          const lines = dsWrapText(ctx, row.value || '', valueWidth);
+          height += Math.max(dsNotebookNoteMin(ctx, rows, rowIndex, valueWidth, L), lines.length * L.line + L.pad);
+        } else {
+          height += dsNotebookPlainHeight(ctx, row, valueWidth, L);
+        }
       });
-      return height + 50 + pad; // 施設名・下の余白
+      return height + L.foot + L.inset; // 施設名・下の余白
     }
 
     // 何人目をどのページのどこに描くか。[[{ index, top, height }], ...]
@@ -8449,6 +8552,58 @@
       return pages;
     }
 
+    // 寸法を選んでページに並べる。needs: [{ normal, tight, notice }]
+    // お知らせのある日に、今までの寸法では2人で1枚に入らない組は、詰めた寸法で2人で1枚にする。
+    // 1人分が用紙に入らない方は詰めた寸法で描く。それでも入らない方は cut に入れる(連絡事項の終わりが「…」で切れる)
+    function dsNotebookPdfArrange(needs) {
+      const full = DS_PDF_PAGE.height - DS_PDF_PAGE.margin * 2;
+      const pairs = (a, b) => dsNotebookPdfPages([a, b]).length === 1;
+      const place = (page, index, layout) => page.map((card) => Object.assign({}, card, { index: index + card.index, layout }));
+      const pages = [];
+      const cut = [];
+      let index = 0;
+      while (index < needs.length) {
+        const current = needs[index];
+        const next = index + 1 < needs.length ? needs[index + 1] : null;
+        if (next && pairs(current.normal, next.normal)) {
+          pages.push(place(dsNotebookPdfPages([current.normal, next.normal])[0], index, DS_PDF_ROW));
+          index += 2;
+        } else if (next && (current.notice || next.notice) && pairs(current.tight, next.tight)) {
+          pages.push(place(dsNotebookPdfPages([current.tight, next.tight])[0], index, DS_PDF_TIGHT));
+          index += 2;
+        } else {
+          const tight = current.normal > full;
+          if (tight && current.tight > full) cut.push(index);
+          pages.push(place(dsNotebookPdfPages([tight ? current.tight : current.normal])[0], index, tight ? DS_PDF_TIGHT : DS_PDF_ROW));
+          index += 1;
+        }
+      }
+      return { pages, cut };
+    }
+
+    function dsNotebookPdfPlan(ctx, entries, dateText, width) {
+      return dsNotebookPdfArrange(entries.map((entry) => ({
+        normal: dsNotebookCardNeed(ctx, entry, dateText, width, DS_PDF_ROW),
+        tight: dsNotebookCardNeed(ctx, entry, dateText, width, DS_PDF_TIGHT),
+        notice: Boolean(entry.notices && entry.notices.length)
+      })));
+    }
+
+    // PDFで連絡事項の終わりが切れる方のお名前(印刷の前に知らせる)
+    function dsNotebookPdfCutNames(entries, dateText) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 8;
+        canvas.height = 8;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return [];
+        const plan = dsNotebookPdfPlan(ctx, entries, dateText, DS_PDF_PAGE.width - DS_PDF_PAGE.margin * 2);
+        return plan.cut.map((index) => entries[index].user.displayName);
+      } catch (error) {
+        return [];
+      }
+    }
+
     function dsWrapText(ctx, text, width) {
       const lines = [];
       String(text || '').split('\n').forEach((paragraph) => {
@@ -8466,9 +8621,10 @@
       return lines;
     }
 
-    function dsDrawNotebookCard(ctx, entry, dateText, x, y, width, height) {
+    function dsDrawNotebookCard(ctx, entry, dateText, x, y, width, height, layout) {
+      const L = layout || DS_PDF_ROW;
       const ink = '#1f2933';
-      const pad = 36;
+      const pad = L.inset;
       ctx.strokeStyle = '#9aa5b1';
       ctx.lineWidth = 2;
       ctx.strokeRect(x, y, width, height);
@@ -8483,48 +8639,51 @@
       ctx.font = `400 24px ${DS_PDF_SERIF}`;
       ctx.textAlign = 'right';
       ctx.fillText(careDateLabel(dateText), right, top + 32);
-      top += 44;
+      top += L.head[0];
       ctx.fillRect(left, top, right - left, 3);
-      top += 22;
+      top += L.head[1];
       ctx.textAlign = 'left';
       ctx.font = `700 33px ${DS_PDF_SERIF}`;
       ctx.fillText(`${entry.user.displayName} 様`, left, top + 32);
-      top += 52;
-      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText);
+      top += L.head[2];
+      const rows = careNotebookRows(entry.care, entry.bathStatus, entry.eventText, entry.notices);
       const labelWidth = 230;
-      const rowHeight = DS_PDF_ROW.height;
-      const lineHeight = DS_PDF_ROW.line;
-      const footerSpace = 50;
+      const rowHeight = L.height;
+      const lineHeight = L.line;
+      const footerSpace = L.foot;
       ctx.font = `400 23px ${DS_PDF_SERIF}`;
-      const valueWidth = right - left - labelWidth - 32;
-      rows.forEach((row) => {
+      const valueWidth = dsNotebookValueWidth(width, L);
+      rows.forEach((row, rowIndex) => {
         const value = row.value || (row.note ? '' : '—');
         let lines = dsWrapText(ctx, value, valueWidth);
         let cellHeight = rowHeight;
         if (row.note) {
-          const room = y + height - pad - footerSpace - top;
-          const maxLines = Math.max(1, Math.floor((room - DS_PDF_ROW.pad) / lineHeight));
+          // 連絡事項の下に来る行(全員へのお知らせ)の高さ。連絡事項はその分を残して切る
+          const below = rows.slice(rowIndex + 1).reduce((sum, next) => sum + dsNotebookPlainHeight(ctx, next, valueWidth, L), 0);
+          const room = y + height - pad - footerSpace - top - below;
+          const maxLines = Math.max(1, Math.floor((room - L.pad) / lineHeight));
           if (lines.length > maxLines) {
             lines = lines.slice(0, maxLines);
             lines[maxLines - 1] = lines[maxLines - 1].slice(0, -1) + '…';
           }
-          cellHeight = Math.max(rowHeight, Math.min(room, Math.max(DS_PDF_ROW.note, lines.length * lineHeight + DS_PDF_ROW.pad)));
+          cellHeight = Math.max(rowHeight, Math.min(room, Math.max(dsNotebookNoteMin(ctx, rows, rowIndex, valueWidth, L), lines.length * lineHeight + L.pad)));
         } else if (lines.length > 1) {
-          cellHeight = lines.length * lineHeight + DS_PDF_ROW.pad;
+          cellHeight = lines.length * lineHeight + L.pad;
         }
-        ctx.fillStyle = '#f3f5f8';
+        ctx.fillStyle = row.notice ? '#fffbea' : '#f3f5f8';
         ctx.fillRect(left, top, labelWidth, cellHeight);
+        if (row.notice) ctx.fillRect(left + labelWidth, top, right - left - labelWidth, cellHeight);
         ctx.strokeStyle = '#8996a5';
         ctx.lineWidth = 1.5;
         ctx.strokeRect(left, top, labelWidth, cellHeight);
         ctx.strokeRect(left + labelWidth, top, right - left - labelWidth, cellHeight);
         ctx.fillStyle = ink;
         ctx.font = `600 23px ${DS_PDF_SERIF}`;
-        ctx.fillText(row.label, left + 16, top + 35);
+        ctx.fillText(row.label, left + 16, top + L.base);
         ctx.font = `400 23px ${DS_PDF_SERIF}`;
         ctx.fillStyle = row.value ? ink : '#9aa5b1';
         lines.forEach((line, lineIndex) => {
-          ctx.fillText(line, left + labelWidth + 16, top + 35 + lineIndex * lineHeight);
+          ctx.fillText(line, left + labelWidth + 16, top + L.base + lineIndex * lineHeight);
         });
         top += cellHeight;
       });
@@ -8581,6 +8740,306 @@
       return out;
     }
 
+    // ---- 連絡帳の「全員へのお知らせ」(2026-11-27) ----
+    // 期間(はじめ〜おわり)の中の日の連絡帳に、印刷する方全員へ同じ文を入れる。紙では連絡事項の下の「お知らせ」の行。
+    // host で受け取るもの: notebookNotices() / setNotebookNotices(list) / call('notebookNotices' | 'saveNotebookNotice' | 'cancelNotebookNotice')
+    // 決まりはサーバー(Code.gs saveNotebookNoticeCore_)と同じ: 1件100文字まで、同じ日に2件まで、期間は62日まで。
+    const DS_NOTICE = { max: 100, perDay: 2, maxDays: 62 };
+
+    function dsNoticeList(host) {
+      const list = host && typeof host.notebookNotices === 'function' ? (host.notebookNotices() || []) : [];
+      return list.filter((notice) => notice && notice.noticeId && notice.status !== 'cancelled' && notice.startDate && notice.endDate)
+        .slice()
+        .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)) ||
+          String(a.createdAt || '').localeCompare(String(b.createdAt || '')) || String(a.noticeId).localeCompare(String(b.noticeId)));
+    }
+
+    // その日の連絡帳に入るお知らせ
+    function dsNoticesForDate(host, dateText) {
+      return dsNoticeList(host).filter((notice) => notice.startDate <= dateText && dateText <= notice.endDate);
+    }
+
+    function dsShortDate(dateText) {
+      const [, month, day] = String(dateText).split('-').map(Number);
+      return `${month}/${day}`;
+    }
+
+    function dsNoticePeriodText(notice) {
+      return notice.startDate === notice.endDate ? dsShortDate(notice.startDate) : `${dsShortDate(notice.startDate)}〜${dsShortDate(notice.endDate)}`;
+    }
+
+    function dsDayCount(start, end) {
+      const toUtc = (text) => {
+        const [year, month, day] = String(text).split('-').map(Number);
+        return Date.UTC(year, month - 1, day);
+      };
+      return Math.round((toUtc(end) - toUtc(start)) / 86400000) + 1;
+    }
+
+    function dsIsDateText(text) {
+      return /^\d{4}-\d{2}-\d{2}$/.test(String(text || '')) && dsAddDays(text, 0) === text;
+    }
+
+    // 連絡帳のメニューの上に出すお知らせの枠(この日に入るもの・これから入るもの)
+    function dsNoticeMenuHtml(host) {
+      if (typeof host.notebookNotices !== 'function') return '';
+      const ui = dsNotebookUi;
+      const date = host.businessDate();
+      const canEdit = Boolean(host.call);
+      const items = dsNoticeList(host).filter((notice) => notice.endDate >= date).map((notice) => {
+        const confirming = ui.noticeConfirm === notice.noticeId;
+        const when = notice.startDate <= date ? 'この日の連絡帳に入ります' : `${dsShortDate(notice.startDate)}から入ります`;
+        return `<div class="ds-nbn-item" data-nbn-id="${escapeHtml(notice.noticeId)}">
+          <b>全員へのお知らせ（${escapeHtml(dsNoticePeriodText(notice))}）</b>
+          <p>${escapeHtml(notice.noticeBody)}</p>
+          <small>${escapeHtml(when)}</small>
+          ${confirming
+            ? `<div class="ds-nbn-ask"><span>取り消すと、これから印刷する連絡帳に入らなくなります。印刷済みの紙は戻りません。</span>
+                <div class="ds-nbn-actions"><button type="button" class="danger" data-nbn-cancel-yes ${ui.noticeBusy ? 'disabled' : ''}>取り消す</button><button type="button" data-nbn-cancel-no ${ui.noticeBusy ? 'disabled' : ''}>やめる</button></div></div>`
+            : (canEdit ? `<div class="ds-nbn-actions"><button type="button" data-nbn-edit>直す</button><button type="button" data-nbn-cancel>取り消す</button></div>` : '')}
+        </div>`;
+      }).join('');
+      const message = ui.noticeMessage ? `<p class="ds-nbn-msg${ui.noticeError ? ' error' : ''}" role="status" aria-live="polite">${escapeHtml(ui.noticeMessage)}</p>` : '';
+      return `<section class="ds-nbn" aria-label="全員へのお知らせ">${items}${message}
+        ${canEdit ? '<button type="button" class="ds-nbn-add" data-nbn-add>＋ 全員へのお知らせを入れる</button>' : ''}</section>`;
+    }
+
+    // お知らせの枠だけを書き直す(下から出る画面全体を作り直さないので、画面がちらつかない)
+    function dsRenderNoticeSection() {
+      const host = dsNotebookUi.host;
+      const backdrop = document.getElementById('dsNotebookMenu');
+      const section = backdrop && backdrop.querySelector('.ds-nbn');
+      if (!host || !section || dsNotebookUi.view !== 'menu') return;
+      section.outerHTML = dsNoticeMenuHtml(host);
+      dsBindNoticeMenu(host, backdrop);
+    }
+
+    function dsBindNoticeMenu(host, backdrop) {
+      const section = backdrop.querySelector('.ds-nbn');
+      if (!section) return;
+      section.addEventListener('click', (event) => {
+        const ui = dsNotebookUi;
+        if (event.target.closest('[data-nbn-add]')) {
+          dsOpenNoticeEditor(null);
+          return;
+        }
+        const item = event.target.closest('[data-nbn-id]');
+        const notice = item ? dsNoticeList(host).find((entry) => entry.noticeId === item.dataset.nbnId) : null;
+        if (!notice) return;
+        if (event.target.closest('[data-nbn-edit]')) {
+          dsOpenNoticeEditor(notice);
+        } else if (event.target.closest('[data-nbn-cancel]')) {
+          ui.noticeConfirm = notice.noticeId;
+          ui.noticeMessage = '';
+          dsRenderNoticeSection();
+        } else if (event.target.closest('[data-nbn-cancel-no]')) {
+          ui.noticeConfirm = '';
+          dsRenderNoticeSection();
+        } else if (event.target.closest('[data-nbn-cancel-yes]')) {
+          dsCancelNotice(host, notice);
+        }
+      });
+    }
+
+    async function dsCancelNotice(host, notice) {
+      const ui = dsNotebookUi;
+      if (ui.noticeBusy) return;
+      ui.noticeBusy = true;
+      dsRenderNoticeSection();
+      try {
+        const result = await host.call('cancelNotebookNotice', { noticeId: notice.noticeId, businessDate: host.businessDate() });
+        host.setNotebookNotices(result.notebookNotices || []);
+        ui.noticeMessage = 'お知らせを取り消しました。';
+        ui.noticeError = false;
+      } catch (error) {
+        ui.noticeMessage = `取り消せませんでした。${friendlyError(error)}`;
+        ui.noticeError = true;
+      }
+      ui.noticeBusy = false;
+      ui.noticeConfirm = '';
+      dsRenderNoticeSection();
+    }
+
+    // メニューを開いたとき、ほかの端末で入れたお知らせも読み直す(読めなければ手元の分のまま)
+    async function dsRefreshNotices(host) {
+      if (!host.call || typeof host.setNotebookNotices !== 'function') return;
+      try {
+        const result = await host.call('notebookNotices', { businessDate: host.businessDate() });
+        if (!result || !Array.isArray(result.notebookNotices)) return;
+        host.setNotebookNotices(result.notebookNotices);
+        if (dsNotebookUi.host === host && !dsNotebookUi.noticeBusy) dsRenderNoticeSection();
+      } catch (error) {
+        // 電波が無いときなどは、前に読んだ分を使う
+      }
+    }
+
+    // お知らせを入れる・直す画面(連絡帳のメニューの中で切り替える)
+    function dsOpenNoticeEditor(notice) {
+      const host = dsNotebookUi.host;
+      if (!host) return;
+      const ui = dsNotebookUi;
+      const base = host.businessDate();
+      ui.view = 'notice';
+      ui.noticeEditId = notice ? notice.noticeId : '';
+      ui.noticeEditorId = (ui.noticeEditorId || 0) + 1;
+      ui.noticeSaving = false;
+      ui.noticeDraft = notice
+        ? { body: notice.noticeBody, mode: 'pick', start: notice.startDate, end: notice.endDate, origStart: notice.startDate }
+        : { body: '', mode: 'today', start: base, end: base, origStart: '' };
+      renderNoticeEditor();
+    }
+
+    function dsNoticeRange(draft, base) {
+      if (draft.mode === 'today') return { start: base, end: base };
+      if (draft.mode === 'week') return { start: base, end: dsAddDays(base, 6) };
+      return { start: draft.start, end: draft.end };
+    }
+
+    // 送る前の確かめ。だめなら理由の文、よければ空
+    function dsNoticeProblem(host, draft) {
+      const ui = dsNotebookUi;
+      const base = host.businessDate();
+      const body = String(draft.body || '').trim();
+      const range = dsNoticeRange(draft, base);
+      if (!body) return 'お知らせの文を入れてください。';
+      if (body.length > DS_NOTICE.max) return `お知らせは${DS_NOTICE.max}文字以内にしてください。`;
+      if (!dsIsDateText(range.start) || !dsIsDateText(range.end)) return 'はじめの日とおわりの日を選んでください。';
+      if (range.end < range.start) return 'おわりの日は、はじめの日より後にしてください。';
+      if (dsDayCount(range.start, range.end) > DS_NOTICE.maxDays) return `期間は${DS_NOTICE.maxDays}日までにしてください。`;
+      const canPast = typeof host.canEditPast === 'function' && host.canEditPast();
+      if (!canPast && range.start < dsTodayJst() && range.start !== draft.origStart) return '過ぎた日からのお知らせは、主任・管理者が入れます。';
+      const others = dsNoticeList(host).filter((notice) => notice.noticeId !== ui.noticeEditId);
+      if (!ui.noticeEditId && others.some((notice) => String(notice.noticeBody || '').trim() === body && notice.startDate === range.start && notice.endDate === range.end)) {
+        return '同じ文・同じ期間のお知らせがすでに入っています。';
+      }
+      for (let day = range.start; day <= range.end; day = dsAddDays(day, 1)) {
+        if (others.filter((notice) => notice.startDate <= day && day <= notice.endDate).length >= DS_NOTICE.perDay) {
+          return `${dsShortDate(day)}はすでにお知らせが${DS_NOTICE.perDay}件あります。どれかを取り消すか、期間を変えてください。`;
+        }
+      }
+      return '';
+    }
+
+    function dsNoticeRangeText(draft, base) {
+      const range = dsNoticeRange(draft, base);
+      if (!dsIsDateText(range.start) || !dsIsDateText(range.end) || range.end < range.start) return '';
+      const span = range.start === range.end ? careDateLabel(range.start) : `${careDateLabel(range.start)}〜${careDateLabel(range.end)}`;
+      return `${span}に来所される方<strong>全員</strong>の連絡帳に入ります。${draft.mode === 'week' ? '曜日ごとに来る方にも1回は届きます。' : ''}`;
+    }
+
+    function renderNoticeEditor() {
+      const host = dsNotebookUi.host;
+      const backdrop = document.getElementById('dsNotebookMenu');
+      if (!host || !backdrop) return;
+      const ui = dsNotebookUi;
+      const draft = ui.noticeDraft;
+      const base = host.businessDate();
+      const isToday = base === dsTodayJst();
+      const canPast = typeof host.canEditPast === 'function' && host.canEditPast();
+      const minDate = canPast ? '' : (draft.origStart && draft.origStart < dsTodayJst() ? draft.origStart : dsTodayJst());
+      const modes = [['today', isToday ? '今日だけ' : 'この日だけ'], ['week', isToday ? '今日から1週間' : 'この日から1週間'], ['pick', '日付を選ぶ']];
+      backdrop.innerHTML = `
+        <div class="sheet ds-fee-sheet ds-nb-menu" role="dialog" aria-modal="true" aria-labelledby="dsNbnTitle">
+          <div class="care-head">
+            <div><h3 id="dsNbnTitle" tabindex="-1">${ui.noticeEditId ? '全員へのお知らせを直す' : '全員へのお知らせ'}</h3><p class="sub">印刷する全員の連絡帳に、同じ文が入ります</p></div>
+            <button type="button" class="care-close" data-nbn-back aria-label="戻る">×</button>
+          </div>
+          <label class="care-field ds-nbn-body"><span>お知らせの文（${DS_NOTICE.max}文字まで）</span>
+            <textarea id="dsNbnBody" rows="4" maxlength="${DS_NOTICE.max}" placeholder="例: 年末年始は12月30日から1月3日までお休みをいただきます。">${escapeHtml(draft.body)}</textarea></label>
+          <p class="ds-nbn-count" id="dsNbnCount"></p>
+          <p class="ds-fee-help">ご家族にお渡しする紙に入ります。おひとりだけのことは、その方のケア記録の「連絡事項」に書いてください。</p>
+          <p class="ds-nbn-label">いつの連絡帳に入れますか</p>
+          <div class="ds-nbn-modes" role="group" aria-label="いつの連絡帳に入れますか">${modes.map(([mode, text]) =>
+            `<button type="button" data-nbn-mode="${mode}" aria-pressed="${String(draft.mode === mode)}">${text}</button>`).join('')}</div>
+          <div class="ds-nbn-dates${draft.mode === 'pick' ? '' : ' hidden'}">
+            <label><span>はじめ</span><input type="date" id="dsNbnStart" value="${escapeHtml(draft.start)}" ${minDate ? `min="${minDate}"` : ''}></label>
+            <label><span>おわり</span><input type="date" id="dsNbnEnd" value="${escapeHtml(draft.end)}" ${minDate ? `min="${minDate}"` : ''}></label>
+          </div>
+          <p class="ds-nbn-range" id="dsNbnRange"></p>
+          <p class="care-status" id="dsNbnStatus" role="status" aria-live="polite"></p>
+          <div class="care-actions"><button type="button" class="primary" data-nbn-save>保存</button><button type="button" data-nbn-back>やめる</button></div>
+        </div>`;
+      const body = backdrop.querySelector('#dsNbnBody');
+      const refresh = () => {
+        draft.body = body.value;
+        const count = backdrop.querySelector('#dsNbnCount');
+        count.textContent = `${draft.body.trim().length} / ${DS_NOTICE.max}`;
+        backdrop.querySelector('#dsNbnRange').innerHTML = dsNoticeRangeText(draft, base);
+      };
+      body.addEventListener('input', refresh);
+      ['dsNbnStart', 'dsNbnEnd'].forEach((id) => backdrop.querySelector(`#${id}`).addEventListener('change', (event) => {
+        if (id === 'dsNbnStart') {
+          draft.start = event.target.value;
+          if (draft.end && draft.start && draft.end < draft.start) {
+            draft.end = draft.start;
+            backdrop.querySelector('#dsNbnEnd').value = draft.end;
+          }
+        } else {
+          draft.end = event.target.value;
+        }
+        refresh();
+      }));
+      backdrop.querySelectorAll('[data-nbn-mode]').forEach((button) => button.addEventListener('click', () => {
+        // 「日付を選ぶ」に切り替えたときは、それまで選んでいた期間を日付の欄の初めの値にする
+        const previous = dsNoticeRange(draft, base);
+        draft.mode = button.dataset.nbnMode;
+        if (draft.mode === 'pick') {
+          draft.start = previous.start;
+          draft.end = previous.end;
+          backdrop.querySelector('#dsNbnStart').value = draft.start;
+          backdrop.querySelector('#dsNbnEnd').value = draft.end;
+        }
+        backdrop.querySelectorAll('[data-nbn-mode]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        backdrop.querySelector('.ds-nbn-dates').classList.toggle('hidden', draft.mode !== 'pick');
+        refresh();
+      }));
+      backdrop.querySelectorAll('[data-nbn-back]').forEach((button) => button.addEventListener('click', () => {
+        if (ui.noticeSaving) return;
+        renderNotebookMenu();
+      }));
+      backdrop.querySelector('[data-nbn-save]').addEventListener('click', () => dsSaveNotice(host, backdrop));
+      refresh();
+      body.focus({ preventScroll: true });
+    }
+
+    async function dsSaveNotice(host, backdrop) {
+      const ui = dsNotebookUi;
+      if (ui.noticeSaving) return;
+      const draft = ui.noticeDraft;
+      const status = backdrop.querySelector('#dsNbnStatus');
+      const problem = dsNoticeProblem(host, draft);
+      if (problem) {
+        status.textContent = problem;
+        status.classList.add('error');
+        return;
+      }
+      const range = dsNoticeRange(draft, host.businessDate());
+      const editorId = ui.noticeEditorId;
+      ui.noticeSaving = true;
+      backdrop.querySelectorAll('button').forEach((button) => { button.disabled = true; });
+      status.textContent = '保存しています…';
+      status.classList.remove('error');
+      try {
+        const result = await host.call('saveNotebookNotice', {
+          noticeId: ui.noticeEditId, startDate: range.start, endDate: range.end,
+          noticeBody: String(draft.body || '').trim(), businessDate: host.businessDate()
+        });
+        host.setNotebookNotices(result.notebookNotices || []);
+        ui.noticeSaving = false;
+        if (ui.noticeEditorId !== editorId || ui.view !== 'notice') return;
+        ui.noticeMessage = result.duplicate ? '同じ文・同じ期間のお知らせがすでに入っています（二重には入れていません）。'
+          : (ui.noticeEditId ? 'お知らせを直しました。' : 'お知らせを入れました。');
+        ui.noticeError = false;
+        renderNotebookMenu();
+      } catch (error) {
+        ui.noticeSaving = false;
+        if (ui.noticeEditorId !== editorId || ui.view !== 'notice' || !document.getElementById('dsNotebookMenu')) return;
+        backdrop.querySelectorAll('button').forEach((button) => { button.disabled = false; });
+        status.textContent = `保存できませんでした。${friendlyError(error)}`;
+        status.classList.add('error');
+      }
+    }
+
     // ---- 「連絡帳」ボタン: 3通りの選び方 ----
 
     const dsNotebookUi = { host: null, mode: 'pick', groupId: '', selected: new Set(), showAll: false, saving: false, message: '', error: false };
@@ -8597,6 +9056,9 @@
 
     function openNotebookMenu(host) {
       dsNotebookUi.host = host;
+      dsNotebookUi.noticeMessage = '';
+      dsNotebookUi.noticeError = false;
+      dsNotebookUi.noticeConfirm = '';
       const previous = document.getElementById('dsNotebookMenu');
       if (previous) previous.remove();
       const backdrop = document.createElement('div');
@@ -8608,6 +9070,7 @@
       });
       document.body.appendChild(backdrop);
       renderNotebookMenu();
+      dsRefreshNotices(host);
     }
 
     function closeNotebookMenu() {
@@ -8623,12 +9086,14 @@
       if (!host || !backdrop) return;
       const todayIds = host.notebookCandidates();
       const groups = dsActiveNotebookGroups(host);
+      dsNotebookUi.view = 'menu';
       backdrop.innerHTML = `
         <div class="sheet ds-fee-sheet ds-nb-menu" role="dialog" aria-modal="true" aria-labelledby="dsNotebookMenuTitle">
           <div class="care-head">
             <div><h3 id="dsNotebookMenuTitle" tabindex="-1">連絡帳を印刷</h3><p class="sub">${escapeHtml(careDateLabel(host.businessDate()))} ・ 押すとすぐ印刷画面が開きます</p></div>
             <button type="button" class="care-close" data-nbm-close aria-label="閉じる">×</button>
           </div>
+          ${dsNoticeMenuHtml(host)}
           <div class="ds-nb-choices">
             <button type="button" class="ds-nb-choice main" data-nbm-today ${todayIds.length ? '' : 'disabled'}>
               <strong>今日の方 全員</strong><small>${todayIds.length ? `${todayIds.length}名を印刷` : '来所を記録した方がまだいません'}</small>
@@ -8648,6 +9113,7 @@
           <div class="care-actions single"><button type="button" data-nbm-new>まとまりを新しく作る</button></div>
         </div>`;
       backdrop.querySelector('[data-nbm-close]').addEventListener('click', closeNotebookMenu);
+      dsBindNoticeMenu(host, backdrop);
       backdrop.querySelector('[data-nbm-today]').addEventListener('click', () => {
         closeNotebookMenu();
         openCareNotebook(host, todayIds, { title: '今日の方 全員', autoPrint: true });
@@ -8694,6 +9160,7 @@
       if (!host || !backdrop) return;
       const ui = dsNotebookUi;
       const isGroup = ui.mode === 'group';
+      ui.view = 'picker';
       backdrop.innerHTML = `
         <div class="sheet ds-fee-sheet ds-nb-menu" role="dialog" aria-modal="true" aria-labelledby="dsNotebookPickTitle">
           <div class="care-head">
